@@ -80,7 +80,7 @@ function Menu(props) {
                 <Card orientation="horizontal" onClick={navigateCoach} >
                     <CardPreview className='horizontalCardImage'>
                         <img
-                            src={resolveAsset("dashboard.svg")}
+                            src={resolveAsset("coach.svg")}
                             alt="App Name Document"
                         />
                     </CardPreview>
