@@ -1,0 +1,6 @@
+@VirtualTeacherGenAIDemo.Server_HostAddress = http://localhost:5111
+
+GET {{VirtualTeacherGenAIDemo.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
