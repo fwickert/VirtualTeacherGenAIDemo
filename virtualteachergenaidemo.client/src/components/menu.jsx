@@ -1,12 +1,12 @@
 import './menu.css';
 import React from 'react';
-import { Body1, Button } from '@fluentui/react-components';
+
 import {
-    makeStyles,
+
     Caption1,
     Text
 } from "@fluentui/react-components";
-import { MoreHorizontal20Regular } from "@fluentui/react-icons";
+
 import { Card, CardPreview, CardHeader } from '@fluentui/react-components';
 import { useNavigate, Link } from 'react-router-dom';
 
@@ -25,8 +25,8 @@ function Menu(props) {
     const navigateTraining = () => {
         navigate('/training');
     };
-    const navigateDashboard= () => {
-        navigate('/dashboard');
+    const navigateLastTraining = () => {
+        navigate('/lastTraining');
     };
 
     const navigateCoach = () => {
@@ -35,7 +35,7 @@ function Menu(props) {
 
     return (
         <div>
-            <section>                
+            <section>
                 <Card orientation="horizontal" onClick={navigateTraining} >
                     <CardPreview className='horizontalCardImage'>
                         <img
@@ -57,7 +57,7 @@ function Menu(props) {
             </section>
 
             <section>
-                <Card orientation="horizontal" onClick={navigateDashboard} >
+                <Card orientation="horizontal" onClick={navigateLastTraining} >
                     <CardPreview className='horizontalCardImage'>
                         <img
                             src={resolveAsset("dashboard.svg")}

@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "description": "Extract product category from a phrase",
+  "execution_settings": {
+    "default": {
+      "max_tokens": 50,
+      "temperature": 0.5,
+      "top_p": 0.5,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0
+    }
+  },
+  "input_variables": [
+    {
+      "name": "phrase",
+      "description": "phrase used to extract category",
+      "default": ""
+    }
+  ]
+}

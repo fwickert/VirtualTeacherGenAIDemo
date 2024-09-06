@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "description": "List some questions to ask about a product",
+  "execution_settings": {
+    "default": {
+      "max_tokens": 300,
+      "temperature": 0.5,
+      "top_p": 0.5,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0
+    }
+  },
+  "input_variables": [
+    {
+      "name": "subject",
+      "description": "phrase to use to create questions to ask",
+      "default": ""
+    },
+{
+      "name": "number",
+      "description": "Number of questions to generate",
+      "default": ""
+    }
+  ]
+}
