@@ -1,0 +1,53 @@
+.container {
+    display: flex;
+    justify-content: center;    
+    height: 100vh; /* Assurez-vous que le conteneur parent prend toute la hauteur de la vue */
+    margin: 0;
+    padding: 0;
+}
+.chat-window {
+    width: 700px;
+    height: 600px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    
+}
+
+.chat-header {
+    padding: 10px;
+    color: black;
+    text-align: center;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+.chat-input{
+    
+}
+
+.fullwidth {
+    width: 90%;
+    padding: 10px;       
+}
+
+
+/*Add media query*/
+
+@media (max-width: 768px) {
+    .chat-window {
+        width: 100%;
+    /*height all the reste of the screeen*/
+    height: calc(100vh - 350px);
+    }
+}
+
+
