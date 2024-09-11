@@ -37,7 +37,7 @@ function ChatHistory(props: any) {
         chat === undefined ?
         <Spinner />
         :
-        <div className="frame">
+        <div className="frame window">
             {
                 chat?.map((message: IChat) => (
                     message.content.length !== 0 ?

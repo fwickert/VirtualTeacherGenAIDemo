@@ -19,7 +19,7 @@ function Dashboard() {
                 </section>
             </div>
             <div className="chat">
-                <div className="">Conversation</div>
+                <div className="chatHistoryTitle">Conversation</div>
                 <ChatHistory chatId={chatId} />
             </div>
             <div className="dashboard">

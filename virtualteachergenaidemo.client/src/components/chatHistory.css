@@ -10,3 +10,8 @@
     justify-content: flex-start;
     margin: 15px;
 }
+
+div.window {
+    max-height: 70vh;
+    overflow-y: auto;
+}
