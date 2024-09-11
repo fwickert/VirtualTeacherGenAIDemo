@@ -1,6 +1,6 @@
 import './training.css'
 import { Text } from "@fluentui/react-components"
-import ChatWindow from '../components/chatWindow'
+import ChatWindow from '../../components/chat/chatWindow'
 
 function Training() {
     return (

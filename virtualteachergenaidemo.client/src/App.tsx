@@ -2,9 +2,9 @@
 import './App.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './views/home';
-import Training from './views/training';
-import LastTraining from './views/lastTraining';
-import Dashboard from './views/dashboard';
+import Training from './views/training/training';
+import LastTraining from './views/trainingList/lastTraining';
+import Dashboard from './views/dashboard/dashboard';
 
 
 function App(props: any) {

@@ -1,7 +1,7 @@
 import "./dashboard.css";
 import { useLocation } from 'react-router-dom';
-import { DashboardTab } from '../components/dashboardTab';
-import ChatHistory from "../components/chatHistory";
+import { DashboardTab } from '../../components/dashboard/dashboardTab';
+import ChatHistory from '../../components/dashboard/chatHistory';
 
 function Dashboard() {   
     const location = useLocation();
@@ -23,7 +23,7 @@ function Dashboard() {
                 <ChatHistory chatId={chatId} />
             </div>
             <div className="dashboard">
-                <DashboardTab chatId={chatId} />
+                <DashboardTab chatId={chatId}  />
             </div>            
         </div>
     );

@@ -4,19 +4,19 @@ import { useEffect, useState } from 'react';
 import { Spinner } from '@fluentui/react-components';
 import { makeStyles, Tab, TabList } from '@fluentui/react-components';
 import type { TabValue, SelectTabData, SelectTabEvent, } from "@fluentui/react-components";
-import { Button } from '@fluentui/react-components';
-import MarkdownRenderer from './markdownRenderer';
-import { DialogPrompt } from './DialogPrompt';
-
-
+import MarkdownRenderer from '../Utilities/markdownRenderer';
+import { DialogPrompt } from '../Utilities/DialogPrompt';
+import { ButtonGenAI } from './buttonGenAI';
+import type { IDashboardRequestProps } from './buttonGenAI';
 
 interface IDashboard {
     id: string;
+    chatId: string;
     infoType: string;
     content: string;
 }
 
-const useStyles = makeStyles({   
+const useStyles = makeStyles({
     panels: {
         padding: "0 10px",
         "& th": {
@@ -26,13 +26,13 @@ const useStyles = makeStyles({
     },
 });
 
-export const DashboardTab = (param: any) => {
+export const DashboardTab = (props: any) => {
     const [dashboard, setDashboard] = useState<IDashboard[]>();
     const styles = useStyles();
-    
+
 
     useEffect(() => {
-        getDashboard(param.chatId);
+        getDashboard(props.chatId);
     }, []);
 
     const [selectedValue, setSelectedValue] =
@@ -42,64 +42,73 @@ export const DashboardTab = (param: any) => {
         setSelectedValue(data.value);
     };
 
-    const summary = dashboard?.find(q => q.infoType == "Summary")?.content;
-    const products = dashboard?.find(q => q.infoType == "Products")?.content;
-    const keywords = dashboard?.find(q => q.infoType == "Keywords")?.content;
-    const advice = dashboard?.find(q => q.infoType == "Advice")?.content;
-    const example = dashboard?.find(q => q.infoType == "Example")?.content;
-    const evaluation = dashboard?.find(q => q.infoType == "Evaluation")?.content;
+    const summary = dashboard?.find(q => q.infoType == "Summary");
+    const products = dashboard?.find(q => q.infoType == "Products");
+    const keywords = dashboard?.find(q => q.infoType == "Keywords");
+    const advice = dashboard?.find(q => q.infoType == "Advice");
+    const example = dashboard?.find(q => q.infoType == "Example");
+    const evaluation = dashboard?.find(q => q.infoType == "Evaluation");
+
+    const dashboardRequest: IDashboardRequestProps = {
+        id: "",
+        chatId: "",
+        conversation: "",
+        connectionId: "test",
+        title:""
+    };
+
 
     const Summary = React.memo(() => (
         <div role="tabpanel" aria-labelledby="Summary" className="tabpanel">
-            <Button>Create Summary</Button>                                  
+            <ButtonGenAI {...dashboardRequest} title="Get Summary" chatId={props.chatId} id={summary!.id} prompt="summary" />
             <DialogPrompt title="Summary prompt" prompt="Summarize" />
             <section className="frame">
-                {summary!}
+                <span id="summary"> {summary!.content}</span>                
             </section>
-            <Button>List Products</Button>
+            <ButtonGenAI {...dashboardRequest} title="Get Products" chatId={props.chatId} id={products!.id} prompt="products" />
             <DialogPrompt title="Products prompt" prompt="Products" />
             <section className="frame">
-                <MarkdownRenderer markdown={products!} />
+                <span id="products"> <MarkdownRenderer markdown={products!.content} /></span>
             </section>
-            <Button>Get Keywords</Button>
+            <ButtonGenAI {...dashboardRequest} title="Get Keywords" chatId={props.chatId} id={keywords!.id} prompt="keywords" />
             <DialogPrompt title="Keywords prompt" prompt="Keywords" />
             <section className="frame">
-                <MarkdownRenderer markdown={keywords!} />
+                <span id="keywords"> <MarkdownRenderer markdown={keywords!.content} /></span>
             </section>
         </div>
     ));
 
     const Advice = React.memo(() => (
         <div role="tabpanel" aria-labelledby="Advice" className="tabpanel">
-            <Button>Get Advice</Button>
+            <ButtonGenAI {...dashboardRequest} title="Get Advice" chatId={props.chatId!} id={advice?.id!} prompt="advice" />
             <DialogPrompt title="Advice prompt" prompt="Advice" />
-            <section className="frame">                
-                <MarkdownRenderer markdown={advice!} />
+            <section className="frame">
+                <span id="advice"> <MarkdownRenderer markdown={advice?.content!} /></span>
             </section>
         </div>
     ));
 
     const Example = React.memo(() => (
         <div role="tabpanel" aria-labelledby="Example" className="tabpanel">
-            <Button>Get Example</Button>
+            <ButtonGenAI {...dashboardRequest} title="Get Example" chatId={props.chatId!} id={example?.id!} prompt="example" />
             <DialogPrompt title="Example prompt" prompt="Example" />
             <section className="frame">
-                <MarkdownRenderer markdown={example!} />
+                <span id="example"> <MarkdownRenderer markdown={example?.content!} /></span>
             </section>
         </div>
     ));
 
     const Evaluation = React.memo(() => (
         <div role="tabpanel" aria-labelledby="Evaluation" className="tabpanel">
-            <Button>Get Evaluation</Button>
+            <ButtonGenAI {...dashboardRequest} title="Get Evaluation" chatId={props.chatId!} id={evaluation?.id!} prompt="evaluation" />
             <DialogPrompt title="Evaluation prompt" prompt="Evaluation" />
             <section className="frame">
-                <MarkdownRenderer markdown={evaluation!} />
+                <span id="evaluation"> <MarkdownRenderer markdown={evaluation?.content!} /></span>
             </section>
         </div>
     ));
 
-   
+
 
     return (
         dashboard === undefined ?
@@ -107,7 +116,7 @@ export const DashboardTab = (param: any) => {
             :
             <div>
 
-                <TabList className="tab" selectedValue={selectedValue} onTabSelect={onTabSelect}>                   
+                <TabList className="tab" selectedValue={selectedValue} onTabSelect={onTabSelect}>
                     <Tab value="Summary">Summary</Tab>
                     <Tab value="Advice">Advice</Tab>
                     <Tab value="Example">Example</Tab>

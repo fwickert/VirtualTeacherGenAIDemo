@@ -16,7 +16,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
            
         }
 
-        public IResult GetQuestions(string subject, int number, CancellationToken token)
+        public IResult GetQuestions(string subject, int number, string connectionId, CancellationToken token)
         {
             _coachResponse.FunctionName = "Question";
             Task.Run(() => _coachResponse.GetCoachAsync("Questions",
@@ -25,20 +25,20 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                     { "subject", subject},
                     { "number", number.ToString()
                 }
-           }, token), token);
+           }, connectionId, token), token);
 
             return TypedResults.Ok("Questions requested");
         }
        
         //return product category
-        public IResult GetProductCategory(string phrase, CancellationToken token)
+        public IResult GetProductCategory(string phrase, string connectionId, CancellationToken token)
         {
             _coachResponse.FunctionName = "Product";
             Task.Run(() => _coachResponse.GetCoachAsync("ProductCategory",
                     new Dictionary<string, string>()
                     {
                     { "phrase", phrase}
-                },token), token);
+                }, connectionId, token), token);
 
             return TypedResults.Ok("Product catageory requested");
         }

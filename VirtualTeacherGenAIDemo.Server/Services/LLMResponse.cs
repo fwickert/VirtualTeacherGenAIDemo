@@ -31,7 +31,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             _pluginsDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
         }
 
-        public async Task GetAsync(string chatId, string id, string whatAbout, Dictionary<string, string> variablesContext, CancellationToken token)
+        public async Task GetAsync(string chatId, string id, string whatAbout, Dictionary<string, string> variablesContext, string connectionId, CancellationToken token)
         {
             var arguments = new KernelArguments();
 
@@ -40,10 +40,10 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 arguments[item.Key] = item.Value;
             }
 
-            await StreamResponseToClient(chatId, id, whatAbout, arguments, token);
+            await StreamResponseToClient(chatId, id, whatAbout, arguments, connectionId, token);
         }
 
-        public async Task GetCoachAsync(string whatAbout, Dictionary<string, string> variablesContext, CancellationToken token)
+        public async Task GetCoachAsync(string whatAbout, Dictionary<string, string> variablesContext, string connectionId, CancellationToken token)
         {
             var arguments = new KernelArguments();
 
@@ -52,10 +52,10 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 arguments[item.Key] = item.Value;
             }
 
-            await StreamResponseCoachToClient(whatAbout, arguments, token);
+            await StreamResponseCoachToClient(whatAbout, arguments, connectionId, token);
         }
 
-        private async Task<MessageResponse> StreamResponseCoachToClient(string whatAbout, KernelArguments arguments, CancellationToken token)
+        private async Task<MessageResponse> StreamResponseCoachToClient(string whatAbout, KernelArguments arguments, string connectionId, CancellationToken token)
         {
 
             MessageResponse messageResponse = new MessageResponse
@@ -67,24 +67,24 @@ namespace VirtualTeacherGenAIDemo.Server.Services
 
             await foreach (StreamingChatMessageContent contentPiece in _kernel.InvokeStreamingAsync<StreamingChatMessageContent>(_kernel.Plugins[this.PluginName][this.FunctionName], arguments, token))
             {
-                await this.UpdateMessageOnClient(messageResponse, token);
+                await this.UpdateMessageOnClient(messageResponse, connectionId, token);
                 messageResponse.State = "InProgress";
 
                 if (!string.IsNullOrEmpty(contentPiece.Content))
                 {
                     messageResponse.Content += contentPiece.Content;
-                    await this.UpdateMessageOnClient(messageResponse, token);
+                    await this.UpdateMessageOnClient(messageResponse, connectionId, token);
                     Console.Write(contentPiece.Content);
                     await Task.Delay(DELAY);
                 }
             }
             messageResponse.State = "End";
 
-            await this.UpdateMessageOnClient(messageResponse, token);
+            await this.UpdateMessageOnClient(messageResponse, connectionId, token);
             return messageResponse;
         }
 
-        private async Task<MessageResponse> StreamResponseToClient(string chatId, string id, string whatAbout, KernelArguments arguments, CancellationToken token)
+        private async Task<MessageResponse> StreamResponseToClient(string chatId, string id, string whatAbout, KernelArguments arguments, string connectionId, CancellationToken token)
         {
 
             MessageResponse messageResponse = new MessageResponse
@@ -96,13 +96,13 @@ namespace VirtualTeacherGenAIDemo.Server.Services
 
             await foreach (StreamingChatMessageContent contentPiece in _kernel.InvokeStreamingAsync<StreamingChatMessageContent>(_kernel.Plugins[this.PluginName][this.FunctionName], arguments, token))
             {
-                await this.UpdateMessageOnClient( messageResponse,  token);
+                await this.UpdateMessageOnClient( messageResponse, connectionId, token);
                 messageResponse.State = "InProgress";
 
                 if (!string.IsNullOrEmpty(contentPiece.Content))
                 {
                     messageResponse.Content += contentPiece.Content;
-                    await this.UpdateMessageOnClient( messageResponse, token);
+                    await this.UpdateMessageOnClient( messageResponse, connectionId, token);
                     Console.Write(contentPiece.Content);
                     await Task.Delay(DELAY);
                 }
@@ -117,7 +117,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 InfoType = whatAbout
             });
 
-            await this.UpdateMessageOnClient( messageResponse, token);
+            await this.UpdateMessageOnClient( messageResponse, connectionId, token);
             return messageResponse;
         }
 
@@ -125,9 +125,9 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         /// Update the response on the client.
         /// </summary>
         /// <param name="message">The message</param>
-        private async Task UpdateMessageOnClient(MessageResponse message, CancellationToken token)
+        private async Task UpdateMessageOnClient(MessageResponse message, string connectionId, CancellationToken token)
         {
-            await this._messageRelayHubContext.Clients.All.SendAsync("ReceiveDashboard", message, token);
+            await this._messageRelayHubContext.Clients.Client(connectionId).SendAsync(message.WhatAbout, message.Content, token);
         }
 
     }

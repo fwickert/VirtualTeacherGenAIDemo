@@ -20,8 +20,6 @@ interface IChat {
 function ChatHistory(props: any) {
     const [chat, setChat] = useState<IChat[]>();
 
-
-
     useEffect(() => {
         getChat(props.chatId);
     }, []);
@@ -37,7 +35,7 @@ function ChatHistory(props: any) {
         chat === undefined ?
         <Spinner />
         :
-        <div className="frame window">
+        <div id="history" className="frame window">
             {
                 chat?.map((message: IChat) => (
                     message.content.length !== 0 ?
