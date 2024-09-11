@@ -30,7 +30,12 @@ body {
     min-height: 100vh;*/
 }
 
-
+.frame {
+    min-height: 80px;
+    border: 1px solid #dee2e6;
+    padding: 15px;
+    margin-top: 20px;
+}
 
 p.intro {
     font: 10px;

@@ -4,22 +4,19 @@ import { useEffect, useState } from 'react';
 import { Spinner } from '@fluentui/react-components';
 import { makeStyles, Tab, TabList } from '@fluentui/react-components';
 import type { TabValue, SelectTabData, SelectTabEvent, } from "@fluentui/react-components";
-import  MarkdownRenderer  from './markdownRenderer';
+import { Button } from '@fluentui/react-components';
+import MarkdownRenderer from './markdownRenderer';
+import { DialogPrompt } from './DialogPrompt';
+
+
+
 interface IDashboard {
     id: string;
     infoType: string;
     content: string;
 }
 
-const useStyles = makeStyles({
-    root: {
-        //alignItems: "flex-start",
-        //display: "flex",
-        //flexDirection: "column",
-        //justifyContent: "flex-start",
-        //padding: "50px 20px",
-        //rowGap: "20px",
-    },
+const useStyles = makeStyles({   
     panels: {
         padding: "0 10px",
         "& th": {
@@ -39,7 +36,7 @@ export const DashboardTab = (param: any) => {
     }, []);
 
     const [selectedValue, setSelectedValue] =
-        React.useState<TabValue>("Advice");
+        React.useState<TabValue>("Summary");
 
     const onTabSelect = (event: SelectTabEvent, data: SelectTabData) => {
         setSelectedValue(data.value);
@@ -54,12 +51,18 @@ export const DashboardTab = (param: any) => {
 
     const Summary = React.memo(() => (
         <div role="tabpanel" aria-labelledby="Summary" className="tabpanel">
+            <Button>Create Summary</Button>                                  
+            <DialogPrompt title="Summary prompt" prompt="Summarize" />
             <section className="frame">
                 {summary!}
             </section>
+            <Button>List Products</Button>
+            <DialogPrompt title="Products prompt" prompt="Products" />
             <section className="frame">
                 <MarkdownRenderer markdown={products!} />
             </section>
+            <Button>Get Keywords</Button>
+            <DialogPrompt title="Keywords prompt" prompt="Keywords" />
             <section className="frame">
                 <MarkdownRenderer markdown={keywords!} />
             </section>
@@ -68,8 +71,9 @@ export const DashboardTab = (param: any) => {
 
     const Advice = React.memo(() => (
         <div role="tabpanel" aria-labelledby="Advice" className="tabpanel">
-            <section className="frame">
-                
+            <Button>Get Advice</Button>
+            <DialogPrompt title="Advice prompt" prompt="Advice" />
+            <section className="frame">                
                 <MarkdownRenderer markdown={advice!} />
             </section>
         </div>
@@ -77,6 +81,8 @@ export const DashboardTab = (param: any) => {
 
     const Example = React.memo(() => (
         <div role="tabpanel" aria-labelledby="Example" className="tabpanel">
+            <Button>Get Example</Button>
+            <DialogPrompt title="Example prompt" prompt="Example" />
             <section className="frame">
                 <MarkdownRenderer markdown={example!} />
             </section>
@@ -85,6 +91,8 @@ export const DashboardTab = (param: any) => {
 
     const Evaluation = React.memo(() => (
         <div role="tabpanel" aria-labelledby="Evaluation" className="tabpanel">
+            <Button>Get Evaluation</Button>
+            <DialogPrompt title="Evaluation prompt" prompt="Evaluation" />
             <section className="frame">
                 <MarkdownRenderer markdown={evaluation!} />
             </section>
@@ -97,9 +105,9 @@ export const DashboardTab = (param: any) => {
         dashboard === undefined ?
             <Spinner />
             :
-            <div className={styles.root}>
+            <div>
 
-                <TabList selectedValue={selectedValue} onTabSelect={onTabSelect}>                   
+                <TabList className="tab" selectedValue={selectedValue} onTabSelect={onTabSelect}>                   
                     <Tab value="Summary">Summary</Tab>
                     <Tab value="Advice">Advice</Tab>
                     <Tab value="Example">Example</Tab>

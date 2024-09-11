@@ -1,6 +1,6 @@
 import './chatHistory.css';
-import * as React from 'react';
 import { useState, useEffect } from 'react';
+import { Spinner } from '@fluentui/react-components';
 
 
 
@@ -34,6 +34,9 @@ function ChatHistory(props: any) {
 
 
     return (
+        chat === undefined ?
+        <Spinner />
+        :
         <div className="frame">
             {
                 chat?.map((message: IChat) => (
