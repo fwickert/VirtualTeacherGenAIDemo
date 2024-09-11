@@ -7,9 +7,7 @@ import LastTraining from './views/lastTraining';
 import Dashboard from './views/dashboard';
 
 
-function App(props) {
-
-
+function App(props: any) {
 
     return (
       

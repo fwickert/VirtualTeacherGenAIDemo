@@ -1,0 +1,27 @@
+.frame {
+    min-height: 80px;
+    border: 1px solid #dee2e6;
+    padding: 15px;
+    margin-top:20px;
+    
+}
+
+.tabpanel{
+    max-height: 80vh;
+    overflow-y:auto;
+}
+
+h1{
+    
+    text-align: center;
+    overflow-wrap: break-word;
+ 
+}
+
+h2{    
+    margin: 20px 0 20px -2px;
+    text-align: left;
+    overflow-wrap: break-word;
+    line-height: 1.1;
+   
+}

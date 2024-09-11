@@ -1,14 +1,22 @@
 import './lastTraining.css';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Spinner, Text } from "@fluentui/react-components";
 import { Card, CardPreview, CardHeader } from '@fluentui/react-components';
 import { useNavigate } from 'react-router-dom';
 
-function LastTraining() {
-    const [lastTraining, setLastTraining] = useState();
+
+interface ILastTraining {
+    id: string;
+    chatId: string;
+    title: string;
+    timestamp: string;
+}
+
+const LastTraining: React.FC = () => {
+    const [lastTraining, setLastTraining] = useState<ILastTraining[] | null>();
     const navigate = useNavigate();
 
-    const navigateDashboard = (chatId) => {
+    const navigateDashboard = (chatId: string) => {
         navigate('/dashboard', { state: { chatId } });
     };
 
@@ -26,11 +34,11 @@ function LastTraining() {
         <div>
             <div>
                 {
-                    lastTraining.map(item =>
+                    lastTraining!.map(item =>
                         <section key={item.chatId}>
                             <Card orientation="horizontal" onClick={navigateDashboard.bind(this, item.chatId) }  >
                                 <CardPreview className='horizontalCardImage'>
-                                    {item.title}
+                                    {item.title} - { item.chatId }
                                 </CardPreview>
 
                                 <CardHeader
@@ -47,7 +55,7 @@ function LastTraining() {
 
     return (
         <div>
-            <h1>Last Training </h1>
+            <h1 className="title">Last Training </h1>
             {contents}
         </div>
     );

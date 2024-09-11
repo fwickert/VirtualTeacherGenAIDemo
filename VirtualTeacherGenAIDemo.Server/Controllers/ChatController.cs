@@ -17,5 +17,12 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
         {
             return chatService.GetHistory();
         }
+
+        [HttpGet("messages", Name = "messages")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IEnumerable<Message>> GetChatMessages([FromServices] ChatService chatService, string chatId, CancellationToken token)
+        {
+            return await chatService.GetChatMessages(chatId);
+        }
     }
 }

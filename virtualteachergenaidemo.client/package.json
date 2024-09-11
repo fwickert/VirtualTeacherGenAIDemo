@@ -13,6 +13,7 @@
     "@fluentui/font-icons-mdl2": "^8.5.50",
     "@fluentui/react": "^8.120.8",
     "@fluentui/react-components": "^9.54.13",
+    "marked": "^14.1.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.1"
@@ -27,6 +28,8 @@
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.9",
     "globals": "^15.9.0",
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1"
   }
 }

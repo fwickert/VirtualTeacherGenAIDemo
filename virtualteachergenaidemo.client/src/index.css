@@ -30,28 +30,22 @@ body {
     min-height: 100vh;*/
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+
+
+p.intro {
+    font: 10px;
+    text-align: center;
+    overflow-wrap: break-word;
+    letter-spacing: 2px;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.title {
+    font-size: 2.5em;
+    margin: 20px 0 20px -2px;
+    text-align: center;
+    overflow-wrap: break-word;
+    line-height: 1.1;
+    letter-spacing: 2px;
 }
 
 @media (prefers-color-scheme: light) {

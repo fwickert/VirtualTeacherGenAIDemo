@@ -1,20 +1,15 @@
-import React from 'react';
 import Menu from '../components/menu';
-import { useEffect, useState } from 'react';
 
-function Home(props) {
-    
-    function showAlert() {
-        history.push('/home');
-    }
-    
+
+function Home(props: any) {
+   
    
     return (
         <div>
            
             <div>
                 <div>
-                    <h1>{props.title}</h1>
+                    <h1 className="title">{props.title}</h1>
                 </div>
                 <Menu />
            

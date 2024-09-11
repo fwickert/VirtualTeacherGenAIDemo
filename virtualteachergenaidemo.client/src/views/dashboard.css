@@ -1,0 +1,33 @@
+body{
+    overflow-y:hidden;
+}
+
+.header {
+    grid-area: header;
+}
+
+.chat {
+    grid-area: chat;
+    overflow-y: auto;
+    margin-top: 24px;
+}
+
+.dashboard {
+    grid-area: dashboard;
+    overflow-y: auto;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-areas:
+        'header header'
+        'chat dashboard';
+    grid-template-columns: 2fr 4fr;
+    grid-template-rows: auto 1fr;
+    gap: 5px;
+    padding: 5px;
+}
+
+    .grid-container > div {
+        background-color: rgba(255, 255, 255, 0.8);
+    }

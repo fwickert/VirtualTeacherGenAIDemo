@@ -1,5 +1,5 @@
 import './menu.css';
-import React from 'react';
+
 
 import {
 
@@ -8,10 +8,10 @@ import {
 } from "@fluentui/react-components";
 
 import { Card, CardPreview, CardHeader } from '@fluentui/react-components';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 
-const resolveAsset = (asset) => {
+const resolveAsset = (asset: string) => {
     const ASSET_URL =
         '/assets/';
 
@@ -19,7 +19,7 @@ const resolveAsset = (asset) => {
 };
 
 
-function Menu(props) {
+function Menu() {
     const navigate = useNavigate();
 
     const navigateTraining = () => {

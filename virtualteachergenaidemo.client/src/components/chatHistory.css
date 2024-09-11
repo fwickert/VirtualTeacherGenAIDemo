@@ -1,0 +1,12 @@
+.left {
+    display: flex;
+    justify-content: flex-end;
+    
+    margin:15px;
+}
+
+.right {
+    display: flex;
+    justify-content: flex-start;
+    margin: 15px;
+}

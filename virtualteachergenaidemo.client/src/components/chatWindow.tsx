@@ -1,8 +1,7 @@
 import './chatWindow.css';
-import React from 'react';
-
-import { Button, Input, makeStyles, shorthands } from '@fluentui/react-components';
+import { Input, makeStyles, shorthands } from '@fluentui/react-components';
 import { SendRegular, MicRegular } from "@fluentui/react-icons";
+
 
 const useClasses = makeStyles({
     container: {
@@ -16,7 +15,10 @@ const useClasses = makeStyles({
 
 });
 
+
+
 function ChatWindow() {
+    
     const classes = useClasses();
     return (
         <div className='container'>
@@ -35,6 +37,8 @@ function ChatWindow() {
             </div>
         </div>
     )
+
+  
 
 };
 
