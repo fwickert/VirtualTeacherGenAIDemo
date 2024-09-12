@@ -5,6 +5,7 @@ import Home from './views/home';
 import Training from './views/training/training';
 import LastTraining from './views/trainingList/lastTraining';
 import Dashboard from './views/dashboard/dashboard';
+import Coach from './views/coach/coach';
 
 
 function App(props: any) {
@@ -18,6 +19,7 @@ function App(props: any) {
                 <Route path="/training" element={<Training />} />
                 <Route path="/lastTraining" element={<LastTraining />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/coach" element={<Coach />} />
             </Routes>
         </Router>
 
