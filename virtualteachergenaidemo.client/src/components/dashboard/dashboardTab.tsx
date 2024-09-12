@@ -150,12 +150,12 @@ export const DashboardTab = (props: any) => {
     async function getDashboard(chatid: string) {
         const defaultData: DashboardState = {
             items: [
-                { infoType: "Summary", title: "Get Summary", prompt: "summary", content: "", chatId: props.chatId, id: uuidv4() },
-                { infoType: "Products", title: "Get Products", prompt: "products", content: "", chatId: props.chatId, id: uuidv4() },
-                { infoType: "Keywords", title: "Get Keywords", prompt: "keywords", content: "", chatId: props.chatId, id: uuidv4() },
-                { infoType: "Advice", title: "Get Advice", prompt: "advice", content: "", chatId: props.chatId, id: uuidv4() },
-                { infoType: "Example", title: "Get Example", prompt: "example", content: "", chatId: props.chatId, id: uuidv4() },
-                { infoType: "Evaluation", title: "Get Evaluation", prompt: "evaluation", content: "", chatId: props.chatId, id: uuidv4() }
+                { infoType: "Summary", title: "Get Summary", prompt: "summary", content: " ", chatId: props.chatId, id: uuidv4() },
+                { infoType: "Products", title: "Get Products", prompt: "products", content: " ", chatId: props.chatId, id: uuidv4() },
+                { infoType: "Keywords", title: "Get Keywords", prompt: "keywords", content: " ", chatId: props.chatId, id: uuidv4() },
+                { infoType: "Advice", title: "Get Advice", prompt: "advice", content: " ", chatId: props.chatId, id: uuidv4() },
+                { infoType: "Example", title: "Get Example", prompt: "example", content: " ", chatId: props.chatId, id: uuidv4() },
+                { infoType: "Evaluation", title: "Get Evaluation", prompt: "evaluation", content: " ", chatId: props.chatId, id: uuidv4() }
             ],
             conversation: dashboardState.conversation,
             connectionId: ""
