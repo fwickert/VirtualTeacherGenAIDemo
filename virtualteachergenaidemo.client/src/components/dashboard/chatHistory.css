@@ -14,4 +14,10 @@
 div.window {
     max-height: 70vh;
     overflow-y: auto;
+    min-height: 70vh;
+}
+
+.spinner {
+    margin-top: 20px;
+    padding-top: 20px;
 }

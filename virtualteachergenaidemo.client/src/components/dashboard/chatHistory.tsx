@@ -30,25 +30,26 @@ function ChatHistory(props: any) {
         const data = await response.json();
 
         setChat(data);
-
-        //const conversation = data?.map((message: IChat) => message.content).join(" ");
-        //setDashboardState({ ...dashboardState, conversation: conversation! });
     }
 
-    
+
     useEffect(() => {
         const conversation = chat?.map((message: IChat) => message.content).join(" ");
         setDashboardState({ ...dashboardState, conversation: conversation! });
     }, [chat]);
-    
-   
-    return (
-        chat === undefined ?
-            <Spinner />
-            :
+
+
+    return (        
             <div id="history" className="frame window">
                 {
-                    chat?.map((message: IChat) => (                        
+                dashboardState.conversation === "" ?
+                    //1===1 ?
+                    <div>
+                        <Spinner className="spinner" />
+
+                    </div>
+                    :
+                    chat?.map((message: IChat) => (
                         message.content.length !== 0 ?
                             <div key={message.id}>
                                 {message.authorRole === AuthorRoles.User ?
@@ -67,11 +68,11 @@ function ChatHistory(props: any) {
                                     </div>
                                 }
 
-                            </div>                            
+                            </div>
                             :
                             ""
                     ))
-                    
+
                 }
 
             </div>

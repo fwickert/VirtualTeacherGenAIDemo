@@ -4,6 +4,7 @@ body{
 
 .header {
     grid-area: header;
+    min-width: 100%;
 }
 
 .chat {
@@ -33,7 +34,9 @@ body{
     grid-template-columns: 2fr 4fr;
     grid-template-rows: auto 1fr;
     gap: 5px;
-    padding: 5px;
+    padding: 5px;    
+    width: 100%;
+    
 }
 
     .grid-container > div {

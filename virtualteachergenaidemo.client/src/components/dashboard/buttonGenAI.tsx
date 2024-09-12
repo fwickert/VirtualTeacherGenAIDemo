@@ -5,8 +5,10 @@ import { useDashboardContextState } from '../sharedContext/dashboardContextState
 import type { DashboardItem } from '../sharedContext/dashboardContextState';
 
 
-let connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
-    .withUrl("https://localhost:7273/messageRelayHub")
+const hubUrl = process.env.HUB_URL;
+
+let connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()    
+    .withUrl(hubUrl)
     .build();
 
 connection.start();

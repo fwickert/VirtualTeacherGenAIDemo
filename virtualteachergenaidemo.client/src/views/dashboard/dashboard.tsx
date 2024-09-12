@@ -18,8 +18,7 @@ function Dashboard() {
     
 
     return (
-        <div className="grid-container">
-            
+        <div className="grid-container">            
             <div className="header">                              
                 <section className="intro">
                     <div className="back">
