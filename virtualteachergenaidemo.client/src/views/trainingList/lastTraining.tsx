@@ -29,7 +29,10 @@ const LastTraining: React.FC = () => {
         getlastTraining();
     }, []);
 
-
+    const formatDate = (timestamp: string) => {
+        const date = new Date(timestamp);
+        return date.toLocaleString();
+    };
 
 
     const contents = lastTraining === undefined ? 
@@ -46,7 +49,7 @@ const LastTraining: React.FC = () => {
                                 </CardPreview>
 
                                 <CardHeader
-                                    header={<Text weight="semibold">{item.timestamp}</Text>}
+                                    header={<Text weight="semibold">{formatDate(item.timestamp)}</Text>}
                                 />
                             </Card>
                         </section>
