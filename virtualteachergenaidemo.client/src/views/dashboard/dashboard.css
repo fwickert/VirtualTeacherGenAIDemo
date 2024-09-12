@@ -21,6 +21,10 @@ body{
     grid-area: dashboard;
 }
 
+.back{
+    position:absolute;
+}
+
 .grid-container {
     display: grid;
     grid-template-areas:

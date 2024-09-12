@@ -101,7 +101,7 @@ export const DashboardTab = (props: any) => {
 
 
     return (
-        dashboardState === undefined || dashboardState.conversation === "" ?
+         dashboardState.conversation === "" ?
             <Spinner />
             :
             <div>                

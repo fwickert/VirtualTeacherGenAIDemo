@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { Spinner, Text } from "@fluentui/react-components";
 import { Card, CardPreview, CardHeader } from '@fluentui/react-components';
 import { useNavigate } from 'react-router-dom';
-
+import { ArrowCircleLeft48Filled } from '@fluentui/react-icons';
+import { Button } from '@fluentui/react-components';
 
 interface ILastTraining {
     id: string;
@@ -18,6 +19,10 @@ const LastTraining: React.FC = () => {
 
     const navigateDashboard = (chatId: string) => {
         navigate('/dashboard', { state: { chatId } });
+    };
+
+    const navigatHome = () => {
+        navigate('/');
     };
 
     useEffect(() => {
@@ -54,7 +59,9 @@ const LastTraining: React.FC = () => {
         </div>;
 
     return (
+
         <div>
+            <Button size="large" appearance="transparent" onClick={navigatHome} icon={<ArrowCircleLeft48Filled />} />
             <h1 className="title">Last Training </h1>
             {contents}
         </div>
