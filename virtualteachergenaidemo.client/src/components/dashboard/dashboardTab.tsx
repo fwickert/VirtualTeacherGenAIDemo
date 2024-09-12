@@ -1,20 +1,22 @@
 import './dashboardTab.css';
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Spinner } from '@fluentui/react-components';
 import { makeStyles, Tab, TabList } from '@fluentui/react-components';
 import type { TabValue, SelectTabData, SelectTabEvent, } from "@fluentui/react-components";
 import MarkdownRenderer from '../Utilities/markdownRenderer';
 import { DialogPrompt } from '../Utilities/DialogPrompt';
 import { ButtonGenAI } from './buttonGenAI';
-import type { IDashboardRequestProps } from './buttonGenAI';
+import { useDashboardContextState } from '../sharedContext/dashboardContextState';
+import type { DashboardState } from '../sharedContext/dashboardContextState';
+import { v4 as uuidv4 } from 'uuid';
 
-interface IDashboard {
-    id: string;
-    chatId: string;
-    infoType: string;
-    content: string;
-}
+//interface IDashboard {
+//    id: string;
+//    chatId: string;
+//    infoType: string;
+//    content: string;
+//}
 
 const useStyles = makeStyles({
     panels: {
@@ -27,7 +29,8 @@ const useStyles = makeStyles({
 });
 
 export const DashboardTab = (props: any) => {
-    const [dashboard, setDashboard] = useState<IDashboard[]>();
+    const { dashboardState, setDashboardState } = useDashboardContextState();
+    
     const styles = useStyles();
 
 
@@ -35,75 +38,62 @@ export const DashboardTab = (props: any) => {
         getDashboard(props.chatId);
     }, []);
 
+  
+
     const [selectedValue, setSelectedValue] =
         React.useState<TabValue>("Summary");
 
     const onTabSelect = (event: SelectTabEvent, data: SelectTabData) => {
         setSelectedValue(data.value);
-    };
-
-    const summary = dashboard?.find(q => q.infoType == "Summary");
-    const products = dashboard?.find(q => q.infoType == "Products");
-    const keywords = dashboard?.find(q => q.infoType == "Keywords");
-    const advice = dashboard?.find(q => q.infoType == "Advice");
-    const example = dashboard?.find(q => q.infoType == "Example");
-    const evaluation = dashboard?.find(q => q.infoType == "Evaluation");
-
-    const dashboardRequest: IDashboardRequestProps = {
-        id: "",
-        chatId: "",
-        conversation: "",
-        connectionId: "test",
-        title:""
-    };
-
+    };    
 
     const Summary = React.memo(() => (
+        
         <div role="tabpanel" aria-labelledby="Summary" className="tabpanel">
-            <ButtonGenAI {...dashboardRequest} title="Get Summary" chatId={props.chatId} id={summary!.id} prompt="summary" />
+            <ButtonGenAI {...dashboardState.items.find(q=>q.infoType == "Summary")} />
             <DialogPrompt title="Summary prompt" prompt="Summarize" />
             <section className="frame">
-                <span id="summary"> {summary!.content}</span>                
+                <span id="summary"> {dashboardState.items.find(q => q.infoType == "Summary")?.content!}</span>
             </section>
-            <ButtonGenAI {...dashboardRequest} title="Get Products" chatId={props.chatId} id={products!.id} prompt="products" />
+            <ButtonGenAI {...dashboardState.items.find(q=>q.infoType == "Products")} />
             <DialogPrompt title="Products prompt" prompt="Products" />
             <section className="frame">
-                <span id="products"> <MarkdownRenderer markdown={products!.content} /></span>
+                <span id="products"> <MarkdownRenderer markdown={dashboardState.items.find(q => q.infoType == "Products")?.content!} /></span>
             </section>
-            <ButtonGenAI {...dashboardRequest} title="Get Keywords" chatId={props.chatId} id={keywords!.id} prompt="keywords" />
+            <ButtonGenAI {...dashboardState.items.find(q=>q.infoType == "Keywords")}/>
             <DialogPrompt title="Keywords prompt" prompt="Keywords" />
             <section className="frame">
-                <span id="keywords"> <MarkdownRenderer markdown={keywords!.content} /></span>
+                <span id="keywords"> <MarkdownRenderer markdown={dashboardState.items.find(q => q.infoType == "Keywords")?.content!} /></span>
             </section>
         </div>
     ));
 
     const Advice = React.memo(() => (
         <div role="tabpanel" aria-labelledby="Advice" className="tabpanel">
-            <ButtonGenAI {...dashboardRequest} title="Get Advice" chatId={props.chatId!} id={advice?.id!} prompt="advice" />
+            <ButtonGenAI {...dashboardState.items.find(q=> q.infoType == "Advice")} />
             <DialogPrompt title="Advice prompt" prompt="Advice" />
             <section className="frame">
-                <span id="advice"> <MarkdownRenderer markdown={advice?.content!} /></span>
+                <span id="advice"> <MarkdownRenderer markdown={dashboardState.items.find(q => q.infoType == "Advice")?.content!} /></span>
             </section>
         </div>
     ));
 
     const Example = React.memo(() => (
         <div role="tabpanel" aria-labelledby="Example" className="tabpanel">
-            <ButtonGenAI {...dashboardRequest} title="Get Example" chatId={props.chatId!} id={example?.id!} prompt="example" />
+            <ButtonGenAI {...dashboardState.items.find(q=>q.infoType == "Example") } />
             <DialogPrompt title="Example prompt" prompt="Example" />
             <section className="frame">
-                <span id="example"> <MarkdownRenderer markdown={example?.content!} /></span>
+                <span id="example"> <MarkdownRenderer markdown={dashboardState.items.find(q => q.infoType == "Example")?.content!} /></span>
             </section>
         </div>
     ));
 
     const Evaluation = React.memo(() => (
         <div role="tabpanel" aria-labelledby="Evaluation" className="tabpanel">
-            <ButtonGenAI {...dashboardRequest} title="Get Evaluation" chatId={props.chatId!} id={evaluation?.id!} prompt="evaluation" />
+            <ButtonGenAI {...dashboardState.items.find(q=>q.infoType == "Evaluation")} />
             <DialogPrompt title="Evaluation prompt" prompt="Evaluation" />
             <section className="frame">
-                <span id="evaluation"> <MarkdownRenderer markdown={evaluation?.content!} /></span>
+                <span id="evaluation"> <MarkdownRenderer markdown={dashboardState.items.find(q => q.infoType == "Evaluation")?.content!} /></span>
             </section>
         </div>
     ));
@@ -111,11 +101,11 @@ export const DashboardTab = (props: any) => {
 
 
     return (
-        dashboard === undefined ?
+        dashboardState === undefined || dashboardState.conversation === "" ?
             <Spinner />
             :
-            <div>
-
+            <div>                
+                {/*<div>{dashboardState.conversation}</div>*/}
                 <TabList className="tab" selectedValue={selectedValue} onTabSelect={onTabSelect}>
                     <Tab value="Summary">Summary</Tab>
                     <Tab value="Advice">Advice</Tab>
@@ -134,8 +124,30 @@ export const DashboardTab = (props: any) => {
     );
 
     async function getDashboard(chatid: string) {
+        const defaultData: DashboardState = {
+            items: [
+                { infoType: "Summary", title: "Get Summary", prompt: "summary", content: "", chatId:props.chatId, id:uuidv4() },
+                { infoType: "Products", title: "Get Products", prompt: "products", content: "", chatId: props.chatId, id: uuidv4() },
+                { infoType: "Keywords", title: "Get Keywords", prompt: "keywords", content: "", chatId: props.chatId, id: uuidv4() },
+                { infoType: "Advice", title: "Get Advice", prompt: "advice", content: "", chatId: props.chatId, id: uuidv4() },
+                { infoType: "Example", title: "Get Example", prompt: "example", content: "", chatId: props.chatId, id: uuidv4() },
+                { infoType: "Evaluation", title: "Get Evaluation", prompt: "evaluation", content: "", chatId: props.chatId, id: uuidv4() }
+            ],
+            conversation: dashboardState.conversation,
+            connectionId: ""
+            
+        };
+        
+
         const response = await fetch('/api/dashboard?chatId=' + chatid);
         const data = await response.json();
-        setDashboard(data);
+        const updatedData = {
+            ...defaultData,
+            items: defaultData.items.map(defaultItem => {
+                const fetchedItem = data.find((item: any) => item.infoType === defaultItem.infoType);
+                return fetchedItem ? { ...defaultItem, ...fetchedItem } : defaultItem;
+            })
+        };
+        setDashboardState(updatedData);
     }
 };

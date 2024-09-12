@@ -109,15 +109,16 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             }
             messageResponse.State = "End";
 
+            string NewId = Guid.NewGuid().ToString();
             //Save content in DB
             await this._dashboardRepository.UpsertAsync(new DashboardItem { 
                 ChatId = chatId,
                 Content = messageResponse.Content,
-                Id = id != null && id != "" ? id : Guid.NewGuid().ToString(),
+                Id = id != null && id != "" ? id : NewId,
                 InfoType = whatAbout
             });
-
-            await this.UpdateMessageOnClient( messageResponse, connectionId, token);
+            
+            //await this.UpdateMessageOnClient( messageResponse, connectionId, token);
             return messageResponse;
         }
 

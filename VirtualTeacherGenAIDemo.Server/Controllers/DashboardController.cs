@@ -23,7 +23,7 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
         {
             //Check if conversation, chatId, connectionId, and id are not null
             if (string.IsNullOrEmpty(dashboardRequest.Conversation) || string.IsNullOrEmpty(dashboardRequest.ChatId) ||
-                string.IsNullOrEmpty(dashboardRequest.ConnectionId) || string.IsNullOrEmpty(dashboardRequest.Id))
+                string.IsNullOrEmpty(dashboardRequest.ConnectionId) )
             {
                 return TypedResults.BadRequest("Invalid request : Invalid Body");
             }

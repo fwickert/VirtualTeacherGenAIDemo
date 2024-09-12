@@ -1,15 +1,9 @@
 import { Button } from '@fluentui/react-components';
 import * as SignalR from '@microsoft/signalr';
 import { marked } from 'marked';
+import { useDashboardContextState } from '../sharedContext/dashboardContextState';
+import type { DashboardItem } from '../sharedContext/dashboardContextState';
 
-interface IDashboardRequestProps {
-    id?: string;
-    chatId?: string;
-    conversation?: string;
-    connectionId?: string;
-    title?: string;
-    prompt?: string;
-}
 
 let connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
     .withUrl("https://localhost:7273/messageRelayHub")
@@ -18,32 +12,33 @@ let connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
 connection.start();
 
 
-
 let input: HTMLSpanElement;
 
 
-const ButtonGenAI = (props: IDashboardRequestProps) => {
-    connection.on(props.prompt!, (data) => {
+const ButtonGenAI = (item: DashboardItem) => {
+    const { dashboardState } = useDashboardContextState();
+
+    connection.on(item.prompt!, (data) => {
         const rawMarkup = marked(data);
+        
         input.innerHTML = rawMarkup.toString();
     });
 
+
+
     const handleClick = async () => {
-        const body: IDashboardRequestProps = {
-            id: props.id,
-            chatId: props.chatId,
-            conversation: document.getElementById("history")?.textContent!,
+        const body = {
+            id: item.id,
+            chatId: item.chatId,
+            conversation: dashboardState.conversation,
             connectionId: connection?.connectionId!,
-            title: props.title,
-            prompt: props.prompt
+            title: item.title,
+            prompt: item.prompt
         }
-
-
-        input = document.getElementById(props.prompt!) as HTMLSpanElement;
+        input = document.getElementById(item.prompt!) as HTMLSpanElement;
         input.textContent = "";
 
-
-        await fetch('/api/dashboard/' + props.prompt, {
+        await fetch('/api/dashboard/' + item.prompt, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -52,9 +47,10 @@ const ButtonGenAI = (props: IDashboardRequestProps) => {
         });
     };
 
+
     return (
-        <Button onClick={handleClick}>{props.title}</Button>
+        <Button onClick={handleClick}> {item.title}</Button>
     );
 };
 
-export { type IDashboardRequestProps, ButtonGenAI }
+export { ButtonGenAI }

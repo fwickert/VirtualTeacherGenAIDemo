@@ -2,8 +2,12 @@ import "./dashboard.css";
 import { useLocation } from 'react-router-dom';
 import { DashboardTab } from '../../components/dashboard/dashboardTab';
 import ChatHistory from '../../components/dashboard/chatHistory';
+import { DashboardContextStateProvider } from '../../components/sharedContext/dashboardContextState';
 
-function Dashboard() {   
+
+function Dashboard() {
+
+
     const location = useLocation();
     const { chatId } = location.state;
 
@@ -18,18 +22,17 @@ function Dashboard() {
                     </p>
                 </section>
             </div>
-            <div className="chat">
-                <div className="chatHistoryTitle">Conversation</div>
-                <ChatHistory chatId={chatId} />
-            </div>
-            <div className="dashboard">
-                <DashboardTab chatId={chatId}  />
-            </div>            
+            <DashboardContextStateProvider>
+                <div className="chat">
+                    <div className="chatHistoryTitle">Conversation</div>
+                    <ChatHistory chatId={chatId} />
+                </div>
+                <div className="dashboard">
+                    <DashboardTab chatId={chatId} />
+                </div>
+            </DashboardContextStateProvider>
         </div>
     );
-
-   
-
 }
 
 export default Dashboard;
