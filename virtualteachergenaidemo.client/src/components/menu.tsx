@@ -34,9 +34,9 @@ function Menu() {
     };
 
     return (
-        <div>
+        <div className="menu">
             <section>
-                <Card orientation="horizontal" onClick={navigateTraining} >
+                <Card className="card" orientation="horizontal" onClick={navigateTraining} >
                     <CardPreview className='horizontalCardImage'>
                         <img
 
@@ -57,7 +57,7 @@ function Menu() {
             </section>
 
             <section>
-                <Card orientation="horizontal" onClick={navigateLastTraining} >
+                <Card className="card" orientation="horizontal" onClick={navigateLastTraining} >
                     <CardPreview className='horizontalCardImage'>
                         <img
                             src={resolveAsset("dashboard.svg")}
@@ -77,7 +77,7 @@ function Menu() {
             </section>
 
             <section>
-                <Card orientation="horizontal" onClick={navigateCoach} >
+                <Card className="card" orientation="horizontal" onClick={navigateCoach} >
                     <CardPreview className='horizontalCardImage'>
                         <img
                             src={resolveAsset("coach.svg")}

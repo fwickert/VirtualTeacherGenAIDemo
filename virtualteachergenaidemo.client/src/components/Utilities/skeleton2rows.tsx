@@ -28,15 +28,11 @@ const useStyles = makeStyles({
     },
 });
 
-export const Row = (props: Partial<SkeletonProps>) => {
+export const Skeleton2Rows = (props: Partial<SkeletonProps>) => {
     const styles = useStyles();
     return (
         <div className={styles.invertedWrapper}>
-            <Skeleton {...props} aria-label="Loading Content">
-                <div className={styles.firstRow}>
-                    <SkeletonItem shape="circle" size={24} />
-                    <SkeletonItem shape="rectangle" size={16} />
-                </div>
+            <Skeleton {...props} aria-label="Loading Content" animation="pulse">
                 <div className={styles.secondThirdRow}>
                     <SkeletonItem shape="circle" size={24} />
                     <SkeletonItem size={16} />
@@ -45,12 +41,12 @@ export const Row = (props: Partial<SkeletonProps>) => {
                     <SkeletonItem size={16} />
                 </div>
                 <div className={styles.secondThirdRow}>
-                    <SkeletonItem shape="square" size={24} />
+                    <SkeletonItem shape="circle" size={24} />
                     <SkeletonItem size={16} />
                     <SkeletonItem size={16} />
                     <SkeletonItem size={16} />
                     <SkeletonItem size={16} />
-                </div>
+                </div>               
             </Skeleton>
         </div>
     );

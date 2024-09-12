@@ -23,12 +23,11 @@ function ChatHistory(props: any) {
 
     useEffect(() => {
         getChat(props.chatId);
-    }, []);
+    }, [props.chadId]);
 
     async function getChat(chatid: string) {
         const response = await fetch('/api/chat/messages?chatId=' + chatid);
         const data = await response.json();
-
         setChat(data);
     }
 
@@ -46,7 +45,6 @@ function ChatHistory(props: any) {
                     //1===1 ?
                     <div>
                         <Spinner className="spinner" />
-
                     </div>
                     :
                     chat?.map((message: IChat) => (
@@ -70,7 +68,7 @@ function ChatHistory(props: any) {
 
                             </div>
                             :
-                            ""
+                            null
                     ))
 
                 }

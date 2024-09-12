@@ -9,7 +9,10 @@ import { ButtonGenAI } from './buttonGenAI';
 import { useDashboardContextState } from '../sharedContext/dashboardContextState';
 import type { DashboardState, DashboardItem } from '../sharedContext/dashboardContextState';
 import { v4 as uuidv4 } from 'uuid';
-import { Row } from '../Utilities/skeleton';
+import { Skeleton3Rows } from '../Utilities/skeleton3rows';
+import { Skeleton2Rows } from '../Utilities/skeleton2rows';
+
+
 
 
 const useStyles = makeStyles({
@@ -24,18 +27,13 @@ const useStyles = makeStyles({
 
 export const DashboardTab = (props: any) => {
     const { dashboardState, setDashboardState } = useDashboardContextState();
-
     const styles = useStyles();
-
 
     useEffect(() => {
         getDashboard(props.chatId);
-    }, []);
+    }, [props.chatId]);
 
-
-
-    const [selectedValue, setSelectedValue] =
-        React.useState<TabValue>("Summary");
+    const [selectedValue, setSelectedValue] = React.useState<TabValue>("Summary");
 
     const onTabSelect = (event: SelectTabEvent, data: SelectTabData) => {
         setSelectedValue(data.value);
@@ -51,22 +49,34 @@ export const DashboardTab = (props: any) => {
     };
 
     const Summary = React.memo(() => (
-
         <div role="tabpanel" aria-labelledby="Summary" className="tabpanel">
             <ButtonGenAI item={dashboardState.items.find(q => q.infoType == "Summary")!} updateDashboardItem={updateDashboardItem} />
             <DialogPrompt title="Summary prompt" prompt="Summarize" />
             <section className="frame">
-                <span id="summary"> {dashboardState.items.find(q => q.infoType == "Summary")?.content!}</span>
+                {
+                    dashboardState.items.find(q => q.infoType == "Summary")?.content === "" ?
+                        <Skeleton2Rows /> :
+                        <span id="summary"> {dashboardState.items.find(q => q.infoType == "Summary")?.content!}</span>
+                }
             </section>
             <ButtonGenAI item={dashboardState.items.find(q => q.infoType == "Products")!} updateDashboardItem={updateDashboardItem} />
             <DialogPrompt title="Products prompt" prompt="Products" />
             <section className="frame">
-                <span id="products"> <MarkdownRenderer markdown={dashboardState.items.find(q => q.infoType == "Products")?.content!} /></span>
+                {
+                    dashboardState.items.find(q => q.infoType == "Products")?.content === "" ?
+                        <Skeleton2Rows /> :
+                        <span id="products"> <MarkdownRenderer markdown={dashboardState.items.find(q => q.infoType == "Products")?.content!} /></span>
+                }
             </section>
             <ButtonGenAI item={dashboardState.items.find(q => q.infoType == "Keywords")!} updateDashboardItem={updateDashboardItem} />
             <DialogPrompt title="Keywords prompt" prompt="Keywords" />
             <section className="frame">
-                <span id="keywords"> <MarkdownRenderer markdown={dashboardState.items.find(q => q.infoType == "Keywords")?.content!} /></span>
+                {
+                    dashboardState.items.find(q => q.infoType == "Keywords")?.content === "" ?
+                        <Skeleton2Rows /> :
+                        <span id="keywords"> <MarkdownRenderer markdown={dashboardState.items.find(q => q.infoType == "Keywords")?.content!} /></span>
+                }
+
             </section>
         </div>
     ));
@@ -76,7 +86,11 @@ export const DashboardTab = (props: any) => {
             <ButtonGenAI item={dashboardState.items.find(q => q.infoType == "Advice")!} updateDashboardItem={updateDashboardItem} />
             <DialogPrompt title="Advice prompt" prompt="Advice" />
             <section className="frame">
-                <span id="advice"> <MarkdownRenderer markdown={dashboardState.items.find(q => q.infoType == "Advice")?.content!} /></span>
+                {
+                    dashboardState.items.find(q => q.infoType == "Advice")?.content === "" ?
+                        <Skeleton2Rows /> :
+                        <span id="advice"> <MarkdownRenderer markdown={dashboardState.items.find(q => q.infoType == "Advice")?.content!} /></span>
+                }
             </section>
         </div>
     ));
@@ -86,7 +100,11 @@ export const DashboardTab = (props: any) => {
             <ButtonGenAI item={dashboardState.items.find(q => q.infoType == "Example")!} updateDashboardItem={updateDashboardItem} />
             <DialogPrompt title="Example prompt" prompt="Example" />
             <section className="frame">
-                <span id="example"> <MarkdownRenderer markdown={dashboardState.items.find(q => q.infoType == "Example")?.content!} /></span>
+                {
+                    dashboardState.items.find(q => q.infoType == "Example")?.content === "" ?
+                        <Skeleton2Rows /> :
+                        <span id="example"> <MarkdownRenderer markdown={dashboardState.items.find(q => q.infoType == "Example")?.content!} /></span>
+                }
             </section>
         </div>
     ));
@@ -96,15 +114,19 @@ export const DashboardTab = (props: any) => {
             <ButtonGenAI item={dashboardState.items.find(q => q.infoType == "Evaluation")!} updateDashboardItem={updateDashboardItem} />
             <DialogPrompt title="Evaluation prompt" prompt="Evaluation" />
             <section className="frame">
-                <span id="evaluation"> <MarkdownRenderer markdown={dashboardState.items.find(q => q.infoType == "Evaluation")?.content!} /></span>
+                {
+                    dashboardState.items.find(q => q.infoType == "Evaluation")?.content === "" ?
+                        <Skeleton2Rows /> :
+                        <span id="evaluation"> <MarkdownRenderer markdown={dashboardState.items.find(q => q.infoType == "Evaluation")?.content!} /></span>
+                }
             </section>
         </div>
     ));
 
 
 
-    return (       
-        <div>       
+    return (
+        <div>
             <TabList className="tab" selectedValue={selectedValue} onTabSelect={onTabSelect}>
                 <Tab value="Summary">Summary</Tab>
                 <Tab value="Advice">Advice</Tab>
@@ -112,7 +134,7 @@ export const DashboardTab = (props: any) => {
                 <Tab value="Evaluation">Evaluation</Tab>
             </TabList>
             {dashboardState.conversation === "" ?
-                <Row />
+                <Skeleton3Rows />
                 :
                 <div className={styles.panels}>
                     {selectedValue === "Summary" && <Summary />}

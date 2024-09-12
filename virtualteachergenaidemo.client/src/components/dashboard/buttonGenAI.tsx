@@ -38,6 +38,8 @@ const ButtonGenAI: React.FC<ButtonGenAIProps> = ({ item, updateDashboardItem }) 
 
 
     const handleClick = async () => {
+        updateDashboardItem({ ...item, content: "" });
+
         const body = {
             id: item.id,
             chatId: item.chatId,
@@ -47,7 +49,7 @@ const ButtonGenAI: React.FC<ButtonGenAIProps> = ({ item, updateDashboardItem }) 
             prompt: item.prompt
         }
         
-        updateDashboardItem({ ...item, content: "" });
+        
 
         await fetch('/api/dashboard/' + item.prompt, {
             method: 'POST',

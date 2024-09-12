@@ -33,11 +33,10 @@ const LastTraining: React.FC = () => {
 
 
     const contents = lastTraining === undefined ? 
-        <Spinner />
-    
+        <Spinner />    
         :
-        <div>
-            <div>
+        <div className="list">
+            
                 {
                     lastTraining!.map(item =>
                         <section key={item.chatId}>
@@ -55,7 +54,7 @@ const LastTraining: React.FC = () => {
 
                     )
                 }
-            </div>
+            
         </div>;
 
     return (
