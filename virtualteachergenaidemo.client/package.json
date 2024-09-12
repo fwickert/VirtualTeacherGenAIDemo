@@ -15,6 +15,7 @@
     "@fluentui/react-components": "^9.54.13",
     "@microsoft/signalr": "^8.0.7",
     "marked": "^14.1.2",
+    "microsoft-cognitiveservices-speech-sdk": "^1.40.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.1",

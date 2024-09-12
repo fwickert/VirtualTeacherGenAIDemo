@@ -6,7 +6,7 @@
     padding: 0;
 }
 .chat-window {
-    width: 700px;
+    width: 50%;
     height: 600px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -17,12 +17,20 @@
 }
 
 .chat-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     padding: 10px;
     color: black;
     text-align: center;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
+    position: relative;
 }
+    .chat-header .mic-icon {
+        position: absolute;
+        right: 10px;
+    }
 
 .chat-messages {
     flex: 1;
@@ -34,10 +42,7 @@
     
 }
 
-.fullwidth {
-    width: 90%;
-    padding: 10px;       
-}
+
 
 
 /*Add media query*/
