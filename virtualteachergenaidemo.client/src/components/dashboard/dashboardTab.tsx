@@ -7,7 +7,7 @@ import MarkdownRenderer from '../Utilities/markdownRenderer';
 import { DialogPrompt } from '../Utilities/DialogPrompt';
 import { ButtonGenAI } from './buttonGenAI';
 import { useDashboardContextState } from '../sharedContext/dashboardContextState';
-import type { DashboardState } from '../sharedContext/dashboardContextState';
+import type { DashboardState, DashboardItem } from '../sharedContext/dashboardContextState';
 import { v4 as uuidv4 } from 'uuid';
 import { Row } from '../Utilities/skeleton';
 
@@ -41,20 +41,29 @@ export const DashboardTab = (props: any) => {
         setSelectedValue(data.value);
     };
 
+    const updateDashboardItem = (updatedItem: DashboardItem) => {
+        setDashboardState(prevState => ({
+            ...prevState,
+            items: prevState.items.map(item =>
+                item.id === updatedItem.id ? updatedItem : item
+            )
+        }));
+    };
+
     const Summary = React.memo(() => (
 
         <div role="tabpanel" aria-labelledby="Summary" className="tabpanel">
-            <ButtonGenAI {...dashboardState.items.find(q => q.infoType == "Summary")} />
+            <ButtonGenAI item={dashboardState.items.find(q => q.infoType == "Summary")!} updateDashboardItem={updateDashboardItem} />
             <DialogPrompt title="Summary prompt" prompt="Summarize" />
             <section className="frame">
                 <span id="summary"> {dashboardState.items.find(q => q.infoType == "Summary")?.content!}</span>
             </section>
-            <ButtonGenAI {...dashboardState.items.find(q => q.infoType == "Products")} />
+            <ButtonGenAI item={dashboardState.items.find(q => q.infoType == "Products")!} updateDashboardItem={updateDashboardItem} />
             <DialogPrompt title="Products prompt" prompt="Products" />
             <section className="frame">
                 <span id="products"> <MarkdownRenderer markdown={dashboardState.items.find(q => q.infoType == "Products")?.content!} /></span>
             </section>
-            <ButtonGenAI {...dashboardState.items.find(q => q.infoType == "Keywords")} />
+            <ButtonGenAI item={dashboardState.items.find(q => q.infoType == "Keywords")!} updateDashboardItem={updateDashboardItem} />
             <DialogPrompt title="Keywords prompt" prompt="Keywords" />
             <section className="frame">
                 <span id="keywords"> <MarkdownRenderer markdown={dashboardState.items.find(q => q.infoType == "Keywords")?.content!} /></span>
@@ -64,7 +73,7 @@ export const DashboardTab = (props: any) => {
 
     const Advice = React.memo(() => (
         <div role="tabpanel" aria-labelledby="Advice" className="tabpanel">
-            <ButtonGenAI {...dashboardState.items.find(q => q.infoType == "Advice")} />
+            <ButtonGenAI item={dashboardState.items.find(q => q.infoType == "Advice")!} updateDashboardItem={updateDashboardItem} />
             <DialogPrompt title="Advice prompt" prompt="Advice" />
             <section className="frame">
                 <span id="advice"> <MarkdownRenderer markdown={dashboardState.items.find(q => q.infoType == "Advice")?.content!} /></span>
@@ -74,7 +83,7 @@ export const DashboardTab = (props: any) => {
 
     const Example = React.memo(() => (
         <div role="tabpanel" aria-labelledby="Example" className="tabpanel">
-            <ButtonGenAI {...dashboardState.items.find(q => q.infoType == "Example")} />
+            <ButtonGenAI item={dashboardState.items.find(q => q.infoType == "Example")!} updateDashboardItem={updateDashboardItem} />
             <DialogPrompt title="Example prompt" prompt="Example" />
             <section className="frame">
                 <span id="example"> <MarkdownRenderer markdown={dashboardState.items.find(q => q.infoType == "Example")?.content!} /></span>
@@ -84,7 +93,7 @@ export const DashboardTab = (props: any) => {
 
     const Evaluation = React.memo(() => (
         <div role="tabpanel" aria-labelledby="Evaluation" className="tabpanel">
-            <ButtonGenAI {...dashboardState.items.find(q => q.infoType == "Evaluation")} />
+            <ButtonGenAI item={dashboardState.items.find(q => q.infoType == "Evaluation")!} updateDashboardItem={updateDashboardItem} />
             <DialogPrompt title="Evaluation prompt" prompt="Evaluation" />
             <section className="frame">
                 <span id="evaluation"> <MarkdownRenderer markdown={dashboardState.items.find(q => q.infoType == "Evaluation")?.content!} /></span>
@@ -94,14 +103,8 @@ export const DashboardTab = (props: any) => {
 
 
 
-    return (
-        //dashboardState.conversation === "" ?
-        ////1 === 1 ?
-        //    //<Spinner />              
-        //    <Row />
-        //    :
-        <div>
-            {/*<div>{dashboardState.conversation}</div>*/}
+    return (       
+        <div>       
             <TabList className="tab" selectedValue={selectedValue} onTabSelect={onTabSelect}>
                 <Tab value="Summary">Summary</Tab>
                 <Tab value="Advice">Advice</Tab>

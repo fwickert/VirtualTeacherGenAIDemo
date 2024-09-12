@@ -14,16 +14,25 @@ let connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
 connection.start();
 
 
-let input: HTMLSpanElement;
+//let input: HTMLSpanElement;
+interface ButtonGenAIProps {
+    item: DashboardItem;
+    updateDashboardItem: (item: DashboardItem) => void;
+}
 
-
-const ButtonGenAI = (item: DashboardItem) => {
+const ButtonGenAI: React.FC<ButtonGenAIProps> = ({ item, updateDashboardItem }) => {
     const { dashboardState } = useDashboardContextState();
 
-    connection.on(item.prompt!, (data) => {
+    connection.on(item?.prompt!, (data) => {
         const rawMarkup = marked(data);
+        //not markup if summary
+        if (item?.infoType === "Summary") {
+            updateDashboardItem({ ...item, content: data });
+            return;
+        }
+
+        updateDashboardItem({ ...item, content: rawMarkup.toString() });
         
-        input.innerHTML = rawMarkup.toString();
     });
 
 
@@ -37,8 +46,8 @@ const ButtonGenAI = (item: DashboardItem) => {
             title: item.title,
             prompt: item.prompt
         }
-        input = document.getElementById(item.prompt!) as HTMLSpanElement;
-        input.textContent = "";
+        
+        updateDashboardItem({ ...item, content: "" });
 
         await fetch('/api/dashboard/' + item.prompt, {
             method: 'POST',
@@ -51,7 +60,7 @@ const ButtonGenAI = (item: DashboardItem) => {
 
 
     return (
-        <Button onClick={handleClick}> {item.title}</Button>
+        <Button onClick={handleClick}> {item?.title}</Button>
     );
 };
 
