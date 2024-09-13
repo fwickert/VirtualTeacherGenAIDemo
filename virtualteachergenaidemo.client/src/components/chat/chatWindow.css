@@ -1,30 +1,39 @@
-.container {
-    display: flex;
-    justify-content: center;
-    
-    margin: 0;
-    padding: 0;
-    position: relative;    
-    flex-direction: column;
-    align-items: center;
+.chat-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-rows: auto;    
+    /*padding: 10px;*/
 }
 
-.audio-visualizer {
-    position: absolute;
-    top: 0;
-    left: 0;
+.grid-column {    
+    /*border: 1px solid rgba(0, 0, 0, 0.8);*/
+    padding: 20px;
+    font-size: 30px;
+    /*text-align: center;*/
 }
+
+
+
+/* Other styles remain unchanged */
+/*.chat-container {
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+}*/
 
 
 .chat-window {
-    width: 50%;
+    width: 100%;
     height: 600px;
     border: 1px solid #ccc;
     border-radius: 5px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    
 }
 
 .chat-header {
@@ -38,6 +47,7 @@
     border-top-right-radius: 5px;
     position: relative;
 }
+
     .chat-header .mic-icon {
         position: absolute;
         right: 10px;
@@ -49,21 +59,13 @@
     overflow-y: auto;
 }
 
-.chat-input{
-    
+.chat-input {
 }
 
-
-
-
-/*Add media query*/
-
+/* Add media query */
 @media (max-width: 768px) {
     .chat-window {
         width: 100%;
-    /*height all the reste of the screeen*/
-    height: calc(100vh - 350px);
+        height: calc(100vh - 350px);
     }
 }
-
-
