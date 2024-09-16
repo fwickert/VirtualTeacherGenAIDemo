@@ -31,7 +31,7 @@ const LastTraining: React.FC = () => {
 
     const formatDate = (timestamp: string) => {
         const date = new Date(timestamp);
-        return date.toLocaleString();
+        return date.toLocaleDateString();
     };
 
 
@@ -43,14 +43,15 @@ const LastTraining: React.FC = () => {
                 {
                     lastTraining!.map(item =>
                         <section key={item.chatId}>
-                            <Card orientation="horizontal" onClick={navigateDashboard.bind(this, item.chatId) }  >
-                                <CardPreview className='horizontalCardImage'>
-                                    {item.title} - { item.chatId }
-                                </CardPreview>
-
+                            <Card orientation="horizontal" onClick={navigateDashboard.bind(this, item.chatId)}  >
                                 <CardHeader
                                     header={<Text weight="semibold">{formatDate(item.timestamp)}</Text>}
                                 />
+                                <CardPreview className='horizontalCardImage'>
+                                   <span class="htitle"> {item.title}</span>
+                                </CardPreview>
+
+                               
                             </Card>
                         </section>
 

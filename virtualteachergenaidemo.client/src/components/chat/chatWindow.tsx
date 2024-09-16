@@ -16,7 +16,7 @@ function ChatWindow() {
         <div className="chat-container">
             <div className="grid-column">
                 <div>
-                    <input type="file" accept="audio/*" onChange={handleFileChange} />
+                    {/*<input type="file" accept="audio/*" onChange={handleFileChange} />*/}
                     <AudioVisualizer audioFile={audioFile} />
                 </div>
             </div>

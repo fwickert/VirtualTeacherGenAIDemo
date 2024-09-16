@@ -14,6 +14,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({ audioFile, useMicroph
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     useEffect(() => {
+        setIsLoading(true);
         const startAudio = async () => {
             const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
             audioContextRef.current = audioContext;
@@ -88,6 +89,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({ audioFile, useMicroph
             requestAnimationFrame(visualize);
         }
     };
+    
 
     const MIN_HEIGHT = 20; // Minimum height of the bars
 
@@ -95,7 +97,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({ audioFile, useMicroph
     const animationDelays = ['0s', '0.5s', '1s', '1.5s'];
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', marginTop: '50px' }}>
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '3px' }}>
                 {!isPlaying && !isLoading && (
                     <div
@@ -141,11 +143,11 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({ audioFile, useMicroph
                     </>
                 )}
             </div>
-            {!isPlaying && (
-                <button onClick={() => setIsLoading(!isLoading)} style={{ marginTop: '20px' }}>
-                    {isLoading ? 'Stop' : 'Loading'}
-                </button>
-            )}
+            {/*{!isPlaying && (*/}
+            {/*    <button onClick={() => setIsLoading(!isLoading)} style={{ marginTop: '20px' }}>*/}
+            {/*        {isLoading ? 'Stop' : 'Loading'}*/}
+            {/*    </button>*/}
+            {/*)}*/}
             <style>
                 {`
                     @keyframes breathing {

@@ -133,7 +133,7 @@ export const DashboardTab = (props: any) => {
                 <Tab value="Example">Example</Tab>
                 <Tab value="Evaluation">Evaluation</Tab>
             </TabList>
-            {dashboardState.conversation === "" ?
+            {dashboardState === undefined ?
                 <Skeleton3Rows />
                 :
                 <div className={styles.panels}>

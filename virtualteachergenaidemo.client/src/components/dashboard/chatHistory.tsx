@@ -41,7 +41,7 @@ function ChatHistory(props: any) {
     return (        
             <div id="history" className="frame window">
                 {
-                dashboardState.conversation === "" ?
+                dashboardState === undefined ?
                     //1===1 ?
                     <div>
                         <Spinner className="spinner" />
