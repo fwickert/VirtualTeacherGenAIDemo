@@ -72,15 +72,15 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
         {
             IStorageContext<Message> messageStorageContext;
             CosmosOptions cosmosConfig = services.BuildServiceProvider().GetRequiredService<IOptions<CosmosOptions>>().Value;
-            messageStorageContext = new CosmosDbContext<Message>(cosmosConfig.ConnectionString, cosmosConfig.Database, cosmosConfig.HistoryContainer);
+            messageStorageContext = new CosmosDbContext<Message>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.HistoryContainer);
             services.AddSingleton<MessageRepository>(new MessageRepository(messageStorageContext));
 
             IStorageContext<HistoryItem> historyStorageContext; 
-            historyStorageContext = new CosmosDbContext<HistoryItem>(cosmosConfig.ConnectionString, cosmosConfig.Database, cosmosConfig.HistoryContainer);
+            historyStorageContext = new CosmosDbContext<HistoryItem>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.HistoryContainer);
             services.AddSingleton<HistoryRepository>(new HistoryRepository(historyStorageContext));            
             
             IStorageContext<DashboardItem> dashboardStorageContext;
-            dashboardStorageContext = new CosmosDbContext<DashboardItem>(cosmosConfig.ConnectionString, cosmosConfig.Database, cosmosConfig.DashboardContainer);
+            dashboardStorageContext = new CosmosDbContext<DashboardItem>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.DashboardContainer);
             services.AddSingleton<DashboardRepository>(new DashboardRepository(dashboardStorageContext));
 
             return services;

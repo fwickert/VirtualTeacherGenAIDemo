@@ -32,6 +32,9 @@ public class CosmosOptions
     /// </summary>  
     [Required , NotEmptyOrWhitespace]
     public string DashboardContainer { get; set; } = string.Empty;
-        
+
+    [Required, NotEmptyOrWhitespace]
+    public string EndPoint { get; set; } = string.Empty;
+
 
 }
