@@ -1,25 +1,22 @@
 
 
-.tab{
+.tab {
     margin-bottom: 20px;
 }
 
-.tabpanel{
+.tabpanel {
     max-height: 73vh;
-    overflow-y:auto;
+    overflow-y: auto;
 }
 
-h1{
-    
+h1 {
     text-align: center;
     overflow-wrap: break-word;
- 
 }
 
-h2{    
+h2 {
     margin: 20px 0 20px -2px;
     text-align: left;
     overflow-wrap: break-word;
     line-height: 1.1;
-   
 }

@@ -4,8 +4,11 @@ import { MicRegular } from "@fluentui/react-icons";
 import { getSpeechRecognizerAsync } from '../../services/speechService';
 import './speechRecognizer.css';
 
-const SpeechRecognizer = () => {
-    const [transcript, setTranscript] = useState('');
+interface SpeechRecognizerProps {
+    onNewMessage: (message: string) => void;
+}
+
+const SpeechRecognizer: React.FC<SpeechRecognizerProps> = ({ onNewMessage }) => {    
     const [isMicOn, setIsMicOn] = useState(false);
 
     const startRecognition = async () => {
@@ -13,8 +16,8 @@ const SpeechRecognizer = () => {
             setIsMicOn(true);
             const recognizer = await getSpeechRecognizerAsync();
 
-            recognizer.recognizeOnceAsync(result => {
-                setTranscript(result.text);
+            recognizer.recognizeOnceAsync(result => {                
+                onNewMessage(result.text);
                 setIsMicOn(false);
             });
         } catch (error) {
@@ -29,8 +32,7 @@ const SpeechRecognizer = () => {
                 className={`mic-icon ${isMicOn ? 'mic-on' : ''}`}               
                 icon={<MicRegular className={`mic-icon ${isMicOn ? 'mic-on' : ''}`} />}
                 disabled={isMicOn}
-            />
-            <p>{transcript}</p>
+            />           
         </div>
     );
 };

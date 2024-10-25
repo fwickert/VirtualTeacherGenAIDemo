@@ -22,13 +22,13 @@ namespace VirtualTeacherGenAIDemo.Server.Services
 
         public IResult GetSummarize(DashboardRequest dashboardRequest, CancellationToken token)
         {
-            _dashboardResponse.FunctionName = "Summarize";
+            _dashboardResponse.FunctionName = "Summary";
 
             Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.ChatId, dashboardRequest.Id, "Summary",
                                new Dictionary<string, string>()
                                {
                     { "conversation", dashboardRequest.Conversation }
-            },dashboardRequest.ConnectionId, token), token);
+            }, dashboardRequest.ConnectionId, token), token);
 
             return TypedResults.Ok("Summarize requested");
         }
@@ -107,7 +107,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         //return all info from a dashboard
         public async Task<IEnumerable<DashboardItem>> GetDashboard(string chatId)
         {
-           return await _dashboardRepository.FindByChatIdAsync(chatId);
+            return await _dashboardRepository.FindByChatIdAsync(chatId);
         }
 
         public async Task<string> GetPrompt(string functionName, string plugin)

@@ -5,6 +5,7 @@ import AudioVisualizer from '../speechRecognizer/AudioVisualizer';
 
 function ChatWindow() {
     const [audioFile, setAudioFile] = useState<File | null>(null);
+    const [messages, setMessages] = useState<string[]>([]);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files[0]) {
@@ -12,11 +13,16 @@ function ChatWindow() {
         }
     };
 
+    const handleNewMessage = (message: string) => {
+        setMessages(prevMessages => [...prevMessages, message]);
+    };
+
+
     return (
         <div className="chat-container">
             <div className="grid-column">
                 <div>
-                    {/*<input type="file" accept="audio/*" onChange={handleFileChange} />*/}
+                    <input type="file" accept="audio/*" onChange={handleFileChange} />
                     <AudioVisualizer audioFile={audioFile} />
                 </div>
             </div>
@@ -25,10 +31,12 @@ function ChatWindow() {
                     <div className="chat-window">
                         <div className="chat-header">
                             Chat
-                            <SpeechRecognizer />
+                            
                         </div>
                         <div className="chat-messages">
-                            {/* Chat messages will go here */}
+                            {messages.map((msg, index) => (
+                                <div key={index} className="chat-message">{msg}</div>
+                            ))}
                         </div>
                         <div className="chat-input">
                             {/* Chat input will go here */}
@@ -37,33 +45,13 @@ function ChatWindow() {
                 </div>
             </div>
             <div className="grid-column">
+                <SpeechRecognizer onNewMessage={handleNewMessage} />
+            </div>
+            <div className="grid-column">
                 {/*<AudioVisualizer useMicrophone />*/}
             </div>
         </div>
-        //<div className="grid-container">
-
-        //    <div className="center">
-        //        <div className="chat-container">
-        //            <div className="chat-window">
-        //                <div className="chat-header">
-        //                    Chat
-        //                    <SpeechRecognizer />
-        //                </div>
-        //                <div className="chat-messages">
-        //                    {/* Chat messages will go here */}
-        //                </div>
-        //                <div className="chat-input">
-        //                    {/* Chat input will go here */}
-        //                </div>
-        //            </div>
-        //        </div>
-        //    </div>
-        //    <div className="right">
-        //        <div>
-        //            test
-        //        </div>
-        //    </div>
-        //</div>
+        
     );
 }
 

@@ -59,7 +59,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                     Type = "Session"
                 };
 
-                await historyRepository.UpsertAsync(historyItem);
+                //await historyRepository.UpsertAsync(historyItem);
             }
 
             MessageResponse response = new MessageResponse
@@ -67,15 +67,10 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 State = "Start",
                 WhatAbout = "chat",
                 ChatId = chatId,
-
             };
 
             await foreach (StreamingChatMessageContent chatUpdate in _chat.GetStreamingChatMessageContentsAsync(chatHistory, cancellationToken: token))
             {
-                await this.UpdateMessageOnClient(response, "", token);
-                response.State = "InProgress";
-                response.Role = chatUpdate.Role;
-
                 if (!string.IsNullOrEmpty(chatUpdate.Content))
                 {
                     response.Content += chatUpdate.Content;
@@ -84,10 +79,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                     await Task.Delay(DELAY);
                 }
             }
-            response.State = "End";
-
-
-
+            
             //Take last message from chatHistory and save in cosmosDB.
             var lastMessage = chatHistory.Last(q => q.Role == AuthorRole.User);
             if (lastMessage != null)
@@ -120,7 +112,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             }
             message.Timestamp = DateTimeOffset.Now;
             message.ChatId = chatId;
-            messageRepository.UpsertAsync(message).GetAwaiter().GetResult();
+           // messageRepository.UpsertAsync(message).GetAwaiter().GetResult();
             chatHistory.AddAssistantMessage(response.Content);
             await this.UpdateMessageOnClient(response, "", token);
 

@@ -1,21 +1,42 @@
 import "./dashboard.css";
+import { useState, useEffect} from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { DashboardTab } from '../../components/dashboard/dashboardTab';
-import ChatHistory from '../../components/dashboard/chatHistory';
-import { DashboardContextStateProvider } from '../../components/sharedContext/dashboardContextState';
+import ChatHistory, { IChat } from '../../components/dashboard/chatHistory';
 import { ArrowCircleLeft48Filled } from '@fluentui/react-icons';
 import { Button } from '@fluentui/react-components';
+import DashboardTabs from '../../components/dashboard/dashboardTabs';
+
+enum AuthorRoles {
+    User = 0,
+    Assistant = 1,
+}
+
 
 function Dashboard() {
     const location = useLocation();
     const navigate = useNavigate();
     const { chatId } = location.state;
+    const [conversation, setConversation] = useState<IChat[]>([]);
+    const [formattedConversation, setFormattedConversation] = useState<string>("");
 
     const handleBackClick = () => {
         navigate('/lastTraining');
     };
 
-    
+    useEffect(() => {
+        fetchConversation(chatId);
+    }, [chatId]);
+
+    const fetchConversation = async (chatId: string) => {
+        const response = await fetch('/api/chat/messages?chatId=' + chatId);
+        const data = await response.json();
+        const formattedConversation = data.map((message: any) => {
+            const role = message.authorRole === AuthorRoles.User ? "Seller" : "Client";
+            return `${role}: ${message.content}`;
+        }).join("\n");
+        setConversation(data);
+        setFormattedConversation(formattedConversation);
+    };
 
     return (
         <div className="grid-container">            
@@ -30,15 +51,13 @@ function Dashboard() {
                     </p>
                 </section>
             </div>
-            <DashboardContextStateProvider>
-                <div className="chat">
-                    <div className="chatHistoryTitle">Conversation</div>
-                    <ChatHistory chatId={chatId} />
-                </div>
-                <div className="dashboard">
-                    <DashboardTab chatId={chatId} />
-                </div>
-            </DashboardContextStateProvider>
+            <div className="chat">
+                <div className="chatHistoryTitle">Conversation</div>
+                <ChatHistory conversation={conversation}  />
+            </div>
+            <div className="dashboard">
+                <DashboardTabs chatId={chatId} conversation={formattedConversation} />
+            </div>
         </div>
     );
 }

@@ -48,7 +48,7 @@ const LastTraining: React.FC = () => {
                                     header={<Text weight="semibold">{formatDate(item.timestamp)}</Text>}
                                 />
                                 <CardPreview className='horizontalCardImage'>
-                                   <span class="htitle"> {item.title}</span>
+                                   <span className="htitle"> {item.title}</span>
                                 </CardPreview>
 
                                

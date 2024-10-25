@@ -58,6 +58,8 @@
     flex: 1;
     padding: 10px;
     overflow-y: auto;
+    font-size:0.5em;
+    text-align:right;
 }
 
 .chat-input {

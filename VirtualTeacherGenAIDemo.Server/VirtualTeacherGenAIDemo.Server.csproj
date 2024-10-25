@@ -15,7 +15,7 @@
     <None Remove="Plugins\DashboardPlugin\Example\skprompt.txt" />
     <None Remove="Plugins\DashboardPlugin\KeyWords\skprompt.txt" />
     <None Remove="Plugins\DashboardPlugin\Products\skprompt.txt" />
-    <None Remove="Plugins\DashboardPlugin\Summarize\skprompt.txt" />
+    <None Remove="Plugins\DashboardPlugin\Summary\skprompt.txt" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,7 +34,7 @@
     <Content Include="Plugins\DashboardPlugin\Products\skprompt.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Plugins\DashboardPlugin\Summarize\skprompt.txt">
+    <Content Include="Plugins\DashboardPlugin\Summary\skprompt.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -71,7 +71,7 @@
     <Content Update="Plugins\DashboardPlugin\Products\config.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Update="Plugins\DashboardPlugin\Summarize\config.json">
+    <Content Update="Plugins\DashboardPlugin\Summary\config.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
