@@ -4,6 +4,7 @@ import SpeechRecognizer from '../speechRecognizer/speechRecognizer';
 import AudioVisualizer from '../speechRecognizer/AudioVisualizer';
 import { ChatHistoryRequest, ChatMessage } from '../../models/ChatHistoryRequest';
 import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
+import { textToSpeechAsync } from '../../services/speechService';
 
 interface Message {
     content: string;
@@ -42,7 +43,9 @@ function ChatWindow() {
                                 const updatedMessages = [...prevMessages];
                                 updatedMessages[updatedMessages.length - 1] = { content: message.content, role: 'Assistant' }
                                 return updatedMessages;
-                            });
+                            });                            
+                        } else if (message.state === "End") {
+                            textToSpeechAsync(message.content);
                         }
                     });
                 })
