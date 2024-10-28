@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.SemanticKernel.ChatCompletion;
+using VirtualTeacherGenAIDemo.Server.Models.Request;
 using VirtualTeacherGenAIDemo.Server.Models.Storage;
 using VirtualTeacherGenAIDemo.Server.Services;
 
@@ -13,7 +14,7 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
     {
         [HttpPost(Name = "chat")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IResult Post([FromServices] ChatService chatService, [FromBody] ChatHistory chatHistory, CancellationToken token, [FromQuery] string chatId = "")
+        public IResult Post([FromServices] ChatService chatService, [FromBody] ChatHistoryRequest chatHistory, CancellationToken token, [FromQuery] string chatId = "")
         {
             return chatService.GetChat(chatId, chatHistory, token);
         }

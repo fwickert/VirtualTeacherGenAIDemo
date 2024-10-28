@@ -68,11 +68,13 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 WhatAbout = "chat",
                 ChatId = chatId,
             };
+            await this.UpdateMessageOnClient(response, "", token);
 
             await foreach (StreamingChatMessageContent chatUpdate in _chat.GetStreamingChatMessageContentsAsync(chatHistory, cancellationToken: token))
             {
                 if (!string.IsNullOrEmpty(chatUpdate.Content))
                 {
+                    response.State = "InProgress";
                     response.Content += chatUpdate.Content;
                     await this.UpdateMessageOnClient(response, "", token);
                     Console.Write(chatUpdate.Content);
@@ -92,7 +94,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                     Id = Guid.NewGuid().ToString(),
                     AuthorRole = Message.AuthorRoles.User
                 };
-                await messageRepository.UpsertAsync(userMessage);
+                //await messageRepository.UpsertAsync(userMessage);
 
             }
 
@@ -113,6 +115,8 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             message.Timestamp = DateTimeOffset.Now;
             message.ChatId = chatId;
            // messageRepository.UpsertAsync(message).GetAwaiter().GetResult();
+
+            response.State = "End";
             chatHistory.AddAssistantMessage(response.Content);
             await this.UpdateMessageOnClient(response, "", token);
 
