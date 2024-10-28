@@ -6,6 +6,7 @@ import { HubConnection } from '@microsoft/signalr';
 import { Button } from '@fluentui/react-components';
 import { DialogPrompt } from '../Utilities/DialogPrompt';
 interface DashboardFeatureResultProps {
+    chatId:string
     data: any;
     infoType: string;
     loading: boolean;
@@ -14,31 +15,31 @@ interface DashboardFeatureResultProps {
 }
 
 
-const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({ data, infoType, loading,conversation, connection }) => {
+const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({chatId, data, infoType, loading, conversation, connection }) => {
     const [content, setContent] = useState(data?.content || '');
     const [isLoading, setIsLoading] = useState(loading);
-    
+
 
     useEffect(() => {
-        if (connection) {            
-            connection.on(infoType, (updatedData: any) => {                
+        if (connection) {
+            connection.on(infoType, (updatedData: any) => {
                 setIsLoading(false);
-                setContent(updatedData);                
+                setContent(updatedData);
             });
 
             return () => {
                 connection.off(infoType);
             };
         }
-        else {console.log('Connection not found') }
+        else { console.log('Connection not found') }
     }, [connection]);
 
     const callApiForFeature = async (feature: string, item: any) => {
-        setIsLoading(true); 
+        setIsLoading(true);
         try {
             const body = {
-                id: item.id,
-                chatId: item.chatId,
+                id: item == undefined ? "" :  item.id,
+                chatId: chatId,
                 conversation: conversation,
                 connectionId: connection.connectionId!,
                 title: feature,
@@ -57,37 +58,30 @@ const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({ data, i
                 setContent('Failed to generate content');
                 setIsLoading(false);
                 return;
-            }           
+            }
         } catch (error) {
             console.error(`Error calling API for ${feature}:`, error);
             setContent('Failed to generate content');
             setIsLoading(false);
         } finally {
-            
+
         }
     };
 
-    return data ? (
-        <div role="tabpanel" aria-labelledby={data.infoType} className="tabpanel">
-            <Button onClick={() => callApiForFeature(infoType, data)}>Generate {infoType}</Button>
-            <DialogPrompt title={infoType } prompt={infoType} />
+    return (
+        <div role="tabpanel" aria-labelledby={infoType} className="tabpanel">
+            <Button onClick={() => callApiForFeature(infoType,data)}>Generate {infoType}</Button>
+            <DialogPrompt title={infoType} />
             <section className="frame">
-                <span id={data.infoType}>
-                    {isLoading ? <Skeleton2Rows /> : <MarkdownRenderer markdown={content} />}
+                <span id={infoType}>
+                    {isLoading ? <Skeleton2Rows /> :
+                        content ? <MarkdownRenderer markdown={content} /> : <span>No Generate Yet</span>
+                            
+                    }
                 </span>
             </section>
         </div>
-    ) :
-        (
-            <section className="frame">
-                <span id={infoType}>
-                    Not Generated Yet
-                </span>
-            </section>
-        )
-
-
-
+    );
 };
 
 export { DashboardFeatureResult }

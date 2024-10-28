@@ -71,6 +71,17 @@
     flex-direction: column;
 }
 
+.delete-message {
+    cursor: pointer;
+    margin-left: 10px;
+    color: dimgray;
+    font-weight: bold;
+}
+
+.delete-message:hover {
+    color: red;
+}
+
 
 .chat-input {
 }

@@ -59,6 +59,7 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ chatId, conversation }) =
         return (
             <div role="tabpanel" aria-labelledby={infoType} className="tabpanel">               
                 <DashboardFeatureResult
+                    chatId={chatId}
                     data={item}
                     loading={loading}
                     infoType={infoType}

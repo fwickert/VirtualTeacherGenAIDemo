@@ -11,11 +11,11 @@ interface Message {
     role: 'User' | 'Assistant';
 }
 
-function ChatWindow() {
-    const [audioFile, setAudioFile] = useState<File | null>(null);
+function ChatWindow() {    
     const [messages, setMessages] = useState<Message[]>([]);
     const [connection, setConnection] = useState<HubConnection | null>(null);
     const currentMessageRef = useRef<string | null>(null);
+
     const chatId = "";
     const hubUrl = process.env.HUB_URL;
 
@@ -46,6 +46,7 @@ function ChatWindow() {
                             });                            
                         } else if (message.state === "End") {
                             textToSpeechAsync(message.content);
+                            
                         }
                     });
                 })
@@ -53,24 +54,22 @@ function ChatWindow() {
         }
     }, [connection]);
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files && event.target.files[0]) {
-            setAudioFile(event.target.files[0]);
-        }
-    };
 
     const handleNewMessage = async (message: string) => {        
         setMessages(prevMessages => [...prevMessages, { content: message, role: 'User' }]);
 
+        const promptSystem = "We are going to play a role-playing game. You are an AI simulating a Luxury brand client and the user will be the seller. The goal is to train the sellers. So the game starts right now. In the scenario, you are the client looking for a handbag. Use a spoken tone as if it's an oral conversation and not written. Use the same language as the user. You are a 40-year-old woman living in Strasbourg France.";
+
         const chatHistory = new ChatHistoryRequest([
-            new ChatMessage("System", "test"),
-            ...messages.map(msg => new ChatMessage("User", msg.content)),
+            new ChatMessage("System", promptSystem),
+            ...messages.map(msg => new ChatMessage(msg.role, msg.content)),
             new ChatMessage("User", message)
         ]);
         await callLLMApi(chatId, chatHistory);
     };
 
     const callLLMApi = async (chatId: string, chatHistory: ChatHistoryRequest) => {
+        console.log(chatHistory);
         try {
             const response = await fetch(`/api/chat?chatId=${chatId}`, {
                 method: 'POST',
@@ -85,13 +84,15 @@ function ChatWindow() {
         }
     };
 
+    const handleDeleteMessage = (index: number) => {
+        setMessages(prevMessages => prevMessages.filter((_, i) => i !== index));
+    };
+
     return (
         <div className="chat-container">
-            <div className="grid-column">
-                <div>
-                    <input type="file" accept="audio/*" onChange={handleFileChange} />
-                    <AudioVisualizer audioFile={audioFile} />
-                </div>
+            <div className="grid-column">                
+                    {/*<input type="file" accept="audio/*" onChange={handleFileChange} />*/}
+                    <AudioVisualizer />                
             </div>
             <div className="grid-column">
                 <div>
@@ -103,6 +104,7 @@ function ChatWindow() {
                             {messages.map((msg, index) => (
                                 <div key={index} className={`chat-message ${msg.role === 'User' ? 'user-message' : 'assistant-message'}`}>
                                     {msg.content}
+                                    <span className="delete-message" onClick={() => handleDeleteMessage(index)}>&times;</span>
                                 </div>
                             ))}
                         </div>

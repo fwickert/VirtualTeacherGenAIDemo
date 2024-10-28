@@ -67,6 +67,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 State = "Start",
                 WhatAbout = "chat",
                 ChatId = chatId,
+                Role = AuthorRole.Assistant
             };
             await this.UpdateMessageOnClient(response, "", token);
 
