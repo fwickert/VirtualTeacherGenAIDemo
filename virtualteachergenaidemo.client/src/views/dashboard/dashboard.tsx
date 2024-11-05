@@ -3,7 +3,7 @@ import { useState, useEffect} from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ChatHistory, { IChat } from '../../components/dashboard/chatHistory';
 import { ArrowCircleLeft48Filled } from '@fluentui/react-icons';
-import { Button } from '@fluentui/react-components';
+import { Button } from '@fluentui/react-button';
 import DashboardTabs from '../../components/dashboard/dashboardTabs';
 
 enum AuthorRoles {

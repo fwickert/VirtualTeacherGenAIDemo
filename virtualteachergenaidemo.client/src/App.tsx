@@ -6,6 +6,7 @@ import Training from './views/training/training';
 import LastTraining from './views/trainingList/lastTraining';
 import Dashboard from './views/dashboard/dashboard';
 import Coach from './views/coach/coach';
+import Agent from './views/admin/agent';
 
 
 function App(props: any) {
@@ -20,6 +21,7 @@ function App(props: any) {
                 <Route path="/lastTraining" element={<LastTraining />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/coach" element={<Coach />} />
+                <Route path="/agent" element={<Agent />} />
             </Routes>
         </Router>
 

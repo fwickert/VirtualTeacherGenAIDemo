@@ -68,7 +68,7 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
             return services;
         }
 
-        internal static IServiceCollection AddPersistenceMessages(this IServiceCollection services)
+        internal static IServiceCollection AddStorageContext(this IServiceCollection services)
         {
             IStorageContext<Message> messageStorageContext;
             CosmosOptions cosmosConfig = services.BuildServiceProvider().GetRequiredService<IOptions<CosmosOptions>>().Value;
@@ -82,6 +82,10 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
             IStorageContext<DashboardItem> dashboardStorageContext;
             dashboardStorageContext = new CosmosDbContext<DashboardItem>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.DashboardContainer);
             services.AddSingleton<DashboardRepository>(new DashboardRepository(dashboardStorageContext));
+
+            IStorageContext<AgentItem> agentStorageContext;
+            agentStorageContext = new CosmosDbContext<AgentItem>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.AgentContainer);
+            services.AddSingleton<AgentRepository>(new AgentRepository(agentStorageContext));
 
             return services;
 

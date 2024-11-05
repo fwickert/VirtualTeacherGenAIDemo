@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddSingleton<ILogger>(sp => sp.GetRequiredService<ILogger<Program>>()) // some services require an un-templated ILogger
     .AddOptions(builder.Configuration)
-    .AddPersistenceMessages()
+    .AddStorageContext()
     .AddAIResponses()
     .AddServices()
     .AddSemanticKernelServices()

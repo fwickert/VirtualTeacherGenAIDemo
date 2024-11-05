@@ -5,9 +5,9 @@ import {
 
     Caption1,
     Text
-} from "@fluentui/react-components";
+} from "@fluentui/react-text";
 
-import { Card, CardPreview, CardHeader } from '@fluentui/react-components';
+import { Card, CardPreview, CardHeader } from '@fluentui/react-card';
 import { useNavigate } from 'react-router-dom';
 
 
@@ -33,13 +33,16 @@ function Menu() {
         navigate('/coach');
     };
 
+    const navigateAgent = () => {
+        navigate('/agent');
+    }
+
     return (
         <div className="menu">
             <section>
                 <Card className="card" orientation="horizontal" onClick={navigateTraining} >
-                    <CardPreview className='horizontalCardImage'>
-                        <img
-
+                    <CardPreview >
+                        <img className='horizontalCardImage'
                             src={resolveAsset("chat.svg")}
                             alt="App Name Document"
                         />
@@ -58,8 +61,8 @@ function Menu() {
 
             <section>
                 <Card className="card" orientation="horizontal" onClick={navigateLastTraining} >
-                    <CardPreview className='horizontalCardImage'>
-                        <img
+                    <CardPreview>
+                        <img className='horizontalCardImage'
                             src={resolveAsset("dashboard.svg")}
                             alt="App Name Document"
                         />
@@ -78,8 +81,8 @@ function Menu() {
 
             <section>
                 <Card className="card" orientation="horizontal" onClick={navigateCoach} >
-                    <CardPreview className='horizontalCardImage'>
-                        <img
+                    <CardPreview>
+                        <img className='horizontalCardImage'
                             src={resolveAsset("coach.svg")}
                             alt="App Name Document"
                         />
@@ -95,6 +98,26 @@ function Menu() {
                     />
                 </Card>
             </section>
+            
+            <section>
+                <Card className="card" orientation="horizontal" onClick={navigateAgent} >
+                    <CardPreview>
+                        <img className='horizontalCardImage'
+                            src={resolveAsset("agent.svg")}
+                            alt="App Name Document"
+                        />
+                    </CardPreview>
+
+                    <CardHeader
+                        header={<Text weight="semibold">Virtual AI Agent</Text>}
+                        description={
+                            <Caption1>Managed your Virtual AI Agent</Caption1>
+                        }
+                    />
+                </Card>
+            </section>
+            
+
         </div>
     )
 };

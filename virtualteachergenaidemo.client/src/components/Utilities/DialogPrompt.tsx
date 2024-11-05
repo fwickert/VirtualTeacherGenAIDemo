@@ -1,5 +1,5 @@
-import { Dialog, DialogTrigger, DialogSurface, DialogTitle, DialogBody, DialogActions, DialogContent } from '@fluentui/react-components';
-import { Button } from '@fluentui/react-components';
+import { Dialog, DialogTrigger, DialogSurface, DialogTitle, DialogBody, DialogActions, DialogContent } from '@fluentui/react-dialog';
+import { Button } from '@fluentui/react-button';
 import { Prompt20Filled } from '@fluentui/react-icons';
 import { useEffect, useState } from 'react';
 

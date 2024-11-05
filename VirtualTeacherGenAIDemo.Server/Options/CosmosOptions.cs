@@ -33,8 +33,16 @@ public class CosmosOptions
     [Required , NotEmptyOrWhitespace]
     public string DashboardContainer { get; set; } = string.Empty;
 
+    //same for AgentContainer
+    /// <summary>
+    ///  Gets or sets the Cosmos container for agents.
+    /// </summary>
+    [Required, NotEmptyOrWhitespace]
+    public string AgentContainer { get; set; } = string.Empty;    
+
     [Required, NotEmptyOrWhitespace]
     public string EndPoint { get; set; } = string.Empty;
 
+    
 
 }

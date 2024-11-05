@@ -1,10 +1,11 @@
 import './lastTraining.css';
 import { useEffect, useState } from 'react';
-import { Spinner, Text } from "@fluentui/react-components";
-import { Card, CardPreview, CardHeader } from '@fluentui/react-components';
+import { Spinner } from "@fluentui/react-spinner";
+import { Text } from "@fluentui/react-text";
+import { Card, CardPreview, CardHeader } from '@fluentui/react-card';
 import { useNavigate } from 'react-router-dom';
 import { ArrowCircleLeft48Filled } from '@fluentui/react-icons';
-import { Button } from '@fluentui/react-components';
+import { Button } from '@fluentui/react-button';
 
 interface ILastTraining {
     id: string;

@@ -2,7 +2,8 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
 import './index.css'
-import { FluentProvider, webLightTheme } from '@fluentui/react-components'
+import { FluentProvider} from '@fluentui/react-provider'
+import { webLightTheme } from '@fluentui/react-theme'
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>

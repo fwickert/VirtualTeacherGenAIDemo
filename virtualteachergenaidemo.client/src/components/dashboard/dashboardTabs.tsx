@@ -1,6 +1,6 @@
 import './dashboardTabs.css';
 import React, { useEffect, useState } from 'react';
-import { Tab, TabList } from '@fluentui/react-components';
+import { Tab, TabList } from '@fluentui/react-tabs';
 import { Skeleton3Rows } from '../../components/Utilities/skeleton3rows';
 import * as SignalR from '@microsoft/signalr';
 import { DashboardFeatureResult } from './DashboardFeatureResult';

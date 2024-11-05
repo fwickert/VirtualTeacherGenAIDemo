@@ -1,5 +1,5 @@
 import './chatHistory.css';
-import { Spinner } from '@fluentui/react-components';
+import { Spinner } from '@fluentui/react-spinner';
 
 enum AuthorRoles {
     User = 0,

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Skeleton2Rows } from '../../components/Utilities/skeleton2rows';
 import MarkdownRenderer from '../Utilities/markdownRenderer';
 import { HubConnection } from '@microsoft/signalr';
-import { Button } from '@fluentui/react-components';
+import { Button } from '@fluentui/react-button';
 import { DialogPrompt } from '../Utilities/DialogPrompt';
 interface DashboardFeatureResultProps {
     chatId:string

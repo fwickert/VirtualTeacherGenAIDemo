@@ -1,8 +1,8 @@
 import './training.css'
-import { Text } from "@fluentui/react-components"
+import { Text } from "@fluentui/react-text"
 import { useNavigate } from 'react-router-dom';
 import ChatWindow from '../../components/chat/chatWindow'
-import { Button } from '@fluentui/react-components';
+import { Button } from '@fluentui/react-button';
 import { ArrowCircleLeft48Filled } from '@fluentui/react-icons';
 
 function Training() {
