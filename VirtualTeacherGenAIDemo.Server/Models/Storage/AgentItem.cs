@@ -16,8 +16,6 @@ namespace VirtualTeacherGenAIDemo.Server.Models.Storage
         [Required, NotEmptyOrWhitespace]
         public string Prompt { get; set; } = string.Empty;
 
-
-        [Required, NotEmptyOrWhitespace]
         public string Id { get; set; } = string.Empty;
 
 

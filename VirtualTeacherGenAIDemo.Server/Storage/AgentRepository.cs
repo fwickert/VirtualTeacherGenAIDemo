@@ -13,5 +13,18 @@ namespace VirtualTeacherGenAIDemo.Server.Storage
             return base.StorageContext.QueryEntitiesAsync(e => e.Type == type || e.Type == "system");
             
         }
+
+        //function Get by id
+        public Task<AgentItem> GetAsync(string id, string type)
+        {
+            return base.StorageContext.ReadAsync(id, type);
+        }
+
+
+        //add new agent
+        public Task AddAsync(AgentItem agent)
+        {
+            return base.StorageContext.CreateAsync(agent);
+        }
     }    
 }

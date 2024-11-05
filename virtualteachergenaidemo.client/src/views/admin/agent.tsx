@@ -1,28 +1,29 @@
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardPreview } from '@fluentui/react-card';
 import { Text } from '@fluentui/react-text';
-import { Button } from '@fluentui/react-button';
+
 import { AgentItem } from '../../models/AgentItem';
+import { AgentDialog } from '../../components/admin/AgentDialog';
 
 const Agent = () => {
-    const [agents, setAgents] = useState<AgentItem[]>([]);
+    const [agents, setAgents] = useState<AgentItem[]>([]);        
 
     useEffect(() => {
         // Fetch agents from an API or data source
-        fetch('/api/agent/retail')
+        fetch('/api/agent/byType?type=retail')
             .then(response => response.json())
             .then(data => setAgents(data))
             .catch(error => console.error('Error fetching agents:', error));
     }, []);
 
-    const addAgent = () => {
-        // Logic to add a new agent
-        console.log('Add new agent');
+    const addAgent = (newAgent: { name: string, prompt: string, instruction:string, type:string}) => {        
+        setAgents([...agents, { id: "", ...newAgent }]);
     };
+    
 
     return (
         <div>
-            <h1>Agent View</h1>           
+            <h1>Agent View</h1>
             <div>
                 {agents.map(agent => (
                     <Card key={agent.id} className="agent-card">
@@ -30,14 +31,16 @@ const Agent = () => {
                             header={<Text weight="semibold">{agent.name}</Text>}
                         />
                         <CardPreview>
-                            <p>{agent.description}</p>
+                            <div>{agent.description}</div>
+                            <div>{agent.prompt}</div>
                         </CardPreview>
                     </Card>
                 ))}
             </div>
-            <div className="add-agent-card" onClick={addAgent}>
-                <Button onClick={addAgent}>Add New Agent</Button>
+            <div className="add-agent-card">
+                <AgentDialog onAddAgent={addAgent} />
             </div>
+           
         </div>
     );
 }
