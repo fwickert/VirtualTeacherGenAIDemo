@@ -112,6 +112,12 @@ namespace VirtualTeacherGenAIDemo.Server.Services
 
         public async Task<string> GetPrompt(string functionName, string plugin)
         {
+            if (functionName.Contains("..") || functionName.Contains("/") || functionName.Contains("\\") ||
+                plugin.Contains("..") || plugin.Contains("/") || plugin.Contains("\\"))
+            {
+                throw new ArgumentException("Invalid functionName or plugin");
+            }
+
             string? promptStream = await ReadFunction.Read(Path.Combine(_pluginsDirectory, plugin, functionName),
                 FunctionFileType.Prompt);
             return promptStream!;
