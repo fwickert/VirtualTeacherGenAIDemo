@@ -3374,9 +3374,9 @@ uuid@^9.0.0:
   version "9.0.1"
   resolved "https://registry.npmjs.org/uuid/-/uuid-9.0.1.tgz"
 
-vite@^5.4.1:
-  version "5.4.3"
-  resolved "https://registry.npmjs.org/vite/-/vite-5.4.3.tgz"
+vite@^5.4.10:
+  version "5.4.10"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-5.4.10.tgz#d358a7bd8beda6cf0f3b7a450a8c7693a4f80c18"
   dependencies:
     esbuild "^0.21.3"
     postcss "^8.4.43"
