@@ -37,6 +37,10 @@ function Menu() {
         navigate('/agent');
     }
 
+    const navigateScenario = () => {
+        navigate('/scenario');
+    }
+
     return (
         <div className="menu">
             <section>
@@ -98,7 +102,25 @@ function Menu() {
                     />
                 </Card>
             </section>
-            
+
+            <section>
+                <Card className="card" orientation="horizontal" onClick={navigateScenario} >
+                    <CardPreview>
+                        <img className='horizontalCardImage'
+                            src={resolveAsset("scenario.svg")}
+                            alt="App Name Document"
+                        />
+                    </CardPreview>
+
+                    <CardHeader
+                        header={<Text weight="semibold">Scenario</Text>}
+                        description={
+                            <Caption1>Managed your Scenario</Caption1>
+                        }
+                    />
+                </Card>
+            </section>
+
             <section>
                 <Card className="card" orientation="horizontal" onClick={navigateAgent} >
                     <CardPreview>
@@ -116,7 +138,8 @@ function Menu() {
                     />
                 </Card>
             </section>
-            
+
+           
 
         </div>
     )

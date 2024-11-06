@@ -38,7 +38,14 @@ public class CosmosOptions
     ///  Gets or sets the Cosmos container for agents.
     /// </summary>
     [Required, NotEmptyOrWhitespace]
-    public string AgentContainer { get; set; } = string.Empty;    
+    public string AgentContainer { get; set; } = string.Empty;
+
+    //Add new contrainer for Scenario
+    /// <summary>
+    /// gets or sets the Cosmos container for scenarios
+    /// </summary>  
+    [Required, NotEmptyOrWhitespace]
+    public string ScenarioContainer { get; set; } = string.Empty;
 
     [Required, NotEmptyOrWhitespace]
     public string EndPoint { get; set; } = string.Empty;

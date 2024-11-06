@@ -87,6 +87,10 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
             agentStorageContext = new CosmosDbContext<AgentItem>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.AgentContainer);
             services.AddSingleton<AgentRepository>(new AgentRepository(agentStorageContext));
 
+            IStorageContext<ScenarioItem> scenarioStorageContext;
+            scenarioStorageContext = new CosmosDbContext<ScenarioItem>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.ScenarioContainer);
+            services.AddSingleton<ScenarioRepository>(new ScenarioRepository(scenarioStorageContext));
+
             return services;
 
         }   
@@ -149,6 +153,8 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
             services.AddScoped<ChatService>();
             services.AddScoped<DashboardService>();
             services.AddScoped<CoachService>();
+            services.AddScoped<AgentService>();
+            services.AddScoped<ScenarioService>();
             return services;
         }
     }
