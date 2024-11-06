@@ -5,9 +5,10 @@ import { Input } from '@fluentui/react-input';
 import { Textarea } from '@fluentui/react-textarea';
 import { Field } from '@fluentui/react-field';
 import { useState } from 'react';
-import { Agent } from '../../models/ScenarioItem'; 
+import { Agent } from '../../models/ScenarioItem';
 import { makeStyles } from '@fluentui/react-components';
-
+import AgentSelectionDialog from './AgentSelectionDialog';
+import { Add24Regular } from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
     customDialogSurface: {
@@ -18,6 +19,24 @@ const useStyles = makeStyles({
         display: 'grid',
         gridTemplateColumns: '1fr 1fr', // Two equal columns
         gap: '16px', // Space between columns
+    },
+    buttonGrid: {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr', // Two equal columns
+        gap: '16px', // Space between columns
+    },
+    circularButton: {
+        borderRadius: '10px',
+        width: '50px',
+        height: '40px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 0,
+        minWidth: 0,
+    },
+    agentName: {
+        marginLeft: '8px', // Space between button and text
     },
 });
 
@@ -31,9 +50,13 @@ export const ScenarioDialog = ({ onAddScenario }: ScenarioDialogProps) => {
     const [description, setDescription] = useState('');
     const [nameError, setNameError] = useState('');
     const [descriptionError, setDescriptionError] = useState('');
+    const [systemAgentError, setSystemAgentError] = useState('');
+    const [businessAgentError, setBusinessAgentError] = useState('');
     const [isOpen, setIsOpen] = useState<boolean>(false);
-    const [systemAgent, setSystemAgent] = useState({ id: '1', name: '', prompt: '', type: 'system' });
-    const [businessAgent, setBusinessAgent] = useState({ id: '2', name: '', prompt: '', type: 'retail' });
+    const [systemAgent, setSystemAgent] = useState<Agent | null>(null);
+    const [businessAgent, setBusinessAgent] = useState<Agent | null>(null);
+    const [isAgentDialogOpen, setIsAgentDialogOpen] = useState<boolean>(false);
+    const [agentType, setAgentType] = useState<'system' | 'retail'>('system');
 
     const handleAddScenario = () => {
         let valid = true;
@@ -51,20 +74,26 @@ export const ScenarioDialog = ({ onAddScenario }: ScenarioDialogProps) => {
             setDescriptionError('');
         }
 
-        if (systemAgent.name.trim() === '' || systemAgent.prompt.trim() === '') {
+        if (!systemAgent) {
+            setSystemAgentError('System Agent is required.');
             valid = false;
+        } else {
+            setSystemAgentError('');
         }
 
-        if (businessAgent.name.trim() === '' || businessAgent.prompt.trim() === '') {
+        if (!businessAgent) {
+            setBusinessAgentError('Business Agent is required.');
             valid = false;
+        } else {
+            setBusinessAgentError('');
         }
 
         if (!valid) return;
 
         const agents = [
-            new Agent(systemAgent.id, systemAgent.name, systemAgent.prompt, systemAgent.type),
-            new Agent(businessAgent.id, businessAgent.name, businessAgent.prompt, businessAgent.type)
-        ];
+            systemAgent,
+            businessAgent
+        ].filter(agent => agent !== null) as Agent[];
 
         onAddScenario({ name, description, agents });
 
@@ -91,75 +120,76 @@ export const ScenarioDialog = ({ onAddScenario }: ScenarioDialogProps) => {
             setDescription('');
             setNameError('');
             setDescriptionError('');
-            setSystemAgent({ id: '1', name: '', prompt: '', type: 'system' });
-            setBusinessAgent({ id: '2', name: '', prompt: '', type: 'retail' });
+            setSystemAgent(null);
+            setBusinessAgent(null);
+            setSystemAgentError('');
+            setBusinessAgentError('');
         }
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-            <DialogTrigger disableButtonEnhancement>
-                <Button appearance="primary" onClick={() => setIsOpen(true)}>Add New Scenario</Button>
-            </DialogTrigger>
-            <DialogSurface className={classes.customDialogSurface}>
-                <DialogBody>
-                    <DialogTitle>Add New Scenario</DialogTitle>
-                    <DialogContent className={classes.dialogContent }>
-                        <div className="formcard">
-                            <Field label="Name" required validationMessage={nameError}>
-                                <Input
-                                    placeholder="Name your scenario"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                />
-                            </Field>
-                            <Field label="Description" required validationMessage={descriptionError}>
-                                <Textarea
-                                    placeholder="Describe your scenario"
-                                    value={description}
-                                    rows={3}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                />
-                            </Field>
-                            <Field label="System Agent Name" required>
-                                <Input
-                                    placeholder="Name your system agent"
-                                    value={systemAgent.name}
-                                    onChange={(e) => setSystemAgent({ ...systemAgent, name: e.target.value })}
-                                />
-                            </Field>
-                            <Field label="System Agent Prompt" required>
-                                <Textarea
-                                    placeholder="Prompt for your system agent"
-                                    value={systemAgent.prompt}
-                                    rows={3}
-                                    onChange={(e) => setSystemAgent({ ...systemAgent, prompt: e.target.value })}
-                                />
-                            </Field>
-                            <Field label="Business Agent Name" required>
-                                <Input
-                                    placeholder="Name your business agent"
-                                    value={businessAgent.name}
-                                    onChange={(e) => setBusinessAgent({ ...businessAgent, name: e.target.value })}
-                                />
-                            </Field>
-                            <Field label="Business Agent Prompt" required>
-                                <Textarea
-                                    placeholder="Prompt for your business agent"
-                                    value={businessAgent.prompt}
-                                    rows={3}
-                                    onChange={(e) => setBusinessAgent({ ...businessAgent, prompt: e.target.value })}
-                                />
-                            </Field>
-                        </div>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button appearance="primary" onClick={handleAddScenario}>Add</Button>
-                        <Button appearance="secondary" onClick={() => setIsOpen(false)}>Cancel</Button>
-                    </DialogActions>
-                </DialogBody>
-            </DialogSurface>
-        </Dialog>
+        <>
+            <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+                <DialogTrigger disableButtonEnhancement>
+                    <Button appearance="primary" onClick={() => setIsOpen(true)}>Add New Scenario</Button>
+                </DialogTrigger>
+                <DialogSurface className={classes.customDialogSurface}>
+                    <DialogBody>
+                        <DialogTitle>Add New Scenario</DialogTitle>
+                        <DialogContent className={classes.dialogContent}>
+                            <div className="formcard">
+                                <Field label="Name" required validationMessage={nameError}>
+                                    <Input
+                                        placeholder="Name your scenario"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                    />
+                                </Field>
+                                <Field label="Description" required validationMessage={descriptionError}>
+                                    <Textarea
+                                        placeholder="Describe your scenario"
+                                        value={description}
+                                        rows={3}
+                                        onChange={(e) => setDescription(e.target.value)}
+                                    />
+                                </Field>
+                                <div className={classes.buttonGrid}>
+                                    <Field label="System Agent" required validationMessage={systemAgentError}>
+                                        <Button className={classes.circularButton} onClick={() => { setAgentType('system'); setIsAgentDialogOpen(true); }}>
+                                            <Add24Regular />
+                                        </Button>
+                                        <span className={classes.agentName}>{systemAgent ? systemAgent.name : 'No agent selected'}</span>
+                                    </Field>
+                                    <Field label="Business Agent" required validationMessage={businessAgentError}>
+                                        <Button className={classes.circularButton} onClick={() => { setAgentType('retail'); setIsAgentDialogOpen(true); }}>
+                                            <Add24Regular />
+                                        </Button>
+                                        <span className={classes.agentName}>{businessAgent ? businessAgent.name : 'No agent selected'}</span>
+                                    </Field>
+                                </div>
+                            </div>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button appearance="primary" onClick={handleAddScenario}>Add</Button>
+                            <Button appearance="secondary" onClick={() => setIsOpen(false)}>Cancel</Button>
+                        </DialogActions>
+                    </DialogBody>
+                </DialogSurface>
+            </Dialog>
+            <AgentSelectionDialog
+                isOpen={isAgentDialogOpen}
+                type={agentType}
+                onSelectAgent={(agent) => {
+                    if (agentType === 'system') {
+                        setSystemAgent(agent);
+                    } else {
+                        setBusinessAgent(agent);
+                    }
+                    setIsAgentDialogOpen(false);
+                }}
+                onClose={() => setIsAgentDialogOpen(false)}
+            />
+        </>
     );
 };
 
