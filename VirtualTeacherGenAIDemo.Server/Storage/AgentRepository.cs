@@ -10,7 +10,7 @@ namespace VirtualTeacherGenAIDemo.Server.Storage
 
         public Task<IEnumerable<AgentItem>> FindByTypeAsync(string type)     
         {   
-            return base.StorageContext.QueryEntitiesAsync(e => e.Type == type || e.Type == "system");
+            return base.StorageContext.QueryEntitiesAsync(e => e.Type == type || e.Type=="system");
             
         }
 
