@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardPreview } from '@fluentui/react-card';
 import { Text } from '@fluentui/react-text';
-
 import { AgentItem } from '../../models/AgentItem';
 import { AgentDialog } from '../../components/admin/AgentDialog';
 
@@ -16,7 +15,7 @@ const Agent = () => {
             .catch(error => console.error('Error fetching agents:', error));
     }, []);
 
-    const addAgent = (newAgent: { name: string, prompt: string, instruction:string, type:string}) => {        
+    const addAgent = (newAgent: { name: string, description: string, prompt:string, type:string}) => {        
         setAgents([...agents, { id: "", ...newAgent }]);
     };
     

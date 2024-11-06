@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using VirtualTeacherGenAIDemo.Server.Models.Storage;
-using VirtualTeacherGenAIDemo.Server.Storage;
+using VirtualTeacherGenAIDemo.Server.Services;
 
 namespace VirtualTeacherGenAIDemo.Server.Controllers
 {
@@ -9,18 +11,18 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
     [ApiController]
     public class AgentController : ControllerBase
     {
-        private readonly AgentRepository _agentRepository;
+        private readonly AgentService _agentService;
 
-        public AgentController(AgentRepository agentRepository)
+        public AgentController(AgentService agentService)
         {
-            _agentRepository = agentRepository;
+            _agentService = agentService;
         }
 
-        [HttpGet("ByType",Name = "{type}")]
+        [HttpGet("ByType", Name = "{type}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IEnumerable<AgentItem>> GetbyType(string type)
         {
-            return await _agentRepository.FindByTypeAsync(type);
+            return await _agentService.GetByTypeAsync(type);
         }
 
         //function Get by Id
@@ -28,7 +30,7 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<AgentItem>> Get(string id, string type)
         {
-            var agent = await _agentRepository.GetAsync(id, type);
+            var agent = await _agentService.GetByIdAsync(id, type);
             if (agent == null)
             {
                 return NotFound();
@@ -36,7 +38,6 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
             return agent;
         }
 
-       
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -48,10 +49,8 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
             }
 
             agent.Id = Guid.NewGuid().ToString();
-            await _agentRepository.AddAsync(agent);
-            return CreatedAtAction(nameof(Get), agent.Type);
+            await _agentService.AddAgentAsync(agent);
+            return CreatedAtAction(nameof(Get), new { id = agent.Id, type = agent.Type }, agent);
         }
-
-
     }
 }
