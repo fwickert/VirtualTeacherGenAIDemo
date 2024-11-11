@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardPreview } from '@fluentui/react-card';
 import { Text } from '@fluentui/react-text';
 import { AgentItem } from '../../models/AgentItem';
-import { AgentDialog } from '../../components/admin/AgentDialog';
+import { AgentDialog } from '../../components/agent/AgentDialog';
 import { Button } from '@fluentui/react-button';
 
 const Agent = () => {

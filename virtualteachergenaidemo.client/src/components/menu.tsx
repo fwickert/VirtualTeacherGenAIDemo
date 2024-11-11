@@ -22,9 +22,15 @@ const resolveAsset = (asset: string) => {
 function Menu() {
     const navigate = useNavigate();
 
+
     const navigateTraining = () => {
         navigate('/training');
     };
+
+    const navigateScenarios = () => {
+        navigate('/scenarios');
+    };
+
     const navigateLastTraining = () => {
         navigate('/lastTraining');
     };
@@ -35,10 +41,6 @@ function Menu() {
 
     const navigateAgent = () => {
         navigate('/agent');
-    }
-
-    const navigateScenario = () => {
-        navigate('/scenario');
     }
 
     return (
@@ -104,7 +106,7 @@ function Menu() {
             </section>
 
             <section>
-                <Card className="card" orientation="horizontal" onClick={navigateScenario} >
+                <Card className="card" orientation="horizontal" onClick={navigateScenarios} >
                     <CardPreview>
                         <img className='horizontalCardImage'
                             src={resolveAsset("scenario.svg")}

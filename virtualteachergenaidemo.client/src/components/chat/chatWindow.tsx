@@ -5,13 +5,18 @@ import AudioVisualizer from '../speechRecognizer/AudioVisualizer';
 import { ChatHistoryRequest, ChatMessage } from '../../models/ChatHistoryRequest';
 import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
 import { textToSpeechAsync } from '../../services/speechService';
+import { ScenarioItem } from '../../models/ScenarioItem';
 
 interface Message {
     content: string;
     role: 'User' | 'Assistant';
 }
 
-function ChatWindow() {    
+interface ChatWindowProps {
+    scenario: ScenarioItem;
+}
+
+function ChatWindow({ scenario }: ChatWindowProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [connection, setConnection] = useState<HubConnection | null>(null);
     const currentMessageRef = useRef<string | null>(null);
@@ -43,10 +48,10 @@ function ChatWindow() {
                                 const updatedMessages = [...prevMessages];
                                 updatedMessages[updatedMessages.length - 1] = { content: message.content, role: 'Assistant' }
                                 return updatedMessages;
-                            });                            
+                            });
                         } else if (message.state === "End") {
                             textToSpeechAsync(message.content);
-                            
+
                         }
                     });
                 })
@@ -54,11 +59,14 @@ function ChatWindow() {
         }
     }, [connection]);
 
-
-    const handleNewMessage = async (message: string) => {        
+    const handleNewMessage = async (message: string) => {
         setMessages(prevMessages => [...prevMessages, { content: message, role: 'User' }]);
 
-        const promptSystem = "We are going to play a role-playing game. You are an AI simulating a Luxury brand client and the user will be the seller. The goal is to train the sellers. So the game starts right now. In the scenario, you are the client looking for a handbag. Use a spoken tone as if it's an oral conversation and not written. Use the same language as the user. You are a 40-year-old woman living in Strasbourg France.";
+        //get the systme agent from the scenario agents
+        const agent = scenario.agents.find(agent => agent.type === 'system');                
+        //Same for retail
+        const retailAgent = scenario.agents.find(agent => agent.type === 'retail');
+        const promptSystem = agent!.prompt + "/r/n" + retailAgent!.prompt;
 
         const chatHistory = new ChatHistoryRequest([
             new ChatMessage("System", promptSystem),
@@ -90,9 +98,9 @@ function ChatWindow() {
 
     return (
         <div className="chat-container">
-            <div className="grid-column">                
-                    {/*<input type="file" accept="audio/*" onChange={handleFileChange} />*/}
-                    <AudioVisualizer />                
+            <div className="grid-column">
+                {/*<input type="file" accept="audio/*" onChange={handleFileChange} />*/}
+                <AudioVisualizer />
             </div>
             <div className="grid-column">
                 <div>
@@ -120,6 +128,7 @@ function ChatWindow() {
             <div className="grid-column">
                 {/*<AudioVisualizer useMicrophone />*/}
             </div>
+            <span>{scenario.name} toto</span>
         </div>
     );
 }
