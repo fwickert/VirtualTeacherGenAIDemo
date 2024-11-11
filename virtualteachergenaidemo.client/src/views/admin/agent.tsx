@@ -9,7 +9,7 @@ const Agent = () => {
 
     useEffect(() => {
         // Fetch agents from an API or data source
-        fetch('/api/agent/byType?type=retail')
+        fetch('/api/agent/byType?type=retail&withSystem=true')
             .then(response => response.json())
             .then(data => setAgents(data))
             .catch(error => console.error('Error fetching agents:', error));

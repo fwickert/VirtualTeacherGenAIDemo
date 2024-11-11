@@ -20,10 +20,17 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
 
         [HttpGet("ByType", Name = "{type}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IEnumerable<AgentItem>> GetbyType(string type)
+        public async Task<IEnumerable<AgentItem>> GetAgentsByType(string type, bool withSystem=false)
         {
+            if (withSystem)
+            {
+                return await _agentService.GetAgentsAndSystemAsync(type);
+            }
+
             return await _agentService.GetByTypeAsync(type);
         }
+
+        
 
         //function Get by Id
         [HttpGet("{id}")]
