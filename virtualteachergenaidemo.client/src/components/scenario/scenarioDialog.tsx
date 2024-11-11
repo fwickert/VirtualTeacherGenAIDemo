@@ -1,13 +1,13 @@
 import './scenarioDialog.css';
-import { Dialog, DialogTrigger, DialogSurface, DialogTitle, DialogBody, DialogActions, DialogContent } from '@fluentui/react-dialog';
+import { Dialog, DialogSurface, DialogTitle, DialogBody, DialogActions, DialogContent } from '@fluentui/react-dialog';
 import { Button } from '@fluentui/react-button';
 import { Input } from '@fluentui/react-input';
 import { Textarea } from '@fluentui/react-textarea';
 import { Field } from '@fluentui/react-field';
-import { useState } from 'react';
-import { Agent } from '../../models/ScenarioItem';
+import { useState, useEffect } from 'react';
+import { Agent, ScenarioItem } from '../../models/ScenarioItem';
 import { makeStyles } from '@fluentui/react-components';
-import AgentSelectionDialog from './AgentSelectionDialog';
+import AgentSelectionDialog from '../agent/AgentSelectionDialog';
 import { Add24Regular } from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
@@ -42,9 +42,12 @@ const useStyles = makeStyles({
 
 interface ScenarioDialogProps {
     onAddScenario: (scenario: { name: string, description: string, agents: Agent[] }) => void;
+    onClose: () => void;
+    isOpen: boolean;
+    scenario?: ScenarioItem | null;
 }
 
-export const ScenarioDialog = ({ onAddScenario }: ScenarioDialogProps) => {
+export const ScenarioDialog = ({ onAddScenario, onClose, isOpen, scenario }: ScenarioDialogProps) => {
     const classes = useStyles();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
@@ -53,12 +56,22 @@ export const ScenarioDialog = ({ onAddScenario }: ScenarioDialogProps) => {
     const [systemAgentError, setSystemAgentError] = useState('');
     const [rolePlayAgentError, setRolePlayAgentError] = useState('');
     const [teacherAgentError, setTeacherAgentError] = useState('');
-    const [isOpen, setIsOpen] = useState<boolean>(false);
     const [systemAgent, setSystemAgent] = useState<Agent | null>(null);
     const [rolePlayAgent, setRolePlayAgent] = useState<Agent | null>(null);
     const [teacherAgent, setTeacherAgent] = useState<Agent | null>(null);
     const [isAgentDialogOpen, setIsAgentDialogOpen] = useState<boolean>(false);
     const [agentType, setAgentType] = useState<'system' | 'retail' | 'teacher'>('system');
+
+    useEffect(() => {
+        if (scenario) {
+            setName(scenario.name);
+            setDescription(scenario.description);
+            // Assuming scenario.agents is an array of agents
+            setSystemAgent(scenario.agents.find(agent => agent.type === 'system') || null);
+            setRolePlayAgent(scenario.agents.find(agent => agent.type === 'retail') || null);
+            setTeacherAgent(scenario.agents.find(agent => agent.type === 'teacher') || null);
+        }
+    }, [scenario]);
 
     const handleAddScenario = () => {
         let valid = true;
@@ -113,41 +126,27 @@ export const ScenarioDialog = ({ onAddScenario }: ScenarioDialogProps) => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ name: name, description: description, agents: agents, id: "" }),
+            body: JSON.stringify({ name: name, description: description, agents: agents, id: scenario ? scenario.id : "" }),
         })
             .then(response => response.json())
             .then(data => console.log('Success:', data))
             .catch(error => console.error('Error:', error));
 
-        setIsOpen(false); // Close the dialog
+        onClose();
     };
 
     const handleOpenChange = (_event: any, data: { open: boolean }) => {
-        setIsOpen(data.open);
-        if (data.open) {
-            // Reset form fields when the dialog is opened
-            setName('');
-            setDescription('');
-            setNameError('');
-            setDescriptionError('');
-            setSystemAgent(null);
-            setRolePlayAgent(null);
-            setTeacherAgent(null);
-            setSystemAgentError('');
-            setRolePlayAgentError('');
-            setTeacherAgentError('');
+        if (!data.open) {
+            onClose();
         }
     };
 
     return (
         <>
             <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-                <DialogTrigger disableButtonEnhancement>
-                    <Button appearance="primary" onClick={() => setIsOpen(true)}>Add New Scenario</Button>
-                </DialogTrigger>
                 <DialogSurface className={classes.customDialogSurface}>
                     <DialogBody>
-                        <DialogTitle>Add New Scenario</DialogTitle>
+                        <DialogTitle>{scenario ? 'Edit Scenario' : 'Add New Scenario'}</DialogTitle>
                         <DialogContent className={classes.dialogContent}>
                             <div className="formcard">
                                 <Field label="Name" required validationMessage={nameError}>
@@ -188,8 +187,8 @@ export const ScenarioDialog = ({ onAddScenario }: ScenarioDialogProps) => {
                             </div>
                         </DialogContent>
                         <DialogActions>
-                            <Button appearance="primary" onClick={handleAddScenario}>Add</Button>
-                            <Button appearance="secondary" onClick={() => setIsOpen(false)}>Cancel</Button>
+                            <Button appearance="primary" onClick={handleAddScenario}>{scenario ? 'Save' : 'Add'}</Button>
+                            <Button appearance="secondary" onClick={onClose}>Cancel</Button>
                         </DialogActions>
                     </DialogBody>
                 </DialogSurface>
@@ -200,7 +199,7 @@ export const ScenarioDialog = ({ onAddScenario }: ScenarioDialogProps) => {
                 onSelectAgent={(agent) => {
                     if (agentType === 'system') {
                         setSystemAgent(agent);
-                    } else if (agentType === 'rolePlay') {
+                    } else if (agentType === 'retail') {
                         setRolePlayAgent(agent);
                     } else {
                         setTeacherAgent(agent);
