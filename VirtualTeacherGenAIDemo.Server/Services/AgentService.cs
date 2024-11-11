@@ -13,12 +13,13 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         }
 
         public async Task<IEnumerable<AgentItem>> GetByTypeAsync(string type)
+        {        
+            return await _agentRepository.GetAgentsByTypeAsync(type);            
+        }
+        
+        public async Task<IEnumerable<AgentItem>> GetAgentsAndSystemAsync(string type)
         {
-            //return all system agents and other with specific type
-            return await _agentRepository.FindByTypeAsync(type);
-
-            
-            
+            return await _agentRepository.GetAgentsAndSystemAsync(type);
         }
 
         public async Task<AgentItem> GetByIdAsync(string id, string type)

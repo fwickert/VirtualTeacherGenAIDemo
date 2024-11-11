@@ -8,10 +8,16 @@ namespace VirtualTeacherGenAIDemo.Server.Storage
         {
         }
 
-        public Task<IEnumerable<AgentItem>> FindByTypeAsync(string type)     
+        public Task<IEnumerable<AgentItem>> GetAgentsByTypeAsync(string type)     
         {   
-            return base.StorageContext.QueryEntitiesAsync(e => e.Type == type || e.Type=="system");
+            return base.StorageContext.QueryEntitiesAsync(e => e.Type == type);
             
+        }
+
+        //function to retrun all agents depend on type and system agents
+        public Task<IEnumerable<AgentItem>> GetAgentsAndSystemAsync(string type)
+        {
+            return base.StorageContext.QueryEntitiesAsync(e => e.Type == type || e.Type == "system");
         }
 
         //function Get by id
