@@ -22,7 +22,7 @@ const useStyles = makeStyles({
     },
     buttonGrid: {
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr', // Two equal columns
+        gridTemplateColumns: '1fr 1fr 1fr', // Three equal columns
         gap: '16px', // Space between columns
     },
     circularButton: {
@@ -51,12 +51,14 @@ export const ScenarioDialog = ({ onAddScenario }: ScenarioDialogProps) => {
     const [nameError, setNameError] = useState('');
     const [descriptionError, setDescriptionError] = useState('');
     const [systemAgentError, setSystemAgentError] = useState('');
-    const [businessAgentError, setBusinessAgentError] = useState('');
+    const [rolePlayAgentError, setRolePlayAgentError] = useState('');
+    const [teacherAgentError, setTeacherAgentError] = useState('');
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [systemAgent, setSystemAgent] = useState<Agent | null>(null);
-    const [businessAgent, setBusinessAgent] = useState<Agent | null>(null);
+    const [rolePlayAgent, setRolePlayAgent] = useState<Agent | null>(null);
+    const [teacherAgent, setTeacherAgent] = useState<Agent | null>(null);
     const [isAgentDialogOpen, setIsAgentDialogOpen] = useState<boolean>(false);
-    const [agentType, setAgentType] = useState<'system' | 'retail'>('system');
+    const [agentType, setAgentType] = useState<'system' | 'retail' | 'teacher'>('system');
 
     const handleAddScenario = () => {
         let valid = true;
@@ -81,18 +83,26 @@ export const ScenarioDialog = ({ onAddScenario }: ScenarioDialogProps) => {
             setSystemAgentError('');
         }
 
-        if (!businessAgent) {
-            setBusinessAgentError('Business Agent is required.');
+        if (!rolePlayAgent) {
+            setRolePlayAgentError('RolePlay Agent is required.');
             valid = false;
         } else {
-            setBusinessAgentError('');
+            setRolePlayAgentError('');
+        }
+
+        if (!teacherAgent) {
+            setTeacherAgentError('Teacher Agent is required.');
+            valid = false;
+        } else {
+            setTeacherAgentError('');
         }
 
         if (!valid) return;
 
         const agents = [
             systemAgent,
-            businessAgent
+            rolePlayAgent,
+            teacherAgent
         ].filter(agent => agent !== null) as Agent[];
 
         onAddScenario({ name, description, agents });
@@ -121,9 +131,11 @@ export const ScenarioDialog = ({ onAddScenario }: ScenarioDialogProps) => {
             setNameError('');
             setDescriptionError('');
             setSystemAgent(null);
-            setBusinessAgent(null);
+            setRolePlayAgent(null);
+            setTeacherAgent(null);
             setSystemAgentError('');
-            setBusinessAgentError('');
+            setRolePlayAgentError('');
+            setTeacherAgentError('');
         }
     };
 
@@ -160,11 +172,17 @@ export const ScenarioDialog = ({ onAddScenario }: ScenarioDialogProps) => {
                                         </Button>
                                         <span className={classes.agentName}>{systemAgent ? systemAgent.name : 'No agent selected'}</span>
                                     </Field>
-                                    <Field label="Business Agent" required validationMessage={businessAgentError}>
+                                    <Field label="RolePlay Agent" required validationMessage={rolePlayAgentError}>
                                         <Button className={classes.circularButton} onClick={() => { setAgentType('retail'); setIsAgentDialogOpen(true); }}>
                                             <Add24Regular />
                                         </Button>
-                                        <span className={classes.agentName}>{businessAgent ? businessAgent.name : 'No agent selected'}</span>
+                                        <span className={classes.agentName}>{rolePlayAgent ? rolePlayAgent.name : 'No agent selected'}</span>
+                                    </Field>
+                                    <Field label="Teacher Agent" required validationMessage={teacherAgentError}>
+                                        <Button className={classes.circularButton} onClick={() => { setAgentType('teacher'); setIsAgentDialogOpen(true); }}>
+                                            <Add24Regular />
+                                        </Button>
+                                        <span className={classes.agentName}>{teacherAgent ? teacherAgent.name : 'No agent selected'}</span>
                                     </Field>
                                 </div>
                             </div>
@@ -182,8 +200,10 @@ export const ScenarioDialog = ({ onAddScenario }: ScenarioDialogProps) => {
                 onSelectAgent={(agent) => {
                     if (agentType === 'system') {
                         setSystemAgent(agent);
+                    } else if (agentType === 'rolePlay') {
+                        setRolePlayAgent(agent);
                     } else {
-                        setBusinessAgent(agent);
+                        setTeacherAgent(agent);
                     }
                     setIsAgentDialogOpen(false);
                 }}

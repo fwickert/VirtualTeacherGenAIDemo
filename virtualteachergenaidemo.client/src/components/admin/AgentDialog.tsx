@@ -1,26 +1,25 @@
 import './AgentDialog.css';
-import { Dialog, DialogTrigger, DialogSurface, DialogTitle, DialogBody, DialogActions, DialogContent } from '@fluentui/react-dialog';
+import { Dialog, DialogSurface, DialogTitle, DialogBody, DialogActions, DialogContent } from '@fluentui/react-dialog';
 import { Button } from '@fluentui/react-button';
 import { Input } from '@fluentui/react-input';
 import { Textarea } from '@fluentui/react-textarea';
 import { Field } from '@fluentui/react-field';
-import { Checkbox, CheckboxOnChangeData } from '@fluentui/react-checkbox';
 import { useState } from 'react';
 
 interface AgentDialogProps {
     onAddAgent: (agent: { name: string, description: string, prompt: string, type: string }) => void;
+    type: string;
+    onClose: () => void;
 }
 
-export const AgentDialog = ({ onAddAgent }: AgentDialogProps) => {
+export const AgentDialog = ({ onAddAgent, type, onClose }: AgentDialogProps) => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [nameError, setNameError] = useState('');
     const [descriptionError, setDescriptionError] = useState('');
     const [prompt, setPrompt] = useState('');
     const [promptError, setPromptError] = useState('');
-    const [isSystem, setIsSystem] = useState<boolean>(false);
-    const [isOpen, setIsOpen] = useState<boolean>(false);
-    let type = "retail";
+    const [isOpen, setIsOpen] = useState<boolean>(true);
 
     const handleAddAgent = () => {
         let valid = true;
@@ -47,49 +46,32 @@ export const AgentDialog = ({ onAddAgent }: AgentDialogProps) => {
 
         if (!valid) return;
 
-        if (isSystem) {
-            type="system";
-            onAddAgent({ name, description, prompt, type });
-        }
-        else {
-            type="retail";
-            onAddAgent({ name, description, prompt, type });
-        }
-        
+        onAddAgent({ name, description, prompt, type });
 
-        //Post new agent to API
+        // Post new agent to API
         fetch('/api/agent', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ name: name, description: description, prompt: prompt, type: type, id:"" }),
+            body: JSON.stringify({ name: name, description: description, prompt: prompt, type: type, id: "" }),
         })
             .then(response => response.json())
             .then(data => console.log('Success:', data))
             .catch(error => console.error('Error:', error));
         setIsOpen(false); // Close the dialog
+        onClose();
     };
 
     const handleOpenChange = (_event: any, data: { open: boolean }) => {
         setIsOpen(data.open);
-        if (data.open) {
-            // Reset form fields when the dialog is opened
-            setName('');
-            setDescription('');
-            setPrompt('');
-            setIsSystem(false);
-            setNameError('');
-            setDescriptionError('');
-            setPromptError('');
+        if (!data.open) {
+            onClose();
         }
     };
 
     return (
         <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-            <DialogTrigger disableButtonEnhancement>
-                <Button appearance="primary" onClick={() => setIsOpen(true)}>Add New Agent</Button>
-            </DialogTrigger>
             <DialogSurface>
                 <DialogBody>
                     <DialogTitle>Add New Agent</DialogTitle>
@@ -120,18 +102,11 @@ export const AgentDialog = ({ onAddAgent }: AgentDialogProps) => {
                                     onChange={(e) => setPrompt(e.target.value)}
                                 />
                             </Field>
-                            <Field>
-                                <Checkbox
-                                    label="Is System Agent"
-                                    checked={isSystem}
-                                    onChange={(_e, data: CheckboxOnChangeData) => setIsSystem(!!data.checked)}
-                                />
-                            </Field>
                         </div>
                     </DialogContent>
                     <DialogActions>
                         <Button appearance="primary" onClick={handleAddAgent}>Add</Button>
-                        <Button appearance="secondary" onClick={() => setIsOpen(false)}>Cancel</Button>
+                        <Button appearance="secondary" onClick={() => { setIsOpen(false); onClose(); }}>Cancel</Button>
                     </DialogActions>
                 </DialogBody>
             </DialogSurface>

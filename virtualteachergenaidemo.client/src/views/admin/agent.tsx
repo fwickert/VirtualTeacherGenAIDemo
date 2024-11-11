@@ -3,9 +3,11 @@ import { Card, CardHeader, CardPreview } from '@fluentui/react-card';
 import { Text } from '@fluentui/react-text';
 import { AgentItem } from '../../models/AgentItem';
 import { AgentDialog } from '../../components/admin/AgentDialog';
+import { Button } from '@fluentui/react-button';
 
 const Agent = () => {
-    const [agents, setAgents] = useState<AgentItem[]>([]);        
+    const [agents, setAgents] = useState<AgentItem[]>([]);
+    const [dialogType, setDialogType] = useState<string | null>(null);
 
     useEffect(() => {
         // Fetch agents from an API or data source
@@ -15,10 +17,9 @@ const Agent = () => {
             .catch(error => console.error('Error fetching agents:', error));
     }, []);
 
-    const addAgent = (newAgent: { name: string, description: string, prompt:string, type:string}) => {        
+    const addAgent = (newAgent: { name: string, description: string, prompt: string, type: string }) => {
         setAgents([...agents, { id: "", ...newAgent }]);
     };
-    
 
     return (
         <div>
@@ -36,10 +37,18 @@ const Agent = () => {
                     </Card>
                 ))}
             </div>
-            <div className="add-agent-card">
-                <AgentDialog onAddAgent={addAgent} />
+            <div className="add-agent-buttons">
+                <Button appearance="primary" onClick={() => setDialogType('system')}>Add System Agent</Button>
+                <Button appearance="primary" onClick={() => setDialogType('retail')}>Add Roleplay Agent</Button>
+                <Button appearance="primary" onClick={() => setDialogType('teacher')}>Add Teacher Agent</Button>
             </div>
-           
+            {dialogType && (
+                <AgentDialog
+                    onAddAgent={addAgent}
+                    type={dialogType}
+                    onClose={() => setDialogType(null)}
+                />
+            )}
         </div>
     );
 }
