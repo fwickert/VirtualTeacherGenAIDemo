@@ -22,6 +22,11 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             return await _agentRepository.GetAgentsAndSystemAsync(type);
         }
 
+        public async Task<IEnumerable<AgentItem>> GetAllAgentsAsync()
+        {
+            return await _agentRepository.GetAllAgentsAsync();
+        }
+
         public async Task<AgentItem> GetByIdAsync(string id, string type)
         {
             return await _agentRepository.GetAsync(id, type);

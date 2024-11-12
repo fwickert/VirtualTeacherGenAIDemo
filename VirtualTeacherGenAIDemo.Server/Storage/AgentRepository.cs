@@ -14,6 +14,12 @@ namespace VirtualTeacherGenAIDemo.Server.Storage
             
         }
 
+        //function to return all agents
+        public Task<IEnumerable<AgentItem>> GetAllAgentsAsync()
+        {
+            return base.StorageContext.QueryEntitiesAsync(e => true);
+        }
+
         //function to retrun all agents depend on type and system agents
         public Task<IEnumerable<AgentItem>> GetAgentsAndSystemAsync(string type)
         {
