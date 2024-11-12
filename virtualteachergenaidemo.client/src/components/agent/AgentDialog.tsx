@@ -4,22 +4,31 @@ import { Button } from '@fluentui/react-button';
 import { Input } from '@fluentui/react-input';
 import { Textarea } from '@fluentui/react-textarea';
 import { Field } from '@fluentui/react-field';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface AgentDialogProps {
     onAddAgent: (agent: { name: string, description: string, prompt: string, type: string }) => void;
     type: string;
     onClose: () => void;
+    agent?: { name: string, description: string, prompt: string, type: string }; // Optional agent prop
 }
 
-export const AgentDialog = ({ onAddAgent, type, onClose }: AgentDialogProps) => {
-    const [name, setName] = useState('');
-    const [description, setDescription] = useState('');
+export const AgentDialog = ({ onAddAgent, type, onClose, agent }: AgentDialogProps) => {
+    const [name, setName] = useState(agent?.name || '');
+    const [description, setDescription] = useState(agent?.description || '');
     const [nameError, setNameError] = useState('');
     const [descriptionError, setDescriptionError] = useState('');
-    const [prompt, setPrompt] = useState('');
+    const [prompt, setPrompt] = useState(agent?.prompt || '');
     const [promptError, setPromptError] = useState('');
     const [isOpen, setIsOpen] = useState<boolean>(true);
+
+    useEffect(() => {
+        if (agent) {
+            setName(agent.name);
+            setDescription(agent.description);
+            setPrompt(agent.prompt);
+        }
+    }, [agent]);
 
     const handleAddAgent = () => {
         let valid = true;
@@ -54,7 +63,7 @@ export const AgentDialog = ({ onAddAgent, type, onClose }: AgentDialogProps) => 
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ name: name, description: description, prompt: prompt, type: type, id: "" }),
+            body: JSON.stringify({ name: name, description: description, prompt: prompt, type: type, id: agent?.id || "" }),
         })
             .then(response => response.json())
             .then(data => console.log('Success:', data))
@@ -74,7 +83,7 @@ export const AgentDialog = ({ onAddAgent, type, onClose }: AgentDialogProps) => 
         <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogSurface>
                 <DialogBody>
-                    <DialogTitle>Add New Agent</DialogTitle>
+                    <DialogTitle>{agent ? 'Edit Agent' : 'Add New Agent'}</DialogTitle>
                     <DialogContent>
                         <div className="formcard">
                             <Field label="Name" required validationMessage={nameError}>
@@ -105,7 +114,7 @@ export const AgentDialog = ({ onAddAgent, type, onClose }: AgentDialogProps) => 
                         </div>
                     </DialogContent>
                     <DialogActions>
-                        <Button appearance="primary" onClick={handleAddAgent}>Add</Button>
+                        <Button appearance="primary" onClick={handleAddAgent}>{agent ? 'Save' : 'Add'}</Button>
                         <Button appearance="secondary" onClick={() => { setIsOpen(false); onClose(); }}>Cancel</Button>
                     </DialogActions>
                 </DialogBody>

@@ -20,7 +20,7 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
 
         [HttpGet("ByType", Name = "{type}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IEnumerable<AgentItem>> GetAgentsByType(string type, bool withSystem=false)
+        public async Task<IEnumerable<AgentItem>> GetAgentsByType(string type, bool withSystem = false)
         {
             if (withSystem)
             {
@@ -30,7 +30,18 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
             return await _agentService.GetByTypeAsync(type);
         }
 
-        
+        //function to return all agents
+        [HttpGet("All")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IEnumerable<AgentItem>> GetAllAgents()
+        {
+            //wait 5 seconds
+            await Task.Delay(2000);
+
+
+            return await _agentService.GetAllAgentsAsync();
+        }
+
 
         //function Get by Id
         [HttpGet("{id}")]

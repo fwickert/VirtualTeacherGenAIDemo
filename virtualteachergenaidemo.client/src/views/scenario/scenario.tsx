@@ -26,7 +26,8 @@ const Scenario = ({ title }: ScenarioProps) => {
     const containerClass = mergeStyles({
         marginLeft: '100px',
         marginRight: '50px',
-        width: '100%'
+        width: '100%',
+        
         
     });
 
