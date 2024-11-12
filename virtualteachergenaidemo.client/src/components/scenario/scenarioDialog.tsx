@@ -12,7 +12,7 @@ import { Add24Regular } from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
     customDialogSurface: {
-        width: '90%', // Set your desired width
+        width: '70%', // Set your desired width
         maxWidth: '90%', // Ensure it doesn't exceed the viewport width
     },
     dialogContent: {

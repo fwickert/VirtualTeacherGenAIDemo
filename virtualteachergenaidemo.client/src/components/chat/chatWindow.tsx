@@ -128,7 +128,7 @@ function ChatWindow({ scenario }: ChatWindowProps) {
             <div className="grid-column">
                 {/*<AudioVisualizer useMicrophone />*/}
             </div>
-            <span>{scenario.name} toto</span>
+            <span>{scenario.name} : {scenario.id}</span>
         </div>
     );
 }
