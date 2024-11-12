@@ -10,7 +10,7 @@ interface AgentDialogProps {
     onAddAgent: (agent: { name: string, description: string, prompt: string, type: string }) => void;
     type: string;
     onClose: () => void;
-    agent?: { name: string, description: string, prompt: string, type: string }; // Optional agent prop
+    agent?: { name: string, description: string, prompt: string, type: string, id:string }; // Optional agent prop
 }
 
 export const AgentDialog = ({ onAddAgent, type, onClose, agent }: AgentDialogProps) => {
