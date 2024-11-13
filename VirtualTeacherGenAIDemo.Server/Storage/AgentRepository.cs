@@ -27,16 +27,28 @@ namespace VirtualTeacherGenAIDemo.Server.Storage
         }
 
         //function Get by id
-        public Task<AgentItem> GetAsync(string id, string type)
+        public Task<AgentItem> GetAgentAsync(string id, string type)
         {
             return base.StorageContext.ReadAsync(id, type);
         }
 
 
         //add new agent
-        public Task AddAsync(AgentItem agent)
+        public Task AddAgentAsync(AgentItem agent)
         {
             return base.StorageContext.CreateAsync(agent);
+        }
+
+        //Update agent
+        public Task UpdateAgentAsync(AgentItem agent)
+        {
+            return base.StorageContext.UpsertAsync(agent);
+        }
+
+        //Delete agent
+        public Task DeleteAgentAsync(AgentItem agent)
+        {
+            return base.StorageContext.DeleteAsync(agent);
         }
     }    
 }

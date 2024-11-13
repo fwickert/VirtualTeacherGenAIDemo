@@ -29,12 +29,22 @@ namespace VirtualTeacherGenAIDemo.Server.Services
 
         public async Task<AgentItem> GetByIdAsync(string id, string type)
         {
-            return await _agentRepository.GetAsync(id, type);
+            return await _agentRepository.GetAgentAsync(id, type);
         }
 
         public async Task AddAgentAsync(AgentItem agent)
         {
-            await _agentRepository.AddAsync(agent);
+            await _agentRepository.AddAgentAsync(agent);
+        }
+
+        public async Task UpdateAgentAsync(AgentItem agent)
+        {
+            await _agentRepository.UpdateAgentAsync(agent);
+        }
+
+        public async Task DeleteAgentAsync(AgentItem agent)
+        {
+            await _agentRepository.DeleteAgentAsync(agent);
         }
     }
 }

@@ -20,12 +20,22 @@ namespace VirtualTeacherGenAIDemo.Server.Services
 
         public async Task<ScenarioItem> GetByIdAsync(string id, string type)
         {
-            return await _scenarioRepository.GetAsync(id, type);
+            return await _scenarioRepository.GetScenarioAsync(id, type);
         }
 
         public async Task AddAsync(ScenarioItem scenario)
         {
-            await _scenarioRepository.AddAsync(scenario);
+            await _scenarioRepository.AddScenarioAsync(scenario);
+        }
+
+        public async Task UpdateAsync(ScenarioItem scenario)
+        {
+            await _scenarioRepository.UpdateScenarioAsync(scenario);
+        }
+
+        public async Task DeleteAsync(ScenarioItem scenario)
+        {
+            await _scenarioRepository.DeleteScenarioAsync(scenario);
         }
     }
 }
