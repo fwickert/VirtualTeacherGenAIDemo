@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace VirtualTeacherGenAIDemo.Server.Models.Storage
 {
-    public class HistoryItem : IStorageEntity
+    public class SessionItem : IStorageEntity
     {
         public string Title { get; set; } = string.Empty;
     
@@ -21,6 +21,10 @@ namespace VirtualTeacherGenAIDemo.Server.Models.Storage
 
         [Required, NotEmptyOrWhitespace]
         public string ChatId { get; set; } = string.Empty;
+
+        [Required]
+        public bool IsCompleted { get; set; } = false;
+
 
     }
 }

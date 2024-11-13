@@ -13,11 +13,11 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         private readonly ChatResponse _chatResponse;
         private readonly AssistantOption _assistantOption;
         private readonly MessageRepository _messageRepository;
-        private readonly HistoryRepository _historyRepository;
+        private readonly SessionRepository _historyRepository;
 
 
         public ChatService([FromServices] MessageRepository messageRepository, 
-            [FromServices] HistoryRepository historyRepository, 
+            [FromServices] SessionRepository historyRepository, 
             [FromServices] ChatResponse chatResponse, 
             IOptions<AssistantOption> option)
         {
@@ -51,12 +51,12 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         }
 
         //Get list of 10 last Conversations
-        public IEnumerable<HistoryItem> GetHistory()
+        public IEnumerable<SessionItem> GetHistory()
         {
             return _historyRepository.GetLastHistory(10);
         }
 
-        public async Task<HistoryItem> GetDashboard(string id, string chatId)
+        public async Task<SessionItem> GetDashboard(string id, string chatId)
         {
             return await _historyRepository.FindByIdAsync(id, chatId);
         }
@@ -67,6 +67,17 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             return await _messageRepository.FindByChatIdAsync(chatId);
         }
 
-       
+        //Delete a message by id
+        public async Task DeleteMessage(string messageId, string chatid)
+        {
+            await _messageRepository.DeleteMessageByIdAsync(messageId, chatid);
+        }
+
+        //Update the Session to isCompleted = true
+        public async Task CompleteSession(string id, string chatId)
+        {
+            await _historyRepository.CompleteSession(id, chatId);
+            
+        }
     }
 }

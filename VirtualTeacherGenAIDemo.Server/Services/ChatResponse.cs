@@ -32,7 +32,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         public async Task StartChat(string persona, string chatId,
             ChatHistory chatHistory,
             MessageRepository messageRepository,
-            HistoryRepository historyRepository,
+            SessionRepository historyRepository,
             CancellationToken token)
         {
             
@@ -49,17 +49,26 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             if (string.IsNullOrEmpty(chatId))
             {
                 chatId = Guid.NewGuid().ToString();
+                string id = Guid.NewGuid().ToString();
                 //create new historyItem
-                HistoryItem historyItem = new()
+                SessionItem historyItem = new()
                 {
-                    Id = Guid.NewGuid().ToString(),
+                    Id = id,
                     ChatId = chatId,
                     Timestamp = DateTimeOffset.Now,
                     Title = "Simulation",
                     Type = "Session"
                 };
 
-                //await historyRepository.UpsertAsync(historyItem);
+                await historyRepository.UpsertAsync(historyItem);
+
+                MessageResponse messageforUI = new()
+                {   
+                    ChatId = chatId,
+                    State = "Session",
+                    Id = id
+                };
+                await this.UpdateMessageOnClient("SessionInsert", messageforUI, token);
             }
 
             MessageResponse response = new MessageResponse
@@ -67,9 +76,9 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 State = "Start",
                 WhatAbout = "chat",
                 ChatId = chatId,
-                Role = AuthorRole.Assistant
+                Role = AuthorRole.Assistant,                
             };
-            await this.UpdateMessageOnClient(response, "", token);
+            await this.UpdateMessageOnClient("ReceiveMessageUpdate", response, token);
 
             await foreach (StreamingChatMessageContent chatUpdate in _chat.GetStreamingChatMessageContentsAsync(chatHistory, cancellationToken: token))
             {
@@ -77,13 +86,13 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 {
                     response.State = "InProgress";
                     response.Content += chatUpdate.Content;
-                    await this.UpdateMessageOnClient(response, "", token);
+                    await this.UpdateMessageOnClient("ReceiveMessageUpdate", response, token);
                     Console.Write(chatUpdate.Content);
                     await Task.Delay(DELAY);
                 }
             }
-            
-            //Take last message from chatHistory and save in cosmosDB.
+
+            ////Take last message from chatHistory and save in cosmosDB.
             var lastMessage = chatHistory.Last(q => q.Role == AuthorRole.User);
             if (lastMessage != null)
             {
@@ -95,8 +104,17 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                     Id = Guid.NewGuid().ToString(),
                     AuthorRole = Message.AuthorRoles.User
                 };
-                //await messageRepository.UpsertAsync(userMessage);
+                await messageRepository.UpsertAsync(userMessage);
 
+                MessageResponse messageforUI = new()
+                {
+                    Content = lastMessage.Content!,
+                    Role = AuthorRole.User,
+                    ChatId = chatId,
+                    State = "End",
+                    Id = userMessage.Id
+                };
+                await this.UpdateMessageOnClient("UserIDUpdate", messageforUI, token);
             }
 
             //ajouter le message dans la BD
@@ -115,11 +133,13 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             }
             message.Timestamp = DateTimeOffset.Now;
             message.ChatId = chatId;
-           // messageRepository.UpsertAsync(message).GetAwaiter().GetResult();
+            messageRepository.UpsertAsync(message).GetAwaiter().GetResult();
 
             response.State = "End";
+            response.Id = message.Id;
+            response.ChatId = message.ChatId;
             chatHistory.AddAssistantMessage(response.Content);
-            await this.UpdateMessageOnClient(response, "", token);
+            await this.UpdateMessageOnClient("ReceiveMessageUpdate",response, token);
 
         }
 
@@ -127,9 +147,9 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         /// Update the response on the client.
         /// </summary>
         /// <param name="message">The message</param>
-        private async Task UpdateMessageOnClient(MessageResponse message, string chatId, CancellationToken token)
+        private async Task UpdateMessageOnClient(string hubconnection, MessageResponse message, CancellationToken token)
         {
-            await this._messageRelayHubContext.Clients.All.SendAsync("ReceiveMessageUpdate", message, token);
+            await this._messageRelayHubContext.Clients.All.SendAsync(hubconnection, message, token);
         }
 
 
