@@ -64,9 +64,9 @@ function ChatWindow({ scenario }: ChatWindowProps) {
 
         //get the systme agent from the scenario agents
         const agent = scenario.agents.find(agent => agent.type === 'system');                
-        //Same for retail
-        const retailAgent = scenario.agents.find(agent => agent.type === 'retail');
-        const promptSystem = agent!.prompt + "/r/n" + retailAgent!.prompt;
+        //Same for rolePlay
+        const rolePlayAgent = scenario.agents.find(agent => agent.type === 'rolePlay');
+        const promptSystem = agent!.prompt + "/r/n" + rolePlayAgent!.prompt;
 
         const chatHistory = new ChatHistoryRequest([
             new ChatMessage("System", promptSystem),

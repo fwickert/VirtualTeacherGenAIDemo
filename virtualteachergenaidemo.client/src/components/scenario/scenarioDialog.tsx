@@ -9,6 +9,7 @@ import { Agent, ScenarioItem } from '../../models/ScenarioItem';
 import { makeStyles } from '@fluentui/react-components';
 import AgentSelectionDialog from '../agent/AgentSelectionDialog';
 import { Add24Regular } from '@fluentui/react-icons';
+import { tokens } from '@fluentui/tokens';
 
 const useStyles = makeStyles({
     customDialogSurface: {
@@ -38,17 +39,26 @@ const useStyles = makeStyles({
     agentName: {
         marginLeft: '8px', // Space between button and text
     },
+    deleteButton: {
+        backgroundColor: tokens.colorPaletteRedBackground3,
+        color: "white",
+        ':hover': {
+            backgroundColor: tokens.colorPaletteRedForeground1,
+            color: 'white',
+        },
+    },
 });
 
 interface ScenarioDialogProps {
-    onAddScenario: (scenario: { name: string, description: string, agents: Agent[] }) => void;
+    onAddScenario: (scenario: ScenarioItem) => void;
+    onDeleteScenario: (scenarioId: string) => void;
     onClose: () => void;
     isOpen: boolean;
     scenario?: ScenarioItem | null;
 }
 
-export const ScenarioDialog = ({ onAddScenario, onClose, isOpen, scenario }: ScenarioDialogProps) => {
-    const classes = useStyles();
+export const ScenarioDialog = ({ onAddScenario, onDeleteScenario, onClose, isOpen, scenario }: ScenarioDialogProps) => {
+    const styles = useStyles();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [nameError, setNameError] = useState('');
@@ -60,7 +70,8 @@ export const ScenarioDialog = ({ onAddScenario, onClose, isOpen, scenario }: Sce
     const [rolePlayAgent, setRolePlayAgent] = useState<Agent | null>(null);
     const [teacherAgent, setTeacherAgent] = useState<Agent | null>(null);
     const [isAgentDialogOpen, setIsAgentDialogOpen] = useState<boolean>(false);
-    const [agentType, setAgentType] = useState<'system' | 'retail' | 'teacher'>('system');
+    const [agentType, setAgentType] = useState<'system' | 'rolePlay' | 'teacher'>('system');
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
 
     useEffect(() => {
         if (scenario) {
@@ -68,7 +79,7 @@ export const ScenarioDialog = ({ onAddScenario, onClose, isOpen, scenario }: Sce
             setDescription(scenario.description);
             // Assuming scenario.agents is an array of agents
             setSystemAgent(scenario.agents.find(agent => agent.type === 'system') || null);
-            setRolePlayAgent(scenario.agents.find(agent => agent.type === 'retail') || null);
+            setRolePlayAgent(scenario.agents.find(agent => agent.type === 'rolePlay') || null);
             setTeacherAgent(scenario.agents.find(agent => agent.type === 'teacher') || null);
         }
     }, [scenario]);
@@ -118,20 +129,35 @@ export const ScenarioDialog = ({ onAddScenario, onClose, isOpen, scenario }: Sce
             teacherAgent
         ].filter(agent => agent !== null) as Agent[];
 
-        onAddScenario({ name, description, agents });
+        const newScenario = { name, description, agents, id: scenario ? scenario.id : "" };
 
-        // Post new scenario to API
-        fetch('/api/scenario', {
-            method: 'POST',
+        const apiUrl = scenario ? `/api/scenario/${scenario.id}` : '/api/scenario';
+        const method = scenario ? 'PUT' : 'POST';
+
+        fetch(apiUrl, {
+            method: method,
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ name: name, description: description, agents: agents, id: scenario ? scenario.id : "" }),
+            body: JSON.stringify(newScenario),
         })
-            .then(response => response.json())
-            .then(data => console.log('Success:', data))
+            .then(response => {
+                if (response.status === 204) {
+                    return null; // No content to parse
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success:', data);
+                if (!scenario) {
+                    newScenario.id = data.id; // Assuming the API returns the new scenario's ID
+                }
+                onAddScenario(newScenario);
+            })
             .catch(error => console.error('Error:', error));
 
+
+        setIsAgentDialogOpen(false);
         onClose();
     };
 
@@ -141,13 +167,37 @@ export const ScenarioDialog = ({ onAddScenario, onClose, isOpen, scenario }: Sce
         }
     };
 
+    const handleDeleteScenario = () => {
+        if (!scenario) return;
+
+        fetch(`/api/scenario/${scenario.id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Agent deleted successfully');
+                    onDeleteScenario(scenario.id);
+                    onClose();
+                } else {
+                    console.error('Failed to delete agent');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+
+        setIsDeleteConfirmOpen(false);
+        setIsAgentDialogOpen(false);
+    };
+
     return (
         <>
             <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-                <DialogSurface className={classes.customDialogSurface}>
+                <DialogSurface className={styles.customDialogSurface}>
                     <DialogBody>
                         <DialogTitle>{scenario ? 'Edit Scenario' : 'Add New Scenario'}</DialogTitle>
-                        <DialogContent className={classes.dialogContent}>
+                        <DialogContent className={styles.dialogContent}>
                             <div className="formcard">
                                 <Field label="Name" required validationMessage={nameError}>
                                     <Input
@@ -164,42 +214,61 @@ export const ScenarioDialog = ({ onAddScenario, onClose, isOpen, scenario }: Sce
                                         onChange={(e) => setDescription(e.target.value)}
                                     />
                                 </Field>
-                                <div className={classes.buttonGrid}>
+                                <div className={styles.buttonGrid}>
                                     <Field label="System Agent" required validationMessage={systemAgentError}>
-                                        <Button className={classes.circularButton} onClick={() => { setAgentType('system'); setIsAgentDialogOpen(true); }}>
+                                        <Button className={styles.circularButton} onClick={() => { setAgentType('system'); setIsAgentDialogOpen(true); }}>
                                             <Add24Regular />
                                         </Button>
-                                        <span className={classes.agentName}>{systemAgent ? systemAgent.name : 'No agent selected'}</span>
+                                        <span className={styles.agentName}>{systemAgent ? systemAgent.name : 'No agent selected'}</span>
                                     </Field>
                                     <Field label="RolePlay Agent" required validationMessage={rolePlayAgentError}>
-                                        <Button className={classes.circularButton} onClick={() => { setAgentType('retail'); setIsAgentDialogOpen(true); }}>
+                                        <Button className={styles.circularButton} onClick={() => { setAgentType('rolePlay'); setIsAgentDialogOpen(true); }}>
                                             <Add24Regular />
                                         </Button>
-                                        <span className={classes.agentName}>{rolePlayAgent ? rolePlayAgent.name : 'No agent selected'}</span>
+                                        <span className={styles.agentName}>{rolePlayAgent ? rolePlayAgent.name : 'No agent selected'}</span>
                                     </Field>
                                     <Field label="Teacher Agent" required validationMessage={teacherAgentError}>
-                                        <Button className={classes.circularButton} onClick={() => { setAgentType('teacher'); setIsAgentDialogOpen(true); }}>
+                                        <Button className={styles.circularButton} onClick={() => { setAgentType('teacher'); setIsAgentDialogOpen(true); }}>
                                             <Add24Regular />
                                         </Button>
-                                        <span className={classes.agentName}>{teacherAgent ? teacherAgent.name : 'No agent selected'}</span>
+                                        <span className={styles.agentName}>{teacherAgent ? teacherAgent.name : 'No agent selected'}</span>
                                     </Field>
                                 </div>
                             </div>
                         </DialogContent>
                         <DialogActions>
+                            {scenario && (
+                                <Button className={styles.deleteButton} onClick={() => setIsDeleteConfirmOpen(true)}>Delete</Button>
+                            )}
                             <Button appearance="primary" onClick={handleAddScenario}>{scenario ? 'Save' : 'Add'}</Button>
                             <Button appearance="secondary" onClick={onClose}>Cancel</Button>
                         </DialogActions>
                     </DialogBody>
                 </DialogSurface>
             </Dialog>
+
+            <Dialog open={isDeleteConfirmOpen} onOpenChange={(_event, data) => setIsDeleteConfirmOpen(data.open)}>
+                <DialogSurface>
+                    <DialogBody>
+                        <DialogTitle>Confirm Delete</DialogTitle>
+                        <DialogContent>
+                            <p>Are you sure you want to delete this agent? This action is irreversible.</p>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button className={styles.deleteButton} onClick={handleDeleteScenario}>Delete</Button>
+                            <Button appearance="secondary" onClick={() => setIsDeleteConfirmOpen(false)}>Cancel</Button>
+                        </DialogActions>
+                    </DialogBody>
+                </DialogSurface>
+            </Dialog>
+
             <AgentSelectionDialog
                 isOpen={isAgentDialogOpen}
                 type={agentType}
                 onSelectAgent={(agent) => {
                     if (agentType === 'system') {
                         setSystemAgent(agent);
-                    } else if (agentType === 'retail') {
+                    } else if (agentType === 'rolePlay') {
                         setRolePlayAgent(agent);
                     } else {
                         setTeacherAgent(agent);

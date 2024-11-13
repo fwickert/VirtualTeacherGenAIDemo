@@ -5,15 +5,33 @@ import { Input } from '@fluentui/react-input';
 import { Textarea } from '@fluentui/react-textarea';
 import { Field } from '@fluentui/react-field';
 import { useState, useEffect } from 'react';
+import { AgentItem } from '../../models/AgentItem';
+import { makeStyles } from '@fluentui/react-components';
+import { tokens } from '@fluentui/tokens';
+
+
 
 interface AgentDialogProps {
-    onAddAgent: (agent: { name: string, description: string, prompt: string, type: string }) => void;
+    onAddAgent: (agent: AgentItem) => void;
+    onDeleteAgent: (agentId: string) => void;
     type: string;
     onClose: () => void;
-    agent?: { name: string, description: string, prompt: string, type: string, id:string }; // Optional agent prop
+    agent?: AgentItem;
 }
 
-export const AgentDialog = ({ onAddAgent, type, onClose, agent }: AgentDialogProps) => {
+const useStyles = makeStyles({
+    deleteButton: {
+        backgroundColor: tokens.colorPaletteRedBackground3,
+        color: "white",
+        ':hover': {
+            backgroundColor: tokens.colorPaletteRedForeground1,
+            color:'white',
+        },
+    },
+});
+
+export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }: AgentDialogProps) => {
+    const styles = useStyles();
     const [name, setName] = useState(agent?.name || '');
     const [description, setDescription] = useState(agent?.description || '');
     const [nameError, setNameError] = useState('');
@@ -21,6 +39,7 @@ export const AgentDialog = ({ onAddAgent, type, onClose, agent }: AgentDialogPro
     const [prompt, setPrompt] = useState(agent?.prompt || '');
     const [promptError, setPromptError] = useState('');
     const [isOpen, setIsOpen] = useState<boolean>(true);
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
 
     useEffect(() => {
         if (agent) {
@@ -55,21 +74,59 @@ export const AgentDialog = ({ onAddAgent, type, onClose, agent }: AgentDialogPro
 
         if (!valid) return;
 
-        onAddAgent({ name, description, prompt, type });
+        const newAgent = { name, description, prompt, type, id: agent?.id || "" };
 
-        // Post new agent to API
-        fetch('/api/agent', {
-            method: 'POST',
+        const apiUrl = agent ? `/api/agent/${agent.id}` : '/api/agent';
+        const method = agent ? 'PUT' : 'POST';
+
+        fetch(apiUrl, {
+            method: method,
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ name: name, description: description, prompt: prompt, type: type, id: agent?.id || "" }),
+            body: JSON.stringify(newAgent),
         })
-            .then(response => response.json())
-            .then(data => console.log('Success:', data))
+            .then(response => {
+                if (response.status === 204) {
+                    return null; // No content to parse
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success:', data);
+                if (!agent) {
+                    newAgent.id = data.id; // Assuming the API returns the new agent's ID                    
+                }
+                onAddAgent(newAgent)
+            })
             .catch(error => console.error('Error:', error));
+
         setIsOpen(false); // Close the dialog
         onClose();
+    };
+
+    const handleDeleteAgent = () => {
+        if (!agent) return;
+
+        fetch(`/api/agent/${agent.id}?type=${agent.type}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Agent deleted successfully');
+                    onDeleteAgent(agent.id);
+                    onClose();
+                } else {
+                    console.error('Failed to delete agent');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+
+        setIsDeleteConfirmOpen(false);
+        setIsOpen(false);
     };
 
     const handleOpenChange = (_event: any, data: { open: boolean }) => {
@@ -80,45 +137,66 @@ export const AgentDialog = ({ onAddAgent, type, onClose, agent }: AgentDialogPro
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-            <DialogSurface>
-                <DialogBody>
-                    <DialogTitle>{agent ? 'Edit Agent' : 'Add New Agent'}</DialogTitle>
-                    <DialogContent>
-                        <div className="formcard">
-                            <Field label="Name" required validationMessage={nameError}>
-                                <Input
-                                    placeholder="Name your agent"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                />
-                            </Field>
-                            <Field label="Description" required validationMessage={descriptionError}>
-                                <Textarea
-                                    placeholder="Describe your agent"
-                                    value={description}
-                                    rows={3}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                />
-                            </Field>
-                        </div>
-                        <div className="formcard">
-                            <Field label="Instruction" required validationMessage={promptError}>
-                                <Textarea
-                                    placeholder="Give instruction to your agent"
-                                    value={prompt}
-                                    rows={10}
-                                    onChange={(e) => setPrompt(e.target.value)}
-                                />
-                            </Field>
-                        </div>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button appearance="primary" onClick={handleAddAgent}>{agent ? 'Save' : 'Add'}</Button>
-                        <Button appearance="secondary" onClick={() => { setIsOpen(false); onClose(); }}>Cancel</Button>
-                    </DialogActions>
-                </DialogBody>
-            </DialogSurface>
-        </Dialog>
+        <>
+            <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+                <DialogSurface>
+                    <DialogBody>
+                        <DialogTitle>{agent ? 'Edit Agent' : 'Add New Agent'}</DialogTitle>
+                        <DialogContent>
+                            <div className="formcard">
+                                <Field label="Name" required validationMessage={nameError}>
+                                    <Input
+                                        placeholder="Name your agent"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                    />
+                                </Field>
+                                <Field label="Description" required validationMessage={descriptionError}>
+                                    <Textarea
+                                        placeholder="Describe your agent"
+                                        value={description}
+                                        rows={3}
+                                        onChange={(e) => setDescription(e.target.value)}
+                                    />
+                                </Field>
+                            </div>
+                            <div className="formcard">
+                                <Field label="Instruction" required validationMessage={promptError}>
+                                    <Textarea
+                                        placeholder="Give instruction to your agent"
+                                        value={prompt}
+                                        rows={10}
+                                        onChange={(e) => setPrompt(e.target.value)}
+                                    />
+                                </Field>
+                            </div>
+                        </DialogContent>
+                        <DialogActions>
+                            {agent && (
+                                <Button className={styles.deleteButton} onClick={() => setIsDeleteConfirmOpen(true)}>Delete</Button>
+                            )}
+                            <Button appearance="primary" onClick={handleAddAgent}>{agent ? 'Save' : 'Add'}</Button>
+                            <Button appearance="secondary" onClick={() => { setIsOpen(false); onClose(); }}>Cancel</Button>
+
+                        </DialogActions>
+                    </DialogBody>
+                </DialogSurface>
+            </Dialog>
+
+            <Dialog open={isDeleteConfirmOpen} onOpenChange={(_event, data) => setIsDeleteConfirmOpen(data.open)}>
+                <DialogSurface>
+                    <DialogBody>
+                        <DialogTitle>Confirm Delete</DialogTitle>
+                        <DialogContent>
+                            <p>Are you sure you want to delete this agent? This action is irreversible.</p>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button className={styles.deleteButton} onClick={handleDeleteAgent}>Delete</Button>
+                            <Button appearance="secondary" onClick={() => setIsDeleteConfirmOpen(false)}>Cancel</Button>
+                        </DialogActions>
+                    </DialogBody>
+                </DialogSurface>
+            </Dialog>
+        </>
     );
 };

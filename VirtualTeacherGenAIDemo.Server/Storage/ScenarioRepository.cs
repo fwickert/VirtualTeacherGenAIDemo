@@ -15,16 +15,28 @@ namespace VirtualTeacherGenAIDemo.Server.Storage
         }
 
         //function Get by id
-        public Task<ScenarioItem> GetAsync(string id, string type)
+        public Task<ScenarioItem> GetScenarioAsync(string id, string type)
         {
             return base.StorageContext.ReadAsync(id, type);
         }
 
         //Add new scenario
-        public Task AddAsync(ScenarioItem scenario)
+        public Task AddScenarioAsync(ScenarioItem scenario)
         {
             
             return base.StorageContext.CreateAsync(scenario);
+        }
+
+        //Update scenario
+        public Task UpdateScenarioAsync(ScenarioItem scenario)
+        {
+            return base.StorageContext.UpsertAsync(scenario);
+        }
+
+        //Delete scenario
+        public Task DeleteScenarioAsync(ScenarioItem scenario)
+        {
+            return base.StorageContext.DeleteAsync(scenario);
         }
     }
     

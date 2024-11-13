@@ -12,11 +12,6 @@ import { tokens } from '@fluentui/tokens';
 import { Button } from '@fluentui/react-button';
 import { AgentDialog } from './AgentDialog'; // Import AgentDialog
 
-interface AgentListProps {
-    onAgentStart: () => void;
-    onAddAgent: (type: string) => void;
-}
-
 const useStyles = makeStyles({
     customPreview: {
         padding: '10px',
@@ -84,12 +79,14 @@ const getAgentColorClass = (agentType: string, classes: any) => {
     }
 };
 
-const AgentList: FC<AgentListProps> = ({ onAddAgent }) => {
+const AgentList: FC = () => {
     const classes = useStyles();
     const [agents, setAgents] = useState<AgentItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedTab, setSelectedTab] = useState('RolePlay');
     const [editingAgent, setEditingAgent] = useState<AgentItem | null>(null);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [dialogType, setDialogType] = useState<string>('');
 
     useEffect(() => {
         // Fetch agents from an API or data source
@@ -108,6 +105,35 @@ const AgentList: FC<AgentListProps> = ({ onAddAgent }) => {
     const onTabSelect = (_event: any, data: any) => {
         setSelectedTab(data.value);
     };
+
+    const handleAddAgent = (type: string) => {
+        setDialogType(type);
+        setEditingAgent(null);
+        setIsDialogOpen(true);
+    };
+
+    const handleAgentAddedOrEdited = (agent: AgentItem) => {
+        setAgents((prevAgents) => {
+            const existingAgentIndex = prevAgents.findIndex((a) => a.id === agent.id);
+            if (existingAgentIndex !== -1) {
+                // Update existing agent
+                const updatedAgents = [...prevAgents];
+                updatedAgents[existingAgentIndex] = agent;
+
+                return updatedAgents;
+            } else {
+                // Add new agent
+                return [...prevAgents, agent];
+            }
+        });
+        setIsDialogOpen(false);
+        setEditingAgent(null);
+    };
+
+    const handleDeleteAgent = (agentId: string) => {
+        setAgents(prevAgents => prevAgents.filter(agent => agent.id !== agentId));
+    };
+
 
     const renderAgents = (filter: string) => {
         return agents
@@ -136,7 +162,11 @@ const AgentList: FC<AgentListProps> = ({ onAddAgent }) => {
                         <Button
                             icon={<EditRegular />}
                             className={classes.editButton}
-                            onClick={() => setEditingAgent(agent)}>
+                            onClick={() => {
+                                setEditingAgent(agent);
+                                setDialogType(agent.type);
+                                setIsDialogOpen(true);
+                            }}>
                             Edit
                         </Button>
                     </CardFooter>
@@ -149,7 +179,7 @@ const AgentList: FC<AgentListProps> = ({ onAddAgent }) => {
     }
 
     return (
-        <div>
+        <div className="tabcontainer">
             <TabList selectedValue={selectedTab} onTabSelect={onTabSelect}>
                 <Tab value="RolePlay">RolePlay</Tab>
                 <Tab value="Teacher">Teacher</Tab>
@@ -158,16 +188,16 @@ const AgentList: FC<AgentListProps> = ({ onAddAgent }) => {
             <div className="agent-cards-grid">
                 {selectedTab === 'RolePlay' && (
                     <>
-                        <Button className={classes.buttonWithIcon} onClick={() => onAddAgent('retail')}>
+                        <Button className={classes.buttonWithIcon} onClick={() => handleAddAgent('rolePlay')}>
                             <AddCircleRegular className={classes.buttonIcon} />
                             Add Roleplay Agent
                         </Button>
-                        {renderAgents('retail')}
+                        {renderAgents('rolePlay')}
                     </>
                 )}
                 {selectedTab === 'Teacher' && (
                     <>
-                        <Button className={classes.buttonWithIcon} onClick={() => onAddAgent('teacher')}>
+                        <Button className={classes.buttonWithIcon} onClick={() => handleAddAgent('teacher')}>
                             <AddCircleRegular className={classes.buttonIcon} />
                             Add Teacher Agent
                         </Button>
@@ -176,7 +206,7 @@ const AgentList: FC<AgentListProps> = ({ onAddAgent }) => {
                 )}
                 {selectedTab === 'System' && (
                     <>
-                        <Button className={classes.buttonWithIcon} onClick={() => onAddAgent('system')}>
+                        <Button className={classes.buttonWithIcon} onClick={() => handleAddAgent('system')}>
                             <AddCircleRegular className={classes.buttonIcon} />
                             Add System Agent
                         </Button>
@@ -184,17 +214,14 @@ const AgentList: FC<AgentListProps> = ({ onAddAgent }) => {
                     </>
                 )}
             </div>
-            {editingAgent && (
+            {isDialogOpen && (
+
                 <AgentDialog
-                    onAddAgent={(agent) => {
-                        setAgents((prevAgents) =>
-                            prevAgents.map((a) => (a.id === editingAgent.id ? { ...a, ...agent } : a))
-                        );
-                        setEditingAgent(null);
-                    }}
-                    type={editingAgent.type}
-                    onClose={() => setEditingAgent(null)}
-                    agent={editingAgent}
+                    onAddAgent={handleAgentAddedOrEdited}
+                    onDeleteAgent={handleDeleteAgent}
+                    type={dialogType}
+                    onClose={() => setIsDialogOpen(false)}
+                    agent={editingAgent || undefined}
                 />
             )}
         </div>

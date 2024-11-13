@@ -8,7 +8,7 @@ import ScenarioDialog from './scenarioDialog';
 import ChatWindow from '../chat/chatWindow';
 import { Spinner } from '@fluentui/react-spinner';
 import { makeStyles } from '@fluentui/react-components';
-import { PersonAvailableFilled } from '@fluentui/react-icons';
+import { PersonAvailableFilled, AddCircleRegular, EditRegular} from '@fluentui/react-icons';
 import { mergeClasses } from '@fluentui/react-components';
 import { tokens } from '@fluentui/tokens';
 
@@ -59,6 +59,18 @@ const useStyles = makeStyles({
         justifyContent: 'left',
         marginTop: '10px',
     },
+    buttonWithIcon: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+    },
+    buttonIcon: {
+        fontSize: '48px',
+        marginBottom: '5px',
+    },
+    editButton: {
+        marginLeft: 'auto',
+    },
 });
 
 const getAgentColorClass = (agentType: string, classes: any) => {
@@ -95,17 +107,10 @@ const ScenarioList: React.FC<ScenarioListProps> = ({ onScenarioStart }) => {
 
     }, []);
 
-    const handleDetailClick = (scenario: ScenarioItem) => {
-        setSelectedScenario(scenario);
-        setIsDialogOpen(true);
-    };
-
     const handleStartClick = async (scenario: ScenarioItem) => {
         try {
             setIsLoading(true);
-            const response = await fetch(`/api/scenario/${scenario.id}`);
-            const scenarioDetails = await response.json();
-            setSelectedScenario(scenarioDetails);
+            setSelectedScenario(scenario);
             setIsChatOpen(true);
             if (onScenarioStart) {
                 onScenarioStart();
@@ -121,11 +126,47 @@ const ScenarioList: React.FC<ScenarioListProps> = ({ onScenarioStart }) => {
         return scenario.agents.length === 3;
     };
 
+    const handleAddScenario = () => {
+        setSelectedScenario(null);
+        setIsDialogOpen(true);
+    };
+
+    const handleEditScenario = (scenario: ScenarioItem) => {
+        setSelectedScenario(scenario);
+        setIsDialogOpen(true);
+    };
+
+    const handleScenarioAddedOrEdited = (scenario: ScenarioItem) => {
+        setScenarios((prevScenarios) => {
+            const existingScenarioIndex = prevScenarios.findIndex((s) => s.id === scenario.id);
+            if (existingScenarioIndex !== -1) {
+                // Update existing scenario
+                const updatedScenarios = [...prevScenarios];
+                updatedScenarios[existingScenarioIndex] = scenario;
+
+                return updatedScenarios;
+            } else {
+                // Add new scenario
+                return [...prevScenarios, scenario];
+            }
+        });
+        setIsDialogOpen(false);
+        setSelectedScenario(null);
+    };
+
+    const handleDeleteScenario = (scenarioId: string) => {
+        setScenarios(prevScenarios => prevScenarios.filter(scenario => scenario.id !== scenarioId));
+    };
+
     return (
         <div className={classes.centerContainer}>
             {isLoading && <Spinner label="Loading..." />}
             {!isLoading && !isChatOpen && (
                 <div className="scenario-cards-grid">
+                    <Button className={classes.buttonWithIcon} onClick={handleAddScenario}>
+                        <AddCircleRegular className={classes.buttonIcon} />
+                        Add New Scenario
+                    </Button>
                     {scenarios.map(scenario => (
                         <Card key={scenario.id} className={`${classes.customCard} card`}>
                             <CardHeader
@@ -144,7 +185,7 @@ const ScenarioList: React.FC<ScenarioListProps> = ({ onScenarioStart }) => {
                                                         className={mergeClasses(classes.icon, colorClass)}
                                                     />
                                                     <Text className={mergeClasses(classes.iconText, colorClass)}>
-                                                        {agent ? agent.name : 'N/A'}
+                                                        {agent ? agent.name : 'Not set'}
                                                     </Text>
                                                 </div>
                                             );
@@ -153,7 +194,13 @@ const ScenarioList: React.FC<ScenarioListProps> = ({ onScenarioStart }) => {
                                 </div>
                             </CardPreview>
                             <CardFooter>
-                                <Button onClick={() => handleDetailClick(scenario)}>Details</Button>
+
+                                <Button
+                                    icon={<EditRegular />}
+                                    className={classes.editButton}
+                                    onClick={() => handleEditScenario(scenario)}>
+                                    Edit
+                                </Button>
                                 <Button
                                     appearance='primary'
                                     onClick={() => handleStartClick(scenario)}
@@ -168,7 +215,8 @@ const ScenarioList: React.FC<ScenarioListProps> = ({ onScenarioStart }) => {
                 <ScenarioDialog
                     isOpen={isDialogOpen}
                     scenario={selectedScenario}
-                    onAddScenario={() => { }}
+                    onAddScenario={handleScenarioAddedOrEdited}
+                    onDeleteScenario={handleDeleteScenario}
                     onClose={() => setIsDialogOpen(false)}
                 />
             )}

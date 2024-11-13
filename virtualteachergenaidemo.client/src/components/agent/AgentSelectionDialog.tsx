@@ -8,7 +8,7 @@ interface AgentSelectionDialogProps {
     onSelectAgent: (agent: Agent) => void;
     onClose: () => void;
     isOpen: boolean;
-    type: 'system' | 'retail' | 'teacher';
+    type: 'system' | 'rolePlay' | 'teacher';
 }
 
 export const AgentSelectionDialog = ({ onSelectAgent, onClose, isOpen, type }: AgentSelectionDialogProps) => {

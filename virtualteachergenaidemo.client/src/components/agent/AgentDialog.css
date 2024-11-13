@@ -6,3 +6,11 @@
     border-radius: 5px;
     background-color: #fcfcfc;
 }
+
+.delete-button-container {
+    display: flex;
+    justify-content: flex-start;
+    flex-grow: 1;    
+}
+
+
