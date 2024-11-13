@@ -75,9 +75,9 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
             messageStorageContext = new CosmosDbContext<Message>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.HistoryContainer);
             services.AddSingleton<MessageRepository>(new MessageRepository(messageStorageContext));
 
-            IStorageContext<HistoryItem> historyStorageContext; 
-            historyStorageContext = new CosmosDbContext<HistoryItem>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.HistoryContainer);
-            services.AddSingleton<HistoryRepository>(new HistoryRepository(historyStorageContext));            
+            IStorageContext<SessionItem> historyStorageContext; 
+            historyStorageContext = new CosmosDbContext<SessionItem>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.HistoryContainer);
+            services.AddSingleton<SessionRepository>(new SessionRepository(historyStorageContext));            
             
             IStorageContext<DashboardItem> dashboardStorageContext;
             dashboardStorageContext = new CosmosDbContext<DashboardItem>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.DashboardContainer);
