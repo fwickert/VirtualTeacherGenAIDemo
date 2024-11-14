@@ -1,0 +1,152 @@
+import './sessionList.css';
+import React, { useEffect, useState } from 'react';
+import { Card, CardHeader, CardPreview, CardFooter } from '@fluentui/react-card';
+import { Text, Title2, Body2 } from '@fluentui/react-text';
+import { Button } from '@fluentui/react-button';
+import { Spinner } from '@fluentui/react-spinner';
+import { makeStyles } from '@fluentui/react-components';
+import { AddCircleRegular, PeopleCommunityFilled, PlayRegular } from '@fluentui/react-icons';
+import { mergeClasses } from '@fluentui/react-components';
+import { tokens } from '@fluentui/tokens';
+import { useNavigate } from 'react-router-dom';
+import { SessionItem } from '../../models/SessionItem';
+
+
+interface SessionListProps {
+    onSessionStart: (session: SessionItem) => void;
+}
+
+const useStyles = makeStyles({
+    customPreview: {
+        padding: '10px',
+    },
+    customCard: {
+        minWidth: '400px',
+        maxWidth: '300px',
+    },
+    iconGrid: {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr 1fr',
+        gap: '10px',
+    },
+    iconItem: {
+        display: 'grid',
+        justifyItems: 'center',
+        alignItems: 'center',
+        marginTop: '20px',
+    },
+    icon: {
+        fontSize: '40px',
+    },
+    iconText: {
+        marginTop: '5px',
+    },
+    grayColor: {
+        color: tokens.colorNeutralForegroundDisabled,
+    },
+    systemColor: {
+        color: tokens.colorPaletteLilacForeground2,
+    },
+    teacherColor: {
+        color: tokens.colorPaletteLightGreenForeground1,
+    },
+    otherColor: {
+        color: tokens.colorBrandForeground1,
+    },
+    centerContainer: {
+        display: 'flex',
+        justifyContent: 'left',
+        marginTop: '10px',
+    },
+    buttonWithIcon: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+    },
+    buttonIcon: {
+        fontSize: '48px',
+        marginBottom: '5px',
+    },
+    resumeButton: {
+        marginLeft: 'auto',
+    },
+});
+
+const SessionList: React.FC<SessionListProps> = ({ onSessionStart }) => {
+    const navigate = useNavigate();
+    const classes = useStyles();
+    const [sessions, setSessions] = useState<SessionItem[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        // Fetch incomplete sessions from the backend using fetch
+        fetch('/api/chat/session/NotCompleted')
+            .then(response => response.json())
+            .then(data => {
+                const parsedData = data.map((session: any) => ({
+                    ...session,
+                    timestamp: new Date(session.timestamp)
+                }));
+                setSessions(parsedData);
+                setIsLoading(false);
+            })
+            .catch(error => {
+                console.error('There was an error fetching the sessions!', error);
+                setIsLoading(false);
+            });
+    }, []);
+
+    const handleResume = async (session: SessionItem) => {       
+        if (onSessionStart) {
+            console.log("Session started ! " + session.id);
+            onSessionStart(session);
+        }
+        
+    };
+
+    const handleAddSession = () => {
+        // Navigate to the scenario page
+        navigate('/scenarios');
+    };
+
+    const formatDate = (date: Date) => {
+        return date.toLocaleDateString('en-GB'); // 'en-GB' locale formats date as dd/MM/yyyy
+    };
+
+    return (
+        <div className={classes.centerContainer}>
+            {isLoading && <Spinner label="Loading..." />}
+            {!isLoading && (
+                <div className="session-cards-grid">
+                    <Button className={classes.buttonWithIcon} onClick={handleAddSession}>
+                        <AddCircleRegular className={classes.buttonIcon} />
+                        Add New Session
+                    </Button>
+                    {sessions.map(session => (
+                        <Card key={session.id} className={`${classes.customCard} card`}>
+                            <CardHeader
+                                header={<Title2>{session.title}</Title2>}
+                                action={<PeopleCommunityFilled className={classes.icon} />}
+                            />
+                            <CardPreview className={classes.customPreview}>
+                                <Body2>Session details or description can go here.</Body2>
+                                <Body2>{formatDate(session.timestamp)}</Body2>
+                            </CardPreview>
+                            <CardFooter>
+                                <Button
+                                    appearance='primary'
+                                    className={classes.resumeButton}
+                                    icon={<PlayRegular />}
+                                    onClick={() => handleResume(session)}>
+                                    Resume
+                                </Button>
+                            </CardFooter>
+                        </Card>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default SessionList;

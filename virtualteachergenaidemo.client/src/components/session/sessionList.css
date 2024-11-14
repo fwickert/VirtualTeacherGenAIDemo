@@ -1,0 +1,38 @@
+.session-cards-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: left;
+    margin-top: 10px;
+}
+
+    .session-cards-grid > .card {
+        flex: 1 1 auto;
+        max-width: 300px;
+    }
+
+
+@media (min-width: 768px) {
+    .session-cards-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (min-width: 1024px) {
+    .session-cards-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
+
+@media (min-width: 768px) {
+    .session-list-container {
+        width: 80%;
+        margin: 0 auto;
+    }
+}
+
+@media (min-width: 1024px) {
+    .session-list-container {
+        width: 100%;
+    }
+}

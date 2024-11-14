@@ -28,7 +28,7 @@ function Dashboard() {
     }, [chatId]);
 
     const fetchConversation = async (chatId: string) => {
-        const response = await fetch('/api/chat/messages?chatId=' + chatId);
+        const response = await fetch('/api/chat/messages/' + chatId);
         const data = await response.json();
         const formattedConversation = data.map((message: any) => {
             const role = message.authorRole === AuthorRoles.User ? "Seller" : "Client";

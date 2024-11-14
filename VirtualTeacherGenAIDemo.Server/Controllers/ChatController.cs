@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.SemanticKernel.ChatCompletion;
+using System.Security.Permissions;
 using VirtualTeacherGenAIDemo.Server.Models.Request;
 using VirtualTeacherGenAIDemo.Server.Models.Storage;
 using VirtualTeacherGenAIDemo.Server.Services;
@@ -33,7 +34,7 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
             return _chatService.GetHistory();
         }
 
-        [HttpGet("messages", Name = "messages")]
+        [HttpGet("messages/{chatid}", Name = "messages")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IEnumerable<Message>> GetChatMessages(string chatId, CancellationToken token)
         {
@@ -46,6 +47,7 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
         public async Task DeleteMessage(string messageId, string chatid,  CancellationToken token)
         {
             await _chatService.DeleteMessage(messageId, chatid);
+
         }
 
         //Complete Session
@@ -54,6 +56,20 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
         public async Task CompleteSession([FromBody] CompleteSessionRequest request, CancellationToken token)
         {
             await _chatService.CompleteSession(request.SessionId, request.ChatId);
+        }
+
+        //Get all not complete session
+        [HttpGet("Session/notCompleted")]
+        public IEnumerable<SessionItem> GetNotCompletedSessions() 
+        { 
+            return _chatService.GetNotCompletedSession();
+        }
+
+        //Get a session by id
+        [HttpGet("Session/{id}")]
+        public async Task<SessionItem> GetSession(string id, string chatid)
+        {
+            return await _chatService.GetSession(id, chatid);
         }
     }
 }

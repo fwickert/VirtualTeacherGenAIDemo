@@ -24,7 +24,7 @@ function Menu() {
 
 
     const navigateTraining = () => {
-        navigate('/training');
+        navigate('/session');
     };
 
     const navigateScenarios = () => {
@@ -85,25 +85,25 @@ function Menu() {
                 </Card>
             </section>
 
-            <section>
-                <Card className="card" orientation="horizontal" onClick={navigateCoach} >
-                    <CardPreview>
-                        <img className='horizontalCardImage'
-                            src={resolveAsset("coach.svg")}
-                            alt="App Name Document"
-                        />
-                    </CardPreview>
+            {/*<section>*/}
+            {/*    <Card className="card" orientation="horizontal" onClick={navigateCoach} >*/}
+            {/*        <CardPreview>*/}
+            {/*            <img className='horizontalCardImage'*/}
+            {/*                src={resolveAsset("coach.svg")}*/}
+            {/*                alt="App Name Document"*/}
+            {/*            />*/}
+            {/*        </CardPreview>*/}
 
-                    <CardHeader
+            {/*        <CardHeader*/}
 
-                        header={<Text weight="semibold">Virtual AI Coach</Text>}
-                        description={
-                            <Caption1>Ask anything at your Virtual AI Coach</Caption1>
-                        }
+            {/*            header={<Text weight="semibold">Virtual AI Coach</Text>}*/}
+            {/*            description={*/}
+            {/*                <Caption1>Ask anything at your Virtual AI Coach</Caption1>*/}
+            {/*            }*/}
 
-                    />
-                </Card>
-            </section>
+            {/*        />*/}
+            {/*    </Card>*/}
+            {/*</section>*/}
 
             <section>
                 <Card className="card" orientation="horizontal" onClick={navigateScenarios} >

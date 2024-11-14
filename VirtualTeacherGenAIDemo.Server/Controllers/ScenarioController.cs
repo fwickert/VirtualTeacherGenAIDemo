@@ -13,8 +13,6 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IEnumerable<ScenarioItem>> Get([FromServices] ScenarioService scenarioService, CancellationToken token)
         {
-            await Task.Delay(2000);
-
             return await scenarioService.GetScenariosAsync();
         }
 

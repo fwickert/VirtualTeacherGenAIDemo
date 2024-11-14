@@ -4,8 +4,9 @@ import SpeechRecognizer from '../speechRecognizer/speechRecognizer';
 import AudioVisualizer from '../speechRecognizer/AudioVisualizer';
 import { ChatHistoryRequest, ChatMessage } from '../../models/ChatHistoryRequest';
 import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
-import { textToSpeechAsync } from '../../services/speechService';
+import { textToSpeechAsync, cancelSpeech } from '../../services/speechService';
 import { ScenarioItem } from '../../models/ScenarioItem';
+import { SessionItem } from '../../models/SessionItem';
 import { Button } from '@fluentui/react-button';
 
 interface Message {
@@ -16,14 +17,16 @@ interface Message {
 }
 
 interface ChatWindowProps {
-    scenario: ScenarioItem;
+    scenario?: ScenarioItem | undefined;
+    session?: SessionItem;
 }
 
-function ChatWindow({ scenario }: ChatWindowProps) {
+function ChatWindow({ scenario, session }: ChatWindowProps) {
+    
     const [messages, setMessages] = useState<Message[]>([]);
     const [connection, setConnection] = useState<HubConnection | null>(null);
-    const [chatId, setChatId] = useState<string>("")    
-    const [sessionId, setSessionId] = useState<string>("")    
+    const [chatId, setChatId] = useState<string>("")
+    const [sessionId, setSessionId] = useState<string>("")
     const currentMessageRef = useRef<string | null>(null);
     const [isSavingSession, setIsSavingSession] = useState<boolean>(false);
 
@@ -88,13 +91,33 @@ function ChatWindow({ scenario }: ChatWindowProps) {
         }
     }, [connection]);
 
+    useEffect(() => {
+        if (session) {
+            fetch(`/api/chat/messages/${session.chatId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const fetchedMessages = data
+                        .filter((msg: any) => msg.content !== "")
+                        .map((msg: any) => ({
+                            id: msg.id,
+                            content: msg.content,
+                            chatId: msg.chatId,
+                            role: msg.authorRole === 0 ? "User" : "Assistant"
+                        }));
+                    setMessages(fetchedMessages);
+                })
+                .catch(error => console.error('Error fetching session messages:', error));
+        }
+    }, [session]);
+
+
     const handleNewMessage = async (message: string) => {
         setMessages(prevMessages => [...prevMessages, { id: "", content: message, role: 'User' }]);
 
         //get the systme agent from the scenario agents
-        const agent = scenario.agents.find(agent => agent.type === 'system');
+        const agent = scenario?.agents.find(agent => agent.type === 'system');
         //Same for rolePlay
-        const rolePlayAgent = scenario.agents.find(agent => agent.type === 'rolePlay');
+        const rolePlayAgent = scenario?.agents.find(agent => agent.type === 'rolePlay');
         const promptSystem = agent!.prompt + "/r/n" + rolePlayAgent!.prompt;
 
         const chatHistory = new ChatHistoryRequest([
@@ -122,6 +145,9 @@ function ChatWindow({ scenario }: ChatWindowProps) {
     };
 
     const handleDeleteMessage = async (index: number) => {
+        //stop the audio
+        cancelSpeech();
+
         const messageToDelete = messages[index];
         try {
             await fetch(`/api/chat/messages/${messageToDelete.id}?chatid=${messageToDelete.chatId}`, {
@@ -186,9 +212,12 @@ function ChatWindow({ scenario }: ChatWindowProps) {
             <div className="grid-column">
                 {/*<AudioVisualizer useMicrophone />*/}
             </div>
-            <Button appearance='primary' onClick={handleSaveSession} disabled={isSavingSession}>Validate Session</Button>            
+            <Button appearance='primary' onClick={handleSaveSession} disabled={isSavingSession}>Validate Session</Button>
+            <span>session: {session?.id }</span>
+
         </div>
     );
 }
 
 export default ChatWindow;
+

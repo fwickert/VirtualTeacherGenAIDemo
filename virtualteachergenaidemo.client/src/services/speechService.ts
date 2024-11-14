@@ -23,14 +23,21 @@ export async function getSpeechRecognizerAsync() {
     return new speechSdk.SpeechRecognizer(speechConfig, audioConfig);
 }
 
+let synthesizer: speechSdk.SpeechSynthesizer | null = null;
+let player: speechSdk.SpeakerAudioDestination | null = null;
+
 export async function textToSpeechAsync(text: string) {
     const token = await getSpeechTokenAsync();
     const speechConfig = speechSdk.SpeechConfig.fromSubscription(token.subscriptionKey, token.region);
     speechConfig.speechSynthesisVoiceName = token.voiceName;
     console.log('Voice:', token.voiceName);
 
-    const audioConfig = speechSdk.AudioConfig.fromDefaultSpeakerOutput();
-    const synthesizer = new speechSdk.SpeechSynthesizer(speechConfig, audioConfig);
+    
+
+    player = new speechSdk.SpeakerAudioDestination();
+    const audioConfig = speechSdk.AudioConfig.fromSpeakerOutput(player);
+    synthesizer = new speechSdk.SpeechSynthesizer(speechConfig, audioConfig);
+
 
     // Split the text into sentences
     const sentences = text.match(/[^\.!\?]+[\.!\?]+/g) || [text];
@@ -49,7 +56,7 @@ export async function textToSpeechAsync(text: string) {
     return new Promise<void>((resolve, reject) => {
         const speakText = (textToSpeak: string) => {
             return new Promise<void>((resolve, reject) => {
-                synthesizer.speakTextAsync(
+                synthesizer!.speakTextAsync(
                     textToSpeak,
                     result => {
                         if (result.reason === speechSdk.ResultReason.SynthesizingAudioCompleted) {
@@ -66,30 +73,35 @@ export async function textToSpeechAsync(text: string) {
             });
         };
 
-        synthesizer.synthesisCompleted = () => {
+        synthesizer!.synthesisCompleted = () => {
             console.log('Synthesis completed');
             if (remainingText.length > 0) {
                 speakText(remainingText)
                     .then(() => {
-                        synthesizer.close();
+                        synthesizer!.close();
                         resolve();
                     })
                     .catch(error => {
-                        synthesizer.close();
+                        synthesizer!.close();
                         reject(error);
                     });
             } else {
-                synthesizer.close();
+                synthesizer!.close();
                 resolve();
             }
         };
 
         // Speak the first part
         speakText(firstPart).catch(error => {
-            synthesizer.close();
+            synthesizer!.close();
             reject(error);
         });
     });
+}
+
+export function cancelSpeech() {
+    player?.pause();
+    player?.close();
 }
 
 

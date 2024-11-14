@@ -8,7 +8,7 @@ namespace VirtualTeacherGenAIDemo.Server.Models.Storage
     public class SessionItem : IStorageEntity
     {
         public string Title { get; set; } = string.Empty;
-    
+
         public DateTimeOffset Timestamp { get; set; }
 
         public string Id { get; set; } = string.Empty;
@@ -25,6 +25,26 @@ namespace VirtualTeacherGenAIDemo.Server.Models.Storage
         [Required]
         public bool IsCompleted { get; set; } = false;
 
+        [Required, NotEmptyOrWhitespace]
+        public string ScenarioName { get; set; } = string.Empty;
+
+        [Required, NotEmptyOrWhitespace]
+        public string ScenarioDescription { get; set; } = string.Empty;
+
+        [Required]
+        public IEnumerable<SessionAgent> Agents { get; set; } = Enumerable.Empty<SessionAgent>();
+
+    }
+
+    public class SessionAgent
+    {
+        
+
+        [Required, NotEmptyOrWhitespace]
+        public string Prompt { get; set; } = string.Empty;
+
+        [Required, NotEmptyOrWhitespace]
+        public string Type { get; set; } = string.Empty;
 
     }
 }
