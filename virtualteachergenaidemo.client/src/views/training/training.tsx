@@ -1,25 +1,40 @@
 import './training.css'
 import { Text } from "@fluentui/react-text"
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import ChatWindow from '../../components/chat/chatWindow'
 import { Button } from '@fluentui/react-button';
 import { ArrowCircleLeft48Filled } from '@fluentui/react-icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ScenarioList from '../../components/scenario/scenarioList';
 import { ScenarioItem } from '../../models/ScenarioItem';
+import { SessionItem } from '../../models/SessionItem';
+import { Session } from 'inspector';
 
 function Training() {
-    
     const navigate = useNavigate();
-    const [selectedScenario, setSelectedScenario] = useState<ScenarioItem | undefined>(undefined);
+    const location = useLocation();
+    const [selectedScenario, setSelectedScenario] = useState<ScenarioItem | undefined>(location.state?.scenario);
+    const [session, setSession] = useState<SessionItem | undefined>();
 
     const handleBackClick = () => {
-        navigate('/');
+        setSelectedScenario(undefined);
+        setSession(undefined);
+        navigate(-1); // Navigate back to the previous page
     };
 
     const handleScenarioSelect = (scenario: ScenarioItem) => {
         setSelectedScenario(scenario);
     };
+
+    useEffect(() => {        
+        if (location.state?.scenario) {
+            setSelectedScenario(location.state.scenario);
+        } else {
+            setSession(location.state.session);
+        
+        }
+    }, [location.state]);
+
 
     return (
         <div>
@@ -32,14 +47,15 @@ function Training() {
                     <p className="intro">
                         Virtual Assistant Teacher is a tool that trains you to sell with an AI customer.<br /> It simulates a real scenario, listens and evaluates you, and gives you feedback and tips. It helps you to boost your confidence and efficiency in sales.
                     </p>
-                    <ScenarioList onScenarioSelect={handleScenarioSelect} />
+
+                    {!selectedScenario && !session && <ScenarioList onScenarioSelect={handleScenarioSelect} />}
                 </section>
             </Text>
 
-            {selectedScenario && <ChatWindow scenario={selectedScenario.id} />}
-
-            
-            
+            <>
+                {console.log("Passing sessionId to ChatWindow: ", session?.id)}
+                {(selectedScenario || session) && <ChatWindow scenario={selectedScenario} session={session} />}
+            </>
         </div>
     );
 };

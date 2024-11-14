@@ -19,6 +19,8 @@ const useStyles = makeStyles({
     customCard: {
         minWidth: '400px',
         maxWidth: '300px',
+        minHeight: '200px',
+        maxHeight: '200px',
     },
     iconGrid: {
         display: 'grid',
@@ -142,20 +144,11 @@ const AgentList: FC = () => {
                 <Card key={agent.id} className={`${classes.customCard} card`} >
                     <CardHeader
                         header={<Title2>{agent.name}</Title2>}
+                        action={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass(agent.type, classes))} />}
                     />
                     <CardPreview className={classes.customPreview}>
                         <div className={classes.iconGrid}>
-                            <div><Body2>{agent.description}</Body2></div>
-                            <div className={classes.iconGrid}>
-                                <div className={classes.iconItem}>
-                                    <PersonAvailableFilled
-                                        className={mergeClasses(classes.icon, getAgentColorClass(agent.type, classes))}
-                                    />
-                                    <Text className={mergeClasses(classes.iconText, getAgentColorClass(agent.type, classes))}>
-                                        {agent.name}
-                                    </Text>
-                                </div>
-                            </div>
+                            <div><Body2>{agent.description}</Body2></div>                            
                         </div>
                     </CardPreview>
                     <CardFooter>
@@ -180,10 +173,10 @@ const AgentList: FC = () => {
 
     return (
         <div className="tabcontainer">
-            <TabList selectedValue={selectedTab} onTabSelect={onTabSelect}>
-                <Tab value="RolePlay">RolePlay</Tab>
-                <Tab value="Teacher">Teacher</Tab>
-                <Tab value="System">System</Tab>
+            <TabList selectedValue={selectedTab} onTabSelect={onTabSelect} appearance='subtle-circular' size='large'>
+                <Tab value="RolePlay" icon={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass('rolePlay', classes))} />}>RolePlay</Tab>
+                <Tab value="Teacher" icon={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass("teacher", classes))} />}>Teacher</Tab>
+                <Tab value="System" icon={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass("system", classes))} />}>System</Tab>
             </TabList>
             <div className="agent-cards-grid">
                 {selectedTab === 'RolePlay' && (

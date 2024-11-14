@@ -5,16 +5,15 @@ import { Text, Title2, Body2 } from '@fluentui/react-text';
 import { ScenarioItem } from '../../models/ScenarioItem';
 import { Button } from '@fluentui/react-button';
 import ScenarioDialog from './scenarioDialog';
-import ChatWindow from '../chat/chatWindow';
 import { Spinner } from '@fluentui/react-spinner';
 import { makeStyles } from '@fluentui/react-components';
-import { PersonAvailableFilled, AddCircleRegular, EditRegular} from '@fluentui/react-icons';
+import { PersonAvailableFilled, AddCircleRegular, EditRegular, PlayRegular } from '@fluentui/react-icons';
 import { mergeClasses } from '@fluentui/react-components';
 import { tokens } from '@fluentui/tokens';
 
 interface ScenarioListProps {
     onScenarioSelect?: (scenario: ScenarioItem) => void;
-    onScenarioStart?: () => void;
+    onScenarioStart?: (scenario: ScenarioItem) => void;
 }
 
 const useStyles = makeStyles({
@@ -24,6 +23,8 @@ const useStyles = makeStyles({
     customCard: {
         minWidth: '400px',
         maxWidth: '300px',
+        minHeight: '280px',
+        maxHeight: '280px',
     },
     iconGrid: {
         display: 'grid',
@@ -34,13 +35,14 @@ const useStyles = makeStyles({
         display: 'grid',
         justifyItems: 'center',
         alignItems: 'center',
-        marginTop: '20px',
+        marginTop: '10px',
     },
     icon: {
-        fontSize: '40px',
+        fontSize: '35px',
     },
     iconText: {
         marginTop: '5px',
+        textAlign: 'center',        
     },
     grayColor: {
         color: tokens.colorNeutralForegroundDisabled,
@@ -89,7 +91,6 @@ const ScenarioList: React.FC<ScenarioListProps> = ({ onScenarioStart }) => {
     const [scenarios, setScenarios] = useState<ScenarioItem[]>([]);
     const [selectedScenario, setSelectedScenario] = useState<ScenarioItem | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [isChatOpen, setIsChatOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -111,9 +112,8 @@ const ScenarioList: React.FC<ScenarioListProps> = ({ onScenarioStart }) => {
         try {
             setIsLoading(true);
             setSelectedScenario(scenario);
-            setIsChatOpen(true);
             if (onScenarioStart) {
-                onScenarioStart();
+                onScenarioStart(scenario);
             }
         } catch (error) {
             console.error('Error fetching scenario details:', error);
@@ -161,7 +161,7 @@ const ScenarioList: React.FC<ScenarioListProps> = ({ onScenarioStart }) => {
     return (
         <div className={classes.centerContainer}>
             {isLoading && <Spinner label="Loading..." />}
-            {!isLoading && !isChatOpen && (
+            {!isLoading && (
                 <div className="scenario-cards-grid">
                     <Button className={classes.buttonWithIcon} onClick={handleAddScenario}>
                         <AddCircleRegular className={classes.buttonIcon} />
@@ -203,6 +203,7 @@ const ScenarioList: React.FC<ScenarioListProps> = ({ onScenarioStart }) => {
                                 </Button>
                                 <Button
                                     appearance='primary'
+                                    icon={<PlayRegular />}
                                     onClick={() => handleStartClick(scenario)}
                                     disabled={!areAllAgentsSet(scenario)}>Start
                                 </Button>
@@ -219,9 +220,6 @@ const ScenarioList: React.FC<ScenarioListProps> = ({ onScenarioStart }) => {
                     onDeleteScenario={handleDeleteScenario}
                     onClose={() => setIsDialogOpen(false)}
                 />
-            )}
-            {isChatOpen && selectedScenario && (
-                <ChatWindow scenario={selectedScenario} />
             )}
         </div>
     );

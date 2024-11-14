@@ -1,14 +1,34 @@
-.left {
-    display: flex;
-    justify-content: flex-end;
-    
-    margin:15px;
+.user-message {
+    background-color: #e1ffc7; /* Example color for user messages */
+    border-radius: 5px;
+    margin-bottom: 5px;
+    font-size: 2em;
 }
 
-.right {
+.assistant-message {
+    background-color: #f1f0f0; /* Example color for assistant messages */
+    border-radius: 5px;
+    margin-bottom: 5px;
+    font-size: 2em;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    font-size: 2em;
+    text-align: right;
+}
+
+.chat-messages {
     display: flex;
-    justify-content: flex-start;
-    margin: 15px;
+    flex-direction: column;
+}
+
+.chat-message {    
+    margin: 5px 0;
+    border-radius: 5px;
+    max-width: 60%;
 }
 
 div.window {

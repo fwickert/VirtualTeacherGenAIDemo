@@ -79,5 +79,18 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             await _historyRepository.CompleteSession(id, chatId);
             
         }
+
+        //return 1 session by id
+        public async Task<SessionItem> GetSession(string id, string chatid)
+        {
+            return await _historyRepository.FindByIdAsync(id, chatid);
+        }
+
+        //return all no completed session
+        public IEnumerable<SessionItem> GetNotCompletedSession()
+        {
+            return _historyRepository.GetNotCompleteSession();
+        }
+
     }
 }

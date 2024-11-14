@@ -7,7 +7,8 @@ import Dashboard from './views/dashboard/dashboard';
 import Coach from './views/coach/coach';
 import Agent from './views/agent/agent';
 import Scenario from './views/scenario/scenario';
-
+import Training from './views/training/training';
+import Session from './views/session/session';
 
 function App(props: any) {
 
@@ -17,7 +18,8 @@ function App(props: any) {
             
             <Routes>
                 <Route path="/" element={<Home title={props.title } />} />
-                <Route path="/training" element={<Scenario title="Choose your scenario" isForSimulation={true} />} />
+                <Route path="/training" element={<Training />} />
+                <Route path="/session" element={<Session />} />
                 <Route path="/lastTraining" element={<LastTraining />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/coach" element={<Coach />} />

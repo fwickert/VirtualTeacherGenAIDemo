@@ -35,10 +35,7 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IEnumerable<AgentItem>> GetAllAgents()
         {
-            //wait 5 seconds
-            await Task.Delay(2000);
-
-
+         
             return await _agentService.GetAllAgentsAsync();
         }
 
