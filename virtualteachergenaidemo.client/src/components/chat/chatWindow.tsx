@@ -8,7 +8,7 @@ import { textToSpeechAsync, cancelSpeech } from '../../services/speechService';
 import { ScenarioItem } from '../../models/ScenarioItem';
 import { ISessionItem } from '../../models/SessionItem';
 import { Button } from '@fluentui/react-button';
-
+import { useUsername } from '../../auth/UserContext'; 
 
 enum AuthorRole {
     User = 0,
@@ -28,13 +28,13 @@ interface ChatWindowProps {
 }
 
 function ChatWindow({ scenario, session }: ChatWindowProps) {
-    
+    const userName = useUsername();
     const [messages, setMessages] = useState<Message[]>([]);
     const [connection, setConnection] = useState<HubConnection | null>(null);    
     const [sessionId, setSessionId] = useState<string>("")
     const currentMessageRef = useRef<string | null>(null);
     const [isSavingSession, setIsSavingSession] = useState<boolean>(false);
-    const [userId, setUserId] = useState<string>("Anonymous");
+    
 
     const hubUrl = process.env.HUB_URL;
 
@@ -131,7 +131,7 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
         const sessionItem: ISessionItem = {
             id: session?.id || sessionId,
             timestamp: new Date(),
-            userId: userId,
+            userId: userName,
             scenarioName: scenarioName || '',
             scenarioDescription: scenarioDescription || '',
             agents: currentScenario?.map(agent => ({
@@ -141,7 +141,7 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
         };
 
 
-        const chatHistory = new ChatHistoryRequest(userId, sessionItem, [
+        const chatHistory = new ChatHistoryRequest(userName, sessionItem, [
             new ChatMessage("", "System", promptSystem),
             ...messages.map(msg => new ChatMessage("", msg.authorRole.toString(), msg.content)),
             new ChatMessage("", "User", message)
@@ -189,7 +189,7 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ sessionId, userId }),
+                body: JSON.stringify({ sessionId, userId: userName }),
             });
             if (response.ok) {
                 console.log('Session saved successfully');

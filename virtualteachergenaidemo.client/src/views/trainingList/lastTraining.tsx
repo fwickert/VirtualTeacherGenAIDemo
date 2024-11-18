@@ -7,11 +7,12 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowCircleLeft48Filled } from '@fluentui/react-icons';
 import { Button } from '@fluentui/react-button';
 import { ILastTrainingItem } from '../../models/LastTrainingItem';
+import { useUsername } from '../../auth/UserContext'; 
 
 const LastTraining: React.FC = () => {
     const [lastTraining, setLastTraining] = useState<ILastTrainingItem[] | null>();
-    const navigate = useNavigate();
-    const [userId, setUserId] = useState<string>('');
+    const navigate = useNavigate();    
+    const userName = useUsername();
 
     const navigateDashboard = (sessionId: string) => {
         navigate('/dashboard', { state: { sessionId } });
@@ -21,13 +22,10 @@ const LastTraining: React.FC = () => {
         navigate('/');
     };
 
-    useEffect(() => {
-        setUserId('Anonymous');
-    }, []);
 
     useEffect(() => {
         getlastTraining();
-    }, [userId]);
+    }, [userName]);
 
     const formatDate = (timestamp: string) => {
         const date = new Date(timestamp);
@@ -65,11 +63,11 @@ const LastTraining: React.FC = () => {
     );
 
     async function getlastTraining() {
-        if (userId === '') {
+        if (userName === '') {
             return;
         }
 
-        const response = await fetch(`/api/Session/history/${userId}`);
+        const response = await fetch(`/api/Session/history/${userName}`);
         const data = await response.json();
         setLastTraining(data);
     }
