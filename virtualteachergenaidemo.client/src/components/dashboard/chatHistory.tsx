@@ -28,13 +28,11 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ conversation }) => {
                     </div>
                     :
                    
-                        <div className="chat-messages">
+                    <div className="dashboard-chat-messages">
                             {conversation.map((message: IChat) => (
                                 message.content.length !== 0 ?
-
-                                    <div key={message.id} className={`chat-message ${message.authorRole === 0 ? 'user-message' : 'assistant-message'}`}>
+                                    <div key={message.id} className={`dashboard-chat-message ${message.authorRole === 0 ? 'dashboard-user-message' : 'dashboard-assistant-message'}`}>
                                         {message.content}
-
                                     </div>
                                     :
                                     null
