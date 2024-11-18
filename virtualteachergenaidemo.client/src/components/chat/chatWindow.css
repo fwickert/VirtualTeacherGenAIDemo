@@ -55,12 +55,14 @@
     background-color: #d1e7dd;
     align-self: flex-end;
     text-align: right;
+    
 }
 
 .assistant-message {
     background-color: #f8d7da;
     align-self: flex-start;
     text-align: left;
+    
 }
 
 .chat-messages {

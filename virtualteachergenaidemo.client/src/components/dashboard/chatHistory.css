@@ -1,30 +1,32 @@
-.user-message {
-    background-color: #e1ffc7; /* Example color for user messages */
-    border-radius: 5px;
-    margin-bottom: 5px;
-    
+.dashboard-user-message {
+    background-color: #d1e7dd;
+    align-self: flex-end;
+    text-align: right;
 }
 
-.assistant-message {
-    background-color: #f1f0f0; /* Example color for assistant messages */
-    border-radius: 5px;
-    margin-bottom: 5px;
-    
+.dashboard-assistant-message {
+    background-color: #f8d7da;
+    align-self: flex-start;
+    text-align: left;
 }
 
-.chat-messages {
+.dashboard-chat-messages {
     flex: 1;
     padding: 10px;
     overflow-y: auto;    
     text-align: right;
 }
 
-.chat-messages {
+.dashboard-chat-messages {
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 5px;    
     display: flex;
     flex-direction: column;
 }
 
-.chat-message {    
+.dashboard-chat-message {
+    padding: 10px;
     margin: 5px 0;
     border-radius: 5px;
     max-width: 60%;
