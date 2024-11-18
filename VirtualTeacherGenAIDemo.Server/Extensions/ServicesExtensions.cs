@@ -70,14 +70,14 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
 
         internal static IServiceCollection AddStorageContext(this IServiceCollection services)
         {
-            IStorageContext<Message> messageStorageContext;
+            IStorageContext<MessageItem> messageStorageContext;
             CosmosOptions cosmosConfig = services.BuildServiceProvider().GetRequiredService<IOptions<CosmosOptions>>().Value;
-            messageStorageContext = new CosmosDbContext<Message>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.HistoryContainer);
+            messageStorageContext = new CosmosDbContext<MessageItem>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.MessageContainer);
             services.AddSingleton<MessageRepository>(new MessageRepository(messageStorageContext));
 
-            IStorageContext<SessionItem> historyStorageContext; 
-            historyStorageContext = new CosmosDbContext<SessionItem>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.HistoryContainer);
-            services.AddSingleton<SessionRepository>(new SessionRepository(historyStorageContext));            
+            IStorageContext<SessionItem> sessionStorageContext; 
+            sessionStorageContext = new CosmosDbContext<SessionItem>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.SessionContainer);
+            services.AddSingleton<SessionRepository>(new SessionRepository(sessionStorageContext));            
             
             IStorageContext<DashboardItem> dashboardStorageContext;
             dashboardStorageContext = new CosmosDbContext<DashboardItem>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.DashboardContainer);
@@ -155,6 +155,7 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
             services.AddScoped<CoachService>();
             services.AddScoped<AgentService>();
             services.AddScoped<ScenarioService>();
+            services.AddScoped<SessionService>();
             return services;
         }
     }

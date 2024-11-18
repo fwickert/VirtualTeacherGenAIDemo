@@ -8,7 +8,7 @@ enum AuthorRoles {
 
 export interface IChat {
     id: string;
-    chatId: string;
+    sessionId: string;
     content: string;
     timestamp: string;
     authorRole: AuthorRoles

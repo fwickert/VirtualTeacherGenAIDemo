@@ -3,21 +3,23 @@ using VirtualTeacherGenAIDemo.Server.Models.Storage;
 
 namespace VirtualTeacherGenAIDemo.Server.Storage
 {
-    public class MessageRepository : Repository<Message>
+    public class MessageRepository : Repository<MessageItem>
     {
         
-        public MessageRepository(IStorageContext<Message> context) : base(context)
+        public MessageRepository(IStorageContext<MessageItem> context) : base(context)
         {
         }
 
-        public Task<IEnumerable<Message>> FindByChatIdAsync(string chatId)
+        public async Task<IEnumerable<MessageItem>> FindByChatIdAsync(string sessionId)
         {
-            return base.StorageContext.QueryEntitiesAsync(e => e.ChatId == chatId);
+            IEnumerable<MessageItem> messages = await base.StorageContext.QueryEntitiesAsync(e => e.SessionId == sessionId);
+
+            return messages;
         }
 
-        public async Task DeleteMessageByIdAsync(string messageId, string chatid)
+        public async Task DeleteMessageByIdAsync(string messageId, string sessionId)
         {
-            var message = await base.FindByIdAsync(messageId, chatid);
+            var message = await base.FindByIdAsync(messageId, sessionId);
             if (message != null)
             {
                 await base.DeleteAsync(message);

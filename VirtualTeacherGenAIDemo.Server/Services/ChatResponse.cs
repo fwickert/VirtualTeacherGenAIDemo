@@ -29,10 +29,12 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             _messageRelayHubContext = messageRelayHubContext;
         }
 
-        public async Task StartChat(string persona, string chatId,
+        public async Task StartChat(string persona, 
             ChatHistory chatHistory,
+            string userId,
+            SessionItem session,
             MessageRepository messageRepository,
-            SessionRepository historyRepository,
+            SessionRepository sessionRepository,
             CancellationToken token)
         {
             
@@ -46,27 +48,28 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 }
             }
 
-            if (string.IsNullOrEmpty(chatId))
+            if (string.IsNullOrEmpty(session.Id))
             {
-                chatId = Guid.NewGuid().ToString();
-                string id = Guid.NewGuid().ToString();
-                //create new historyItem
+                session.Id = Guid.NewGuid().ToString();                
                 SessionItem historyItem = new()
                 {
-                    Id = id,
-                    ChatId = chatId,
-                    Timestamp = DateTimeOffset.Now,
-                    Title = "Simulation",
-                    Type = "Session"
+                    Id = session.Id,
+                    Timestamp = session.Timestamp,
+                    Title = string.IsNullOrEmpty(session.Title) ? "Title to be created by LLM" : session.Title, // Use default title if empty
+                    UserId = session.UserId,
+                    ScenarioName = session.ScenarioName,
+                    ScenarioDescription = session.ScenarioDescription,
+                    Agents = session.Agents,
+                    IsCompleted = false,                    
                 };
 
-                await historyRepository.UpsertAsync(historyItem);
+                await sessionRepository.UpsertAsync(historyItem);
 
+                
                 MessageResponse messageforUI = new()
                 {   
-                    ChatId = chatId,
-                    State = "Session",
-                    Id = id
+                    SessionId = session.Id,
+                    State = "Session",                    
                 };
                 await this.UpdateMessageOnClient("SessionInsert", messageforUI, token);
             }
@@ -75,8 +78,8 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             {
                 State = "Start",
                 WhatAbout = "chat",
-                ChatId = chatId,
-                Role = AuthorRole.Assistant,                
+                SessionId = session.Id,
+                Role = AuthorRole.Assistant,                            
             };
             await this.UpdateMessageOnClient("ReceiveMessageUpdate", response, token);
 
@@ -96,13 +99,13 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             var lastMessage = chatHistory.Last(q => q.Role == AuthorRole.User);
             if (lastMessage != null)
             {
-                Message userMessage = new()
+                MessageItem userMessage = new()
                 {
-                    ChatId = chatId,
+                    SessionId = session.Id,
                     Content = lastMessage.Content!,
                     Timestamp = DateTimeOffset.Now,
                     Id = Guid.NewGuid().ToString(),
-                    AuthorRole = Message.AuthorRoles.User
+                    AuthorRole = MessageItem.AuthorRoles.User
                 };
                 await messageRepository.UpsertAsync(userMessage);
 
@@ -110,34 +113,34 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 {
                     Content = lastMessage.Content!,
                     Role = AuthorRole.User,
-                    ChatId = chatId,
+                    SessionId = session.Id,
                     State = "End",
-                    Id = userMessage.Id
+                    MessageId = userMessage.Id
                 };
                 await this.UpdateMessageOnClient("UserIDUpdate", messageforUI, token);
             }
 
             //ajouter le message dans la BD
-            Message message = new()
+            MessageItem message = new()
             {
                 Content = response.Content,
             };
             message.Id = Guid.NewGuid().ToString();
             if (response.Role == AuthorRole.User)
             {
-                message.AuthorRole = Message.AuthorRoles.User;
+                message.AuthorRole = MessageItem.AuthorRoles.User;
             }
             else
             {
-                message.AuthorRole = Message.AuthorRoles.Assistant;
+                message.AuthorRole = MessageItem.AuthorRoles.Assistant;
             }
             message.Timestamp = DateTimeOffset.Now;
-            message.ChatId = chatId;
+            message.SessionId = session.Id;
             messageRepository.UpsertAsync(message).GetAwaiter().GetResult();
 
             response.State = "End";
-            response.Id = message.Id;
-            response.ChatId = message.ChatId;
+            response.MessageId = message.Id;
+            response.SessionId= message.SessionId;
             chatHistory.AddAssistantMessage(response.Content);
             await this.UpdateMessageOnClient("ReceiveMessageUpdate",response, token);
 

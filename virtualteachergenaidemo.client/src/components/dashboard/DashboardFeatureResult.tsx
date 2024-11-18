@@ -6,7 +6,7 @@ import { HubConnection } from '@microsoft/signalr';
 import { Button } from '@fluentui/react-button';
 import { DialogPrompt } from '../Utilities/DialogPrompt';
 interface DashboardFeatureResultProps {
-    chatId:string
+    sessionId:string
     data: any;
     infoType: string;
     loading: boolean;
@@ -15,7 +15,7 @@ interface DashboardFeatureResultProps {
 }
 
 
-const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({chatId, data, infoType, loading, conversation, connection }) => {
+const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({ sessionId, data, infoType, loading, conversation, connection }) => {
     const [content, setContent] = useState(data?.content || '');
     const [isLoading, setIsLoading] = useState(loading);
 
@@ -39,7 +39,7 @@ const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({chatId, 
         try {
             const body = {
                 id: item == undefined ? "" :  item.id,
-                chatId: chatId,
+                sessionId: sessionId,
                 conversation: conversation,
                 connectionId: connection.connectionId!,
                 title: feature,

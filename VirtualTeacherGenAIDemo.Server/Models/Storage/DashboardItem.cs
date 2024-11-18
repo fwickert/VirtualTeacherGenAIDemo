@@ -8,12 +8,12 @@ namespace VirtualTeacherGenAIDemo.Server.Models.Storage
     public class DashboardItem : IStorageEntity
     {
         [Required, NotEmptyOrWhitespace]
-        public string ChatId { get; set; } = string.Empty;
+        public string SessionId { get; set; } = string.Empty;
 
         public string Id { get; set; } = string.Empty;
 
         [JsonIgnore]
-        public string Partition => this.ChatId;
+        public string Partition => this.SessionId;
 
         public string InfoType { get; set; } = string.Empty;
 

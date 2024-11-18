@@ -5,11 +5,9 @@
 
 }
 
-.grid-column {        
-    padding: 20px;
-    font-size: 30px;
+.grid-column {
+    margin-bottom: 10px;
 }
-
 
 .chat-window {
     width: 800px;
@@ -42,8 +40,7 @@
 .chat-messages {
     flex: 1;
     padding: 10px;
-    overflow-y: auto;
-    font-size:0.5em;
+    overflow-y: auto;    
     text-align:right;
 }
 

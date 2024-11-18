@@ -6,29 +6,35 @@ import { ChatHistoryRequest, ChatMessage } from '../../models/ChatHistoryRequest
 import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
 import { textToSpeechAsync, cancelSpeech } from '../../services/speechService';
 import { ScenarioItem } from '../../models/ScenarioItem';
-import { SessionItem } from '../../models/SessionItem';
+import { ISessionItem } from '../../models/SessionItem';
 import { Button } from '@fluentui/react-button';
 
+
+enum AuthorRole {
+    User = 0,
+    Assistant = 1
+}
+
 interface Message {
-    content: string;
+    content: string;    
+    sessionId?: string;    
     id: string;
-    chatId?: string;
-    role: 'User' | 'Assistant';
+    authorRole: AuthorRole;
 }
 
 interface ChatWindowProps {
     scenario?: ScenarioItem | undefined;
-    session?: SessionItem;
+    session?: ISessionItem;
 }
 
 function ChatWindow({ scenario, session }: ChatWindowProps) {
     
     const [messages, setMessages] = useState<Message[]>([]);
-    const [connection, setConnection] = useState<HubConnection | null>(null);
-    const [chatId, setChatId] = useState<string>("")
+    const [connection, setConnection] = useState<HubConnection | null>(null);    
     const [sessionId, setSessionId] = useState<string>("")
     const currentMessageRef = useRef<string | null>(null);
     const [isSavingSession, setIsSavingSession] = useState<boolean>(false);
+    const [userId, setUserId] = useState<string>("Anonymous");
 
     const hubUrl = process.env.HUB_URL;
 
@@ -50,20 +56,19 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
                     connection.on('ReceiveMessageUpdate', (message: any) => {
                         if (message.state === "Start") {
                             currentMessageRef.current = message.content;
-                            setChatId(message.chatId);
-                            setMessages(prevMessages => [...prevMessages, { id: message.id, content: message.content, role: 'Assistant' }]);
+                            
+                            setMessages(prevMessages => [...prevMessages, {id:message.id, sessionId: message.sessionId, content: message.content, authorRole: AuthorRole.Assistant }]);
                         } else if (message.state === "InProgress") {
                             setMessages(prevMessages => {
                                 const updatedMessages = [...prevMessages];
-                                updatedMessages[updatedMessages.length - 1] = { id: message.id, content: message.content, role: 'Assistant' }
+                                updatedMessages[updatedMessages.length - 1] = {id:message.id, sessionId: message.sessionId, content: message.content, authorRole: AuthorRole.Assistant }
                                 return updatedMessages;
                             });
                         } else if (message.state === "End") {
                             //find message by id and update it with the id from the server
                             setMessages(prevMessages => {
                                 const updatedMessages = [...prevMessages];
-                                updatedMessages[updatedMessages.length - 1].id = message.id;
-                                updatedMessages[updatedMessages.length - 1].chatId = message.chatId;
+                                updatedMessages[updatedMessages.length - 1].sessionId = message.sessionId;                                
                                 return updatedMessages;
                             });
                             textToSpeechAsync(message.content);
@@ -73,38 +78,37 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
                     connection.on('UserIDUpdate', (message: any) => {
                         setMessages(prevMessages => {
                             const updatedMessages = [...prevMessages];
-                            const lastUserMessageIndex = updatedMessages.slice().reverse().findIndex(msg => msg.role === 'User');
+                            const lastUserMessageIndex = updatedMessages.slice().reverse().findIndex(msg => msg.authorRole === AuthorRole.User);
                             if (lastUserMessageIndex !== -1) {
-                                const index = updatedMessages.length - 1 - lastUserMessageIndex;
-                                updatedMessages[index] = { ...updatedMessages[index], id: message.id };
-                                updatedMessages[index] = { ...updatedMessages[index], chatId: message.chatId };
+                                const index = updatedMessages.length - 1 - lastUserMessageIndex;                                
+                                updatedMessages[index] = { ...updatedMessages[index], sessionId: message.sessionId};
                             }
                             return updatedMessages;
                         });
                     });
 
                     connection.on('SessionInsert', (message: any) => {
-                        setSessionId(message.id);
+                        setSessionId(message.sessionId);
                     });
                 })
                 .catch(e => console.log('Connection failed: ', e));
         }
     }, [connection]);
 
-    useEffect(() => {
+    useEffect(() => {        
         if (session) {
-            fetch(`/api/chat/messages/${session.chatId}`)
+            fetch(`/api/chat/messages/${session.id}`)
                 .then(response => response.json())
                 .then(data => {
                     const fetchedMessages = data
-                        .filter((msg: any) => msg.content !== "")
-                        .map((msg: any) => ({
-                            id: msg.id,
+                        .filter((msg: Message) => msg.content !== "")
+                        .map((msg: Message) => ({
+                            id: msg.sessionId,
                             content: msg.content,
-                            chatId: msg.chatId,
-                            role: msg.authorRole === 0 ? "User" : "Assistant"
+                            sessionID: msg.sessionId,
+                            authorRole: msg.authorRole
                         }));
-                    setMessages(fetchedMessages);
+                    setMessages(fetchedMessages);                    
                 })
                 .catch(error => console.error('Error fetching session messages:', error));
         }
@@ -112,26 +116,45 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
 
 
     const handleNewMessage = async (message: string) => {
-        setMessages(prevMessages => [...prevMessages, { id: "", content: message, role: 'User' }]);
+        setMessages(prevMessages => [...prevMessages, { id: "", sessionId: sessionId, content: message, authorRole: AuthorRole.User}]);
 
-        //get the systme agent from the scenario agents
-        const agent = scenario?.agents.find(agent => agent.type === 'system');
-        //Same for rolePlay
-        const rolePlayAgent = scenario?.agents.find(agent => agent.type === 'rolePlay');
+        
+        const currentScenario = scenario?.agents || session?.agents;
+        const agent = currentScenario?.find(agent => agent.type === 'system');
+        const rolePlayAgent = currentScenario?.find(agent => agent.type === 'rolePlay');
         const promptSystem = agent!.prompt + "/r/n" + rolePlayAgent!.prompt;
 
-        const chatHistory = new ChatHistoryRequest([
+        const scenarioName = scenario?.name || session?.scenarioName;
+        const scenarioDescription = scenario?.description || session?.scenarioDescription;
+
+        //Create ISessionItem object
+        const sessionItem: ISessionItem = {
+            id: session?.id || sessionId,
+            timestamp: new Date(),
+            userId: userId,
+            scenarioName: scenarioName || '',
+            scenarioDescription: scenarioDescription || '',
+            agents: currentScenario?.map(agent => ({
+                prompt: agent.prompt,
+                type: agent.type
+            })) || []
+        };
+
+
+        const chatHistory = new ChatHistoryRequest(userId, sessionItem, [
             new ChatMessage("", "System", promptSystem),
-            ...messages.map(msg => new ChatMessage("", msg.role, msg.content)),
+            ...messages.map(msg => new ChatMessage("", msg.authorRole.toString(), msg.content)),
             new ChatMessage("", "User", message)
         ]);
+        console.log(chatHistory);
+
         await callLLMApi(chatHistory);
     };
 
     const callLLMApi = async (chatHistory: ChatHistoryRequest) => {
         console.log(chatHistory);
         try {
-            const response = await fetch(`/api/chat?chatId=${chatId}`, {
+            const response = await fetch(`/api/chat/message?sessionId=${sessionId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -150,7 +173,7 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
 
         const messageToDelete = messages[index];
         try {
-            await fetch(`/api/chat/messages/${messageToDelete.id}?chatid=${messageToDelete.chatId}`, {
+            await fetch(`/api/chat/messages/${messageToDelete.id}?sessionId=${messageToDelete.sessionId}`, {
                 method: 'DELETE',
             });
             setMessages(prevMessages => prevMessages.filter((_, i) => i !== index));
@@ -159,14 +182,14 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
         }
     };
 
-    const handleSaveSession = async () => {
+    const handleSaveSession = async (sessionId: string | undefined) => {
         try {
-            const response = await fetch(`/api/chat/CompleteSession`, {
+            const response = await fetch(`/api/Session/CompleteSession`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ chatId, sessionId }),
+                body: JSON.stringify({ sessionId, userId }),
             });
             if (response.ok) {
                 console.log('Session saved successfully');
@@ -194,7 +217,7 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
                         </div>
                         <div className="chat-messages">
                             {messages.map((msg, index) => (
-                                <div key={index} className={`chat-message ${msg.role === 'User' ? 'user-message' : 'assistant-message'}`}>
+                                <div key={index} className={`chat-message ${msg.authorRole === AuthorRole.User ? 'user-message' : 'assistant-message'}`}>
                                     {msg.content}
                                     <span className="delete-message" onClick={() => handleDeleteMessage(index)}>&times;</span>
                                 </div>
@@ -212,8 +235,7 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
             <div className="grid-column">
                 {/*<AudioVisualizer useMicrophone />*/}
             </div>
-            <Button appearance='primary' onClick={handleSaveSession} disabled={isSavingSession}>Validate Session</Button>
-            <span>session: {session?.id }</span>
+            <Button appearance='primary' onClick={() =>handleSaveSession(session?.id)} disabled={isSavingSession}>Validate Session</Button>            
 
         </div>
     );

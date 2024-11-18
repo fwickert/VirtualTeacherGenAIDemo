@@ -1,9 +1,16 @@
 ﻿using OpenAI.Chat;
+using System.ComponentModel.DataAnnotations;
+using VirtualTeacherGenAIDemo.Server.Models.Storage;
 
 namespace VirtualTeacherGenAIDemo.Server.Models.Request
 {
     public class ChatHistoryRequest
     {
+
+        public string UserId { get; set; } = string.Empty;
+                
+        public SessionItem? Session { get; set; }
+
         public List<ChatMessage> Messages { get; set; } = new();
     }
 

@@ -8,9 +8,9 @@ namespace VirtualTeacherGenAIDemo.Server.Storage
         {
         }
 
-        public Task<IEnumerable<DashboardItem>> FindByChatIdAsync(string chatId)
+        public Task<IEnumerable<DashboardItem>> FindByChatIdAsync(string sessionId)
         {
-            return base.StorageContext.QueryEntitiesAsync(e => e.ChatId == chatId);
+            return base.StorageContext.QueryEntitiesAsync(e => e.SessionId == sessionId);
         }
     }
 }

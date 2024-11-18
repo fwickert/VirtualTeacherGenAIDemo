@@ -7,14 +7,14 @@ import { ArrowCircleLeft48Filled } from '@fluentui/react-icons';
 import { useState, useEffect } from 'react';
 import ScenarioList from '../../components/scenario/scenarioList';
 import { ScenarioItem } from '../../models/ScenarioItem';
-import { SessionItem } from '../../models/SessionItem';
+import { ISessionItem } from '../../models/SessionItem';
 import { Session } from 'inspector';
 
 function Training() {
     const navigate = useNavigate();
     const location = useLocation();
     const [selectedScenario, setSelectedScenario] = useState<ScenarioItem | undefined>(location.state?.scenario);
-    const [session, setSession] = useState<SessionItem | undefined>();
+    const [session, setSession] = useState<ISessionItem | undefined>();
 
     const handleBackClick = () => {
         setSelectedScenario(undefined);
@@ -24,14 +24,15 @@ function Training() {
 
     const handleScenarioSelect = (scenario: ScenarioItem) => {
         setSelectedScenario(scenario);
+
     };
 
-    useEffect(() => {        
+    useEffect(() => {
         if (location.state?.scenario) {
             setSelectedScenario(location.state.scenario);
         } else {
             setSession(location.state.session);
-        
+
         }
     }, [location.state]);
 
@@ -52,10 +53,9 @@ function Training() {
                 </section>
             </Text>
 
-            <>
-                {console.log("Passing sessionId to ChatWindow: ", session?.id)}
-                {(selectedScenario || session) && <ChatWindow scenario={selectedScenario} session={session} />}
-            </>
+
+            {(selectedScenario || session) && <ChatWindow scenario={selectedScenario} session={session} />}
+
         </div>
     );
 };
