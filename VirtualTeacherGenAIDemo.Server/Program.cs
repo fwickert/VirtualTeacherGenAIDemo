@@ -41,8 +41,20 @@ app.UseHttpsRedirection();
 app.UseCors();
 app.UseAuthorization();
 
-app.MapControllers();
-
 app.MapFallbackToFile("/index.html");
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapGet("/api/auth-config", (IConfiguration config) => new
+{
+    TenantId = config["AzureAd:TenantId"],
+    ClientId = config["AzureAd:ClientId"],
+    Authority = $"{config["AzureAd:Instance"]}{config["AzureAd:TenantId"]}",
+    RedirectUri = config["AzureAd:RedirectUri"]
+});
+
+app.MapControllers();
 
 app.Run();

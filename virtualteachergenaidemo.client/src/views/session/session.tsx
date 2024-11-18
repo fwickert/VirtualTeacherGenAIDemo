@@ -6,8 +6,10 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowCircleLeft48Filled } from '@fluentui/react-icons';
 import { ISessionItem } from '../../models/SessionItem';
 
+
 const SessionPage: React.FC = () => {
     const navigate = useNavigate();
+
 
     const handleBackClick = () => {
         navigate('/');

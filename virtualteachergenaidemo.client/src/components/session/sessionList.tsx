@@ -9,8 +9,7 @@ import { AddCircleRegular, PeopleCommunityFilled, PlayRegular } from '@fluentui/
 import { tokens } from '@fluentui/tokens';
 import { useNavigate } from 'react-router-dom';
 import { ISessionItem } from '../../models/SessionItem';
-
-
+import { useUsername } from '../../auth/UserContext'; 
 interface SessionListProps {
     onSessionStart: (session: ISessionItem) => void;
 }
@@ -74,13 +73,13 @@ const useStyles = makeStyles({
 const SessionList: React.FC<SessionListProps> = ({ onSessionStart }) => {
     const navigate = useNavigate();
     const classes = useStyles();
-    const [sessions, setSessions] = useState<ISessionItem[]>([]);
-    const [userId, setUserId] = useState<string>('Anonymous');
+    const userName = useUsername();
+    const [sessions, setSessions] = useState<ISessionItem[]>([]);    
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         // Fetch incomplete sessions from the backend using fetch
-        fetch(`/api/Session/NotCompleted/${userId}`)
+        fetch(`/api/Session/NotCompleted/${userName}`)
             .then(response => response.json())
             .then(data => {
                 const parsedData = data.map((session: any) => ({
@@ -129,7 +128,7 @@ const SessionList: React.FC<SessionListProps> = ({ onSessionStart }) => {
                             />
                             <CardPreview className={classes.customPreview}>
                                 <Body2>Session details or description can go here.</Body2>
-                                <Body2>{formatDate(session.timestamp)}</Body2>
+                                <Body2>{formatDate(session.timestamp!)}</Body2>
                             </CardPreview>
                             <CardFooter>
                                 <Button
