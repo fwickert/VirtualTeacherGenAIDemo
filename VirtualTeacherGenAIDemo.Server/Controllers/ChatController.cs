@@ -20,29 +20,26 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
             _chatService = chatService;
         }
 
-        [HttpPost(Name = "chat")]
+        [HttpPost("message",Name = "message")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IResult Post([FromBody] ChatHistoryRequest chatHistory, CancellationToken token, [FromQuery] string chatId = "")
+        public IResult Post([FromBody] ChatHistoryRequest chatHistory, CancellationToken token)
         {
-            return _chatService.GetChat(chatId, chatHistory, token);
+            return _chatService.GetChat(chatHistory, token);
         }
 
-        [HttpGet("history", Name = "history")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public IEnumerable<SessionItem> Get(CancellationToken token)
-        {
-            return _chatService.GetHistory();
-        }
 
-        [HttpGet("messages/{chatid}", Name = "messages")]
+        [HttpGet("messages/{sessionid}", Name = "messages")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IEnumerable<Message>> GetChatMessages(string chatId, CancellationToken token)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IEnumerable<MessageItem>?> GetChatMessages(string sessionId, CancellationToken token)
         {
-            return await _chatService.GetChatMessages(chatId);
+            IEnumerable<MessageItem> messages =  await _chatService.GetChatMessages(sessionId);
+                      
+            return messages;
         }
 
         //Delete chat message
-        [HttpDelete("messages/{messageId}")]
+        [HttpDelete("message/{messageId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task DeleteMessage(string messageId, string chatid,  CancellationToken token)
         {
@@ -50,26 +47,5 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
 
         }
 
-        //Complete Session
-        [HttpPost("CompleteSession")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task CompleteSession([FromBody] CompleteSessionRequest request, CancellationToken token)
-        {
-            await _chatService.CompleteSession(request.SessionId, request.ChatId);
-        }
-
-        //Get all not complete session
-        [HttpGet("Session/notCompleted")]
-        public IEnumerable<SessionItem> GetNotCompletedSessions() 
-        { 
-            return _chatService.GetNotCompletedSession();
-        }
-
-        //Get a session by id
-        [HttpGet("Session/{id}")]
-        public async Task<SessionItem> GetSession(string id, string chatid)
-        {
-            return await _chatService.GetSession(id, chatid);
-        }
     }
 }

@@ -25,7 +25,7 @@ public class CosmosOptions
     /// Gets or sets the Cosmos container for chat sessions.
     /// </summary>
     [Required, NotEmptyOrWhitespace]
-    public string HistoryContainer { get; set; } = string.Empty;
+    public string MessageContainer { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the Cosmos container for dashboard.
@@ -46,6 +46,9 @@ public class CosmosOptions
     /// </summary>  
     [Required, NotEmptyOrWhitespace]
     public string ScenarioContainer { get; set; } = string.Empty;
+
+    [Required, NotEmptyOrWhitespace]
+    public string SessionContainer { get; set; } = string.Empty;
 
     [Required, NotEmptyOrWhitespace]
     public string EndPoint { get; set; } = string.Empty;

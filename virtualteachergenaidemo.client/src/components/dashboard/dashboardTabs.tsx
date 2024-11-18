@@ -6,7 +6,7 @@ import * as SignalR from '@microsoft/signalr';
 import { DashboardFeatureResult } from './DashboardFeatureResult';
 
 interface DashboardTabsProps {
-    chatId: string;
+    sessionId: string;
     conversation: string;
 }
 
@@ -18,16 +18,16 @@ let connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
 
 connection.start();
 
-const DashboardTabs: React.FC<DashboardTabsProps> = ({ chatId, conversation }) => {
+const DashboardTabs: React.FC<DashboardTabsProps> = ({ sessionId, conversation }) => {
     const [selectedValue, setSelectedValue] = useState<string>("Summary");
     const [dashboardData, setDashboardData] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
    
 
     useEffect(() => {
-        console.log('Fetching dashboard data for chatId:', chatId);
-        fetchDashboardData(chatId);
-    }, [chatId]);
+        console.log('Fetching dashboard data for chatId:', sessionId);
+        fetchDashboardData(sessionId);
+    }, [sessionId]);
 
     const fetchDashboardData = async (chatId: string) => {
         try {
@@ -59,7 +59,7 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ chatId, conversation }) =
         return (
             <div role="tabpanel" aria-labelledby={infoType} className="tabpanel">               
                 <DashboardFeatureResult
-                    chatId={chatId}
+                    sessionId={sessionId}
                     data={item}
                     loading={loading}
                     infoType={infoType}

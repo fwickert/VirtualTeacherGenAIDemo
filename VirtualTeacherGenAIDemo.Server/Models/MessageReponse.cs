@@ -4,7 +4,7 @@ namespace VirtualTeacherGenAIDemo.Server.Models
 {
     public class MessageResponse
     {
-        public string Id { get; set; } = string.Empty;
+        public string MessageId { get; set; } = string.Empty;
 
         public string Content { get; set; } = string.Empty;
 
@@ -20,7 +20,7 @@ namespace VirtualTeacherGenAIDemo.Server.Models
 
         public  AuthorRole? Role { get; set; }
 
-        public string ChatId { get; set; } = string.Empty;
+        public string SessionId { get; set; } = string.Empty;
 
     }
 }

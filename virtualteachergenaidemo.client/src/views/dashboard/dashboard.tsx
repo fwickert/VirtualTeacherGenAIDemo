@@ -15,7 +15,7 @@ enum AuthorRoles {
 function Dashboard() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { chatId } = location.state;
+    const { sessionId } = location.state;
     const [conversation, setConversation] = useState<IChat[]>([]);
     const [formattedConversation, setFormattedConversation] = useState<string>("");
 
@@ -24,11 +24,11 @@ function Dashboard() {
     };
 
     useEffect(() => {
-        fetchConversation(chatId);
-    }, [chatId]);
+        fetchConversation(sessionId);
+    }, [sessionId]);
 
-    const fetchConversation = async (chatId: string) => {
-        const response = await fetch('/api/chat/messages/' + chatId);
+    const fetchConversation = async (sessionId: string) => {
+        const response = await fetch('/api/chat/messages/' + sessionId);
         const data = await response.json();
         const formattedConversation = data.map((message: any) => {
             const role = message.authorRole === AuthorRoles.User ? "Seller" : "Client";
@@ -56,7 +56,7 @@ function Dashboard() {
                 <ChatHistory conversation={conversation}  />
             </div>
             <div className="dashboard">
-                <DashboardTabs chatId={chatId} conversation={formattedConversation} />
+                <DashboardTabs sessionId={sessionId} conversation={formattedConversation} />
             </div>
         </div>
     );

@@ -13,15 +13,12 @@ namespace VirtualTeacherGenAIDemo.Server.Models.Storage
 
         public string Id { get; set; } = string.Empty;
 
+        [Required, NotEmptyOrWhitespace]
+        public string UserId { get; set; } = string.Empty;
+
         [JsonIgnore]
-        public string Partition => this.ChatId;
-
-        [Required, NotEmptyOrWhitespace]
-        public string Type { get; set; } = string.Empty;
-
-        [Required, NotEmptyOrWhitespace]
-        public string ChatId { get; set; } = string.Empty;
-
+        public string Partition => this.UserId;
+        
         [Required]
         public bool IsCompleted { get; set; } = false;
 

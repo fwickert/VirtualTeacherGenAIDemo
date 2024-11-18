@@ -4,7 +4,7 @@ import { mergeStyles } from '@fluentui/react';
 import { Button } from '@fluentui/react-button';
 import { useNavigate } from 'react-router-dom';
 import { ArrowCircleLeft48Filled } from '@fluentui/react-icons';
-import { SessionItem } from '../../models/SessionItem';
+import { ISessionItem } from '../../models/SessionItem';
 
 const SessionPage: React.FC = () => {
     const navigate = useNavigate();
@@ -13,7 +13,7 @@ const SessionPage: React.FC = () => {
         navigate('/');
     };
 
-    const handleSessionStart = async (session: SessionItem) => {        
+    const handleSessionStart = async (session: ISessionItem) => {            
         navigate('/training', { state: { session } });
     };
 

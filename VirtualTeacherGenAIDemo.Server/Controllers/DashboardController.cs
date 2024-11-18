@@ -22,7 +22,7 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
         public IResult Post([FromServices] DashboardService dashboardService, [FromBody] DashboardRequest dashboardRequest, CancellationToken token)
         {
             //Check if conversation, chatId, connectionId, and id are not null
-            if (string.IsNullOrEmpty(dashboardRequest.Conversation) || string.IsNullOrEmpty(dashboardRequest.ChatId) ||
+            if (string.IsNullOrEmpty(dashboardRequest.Conversation) || string.IsNullOrEmpty(dashboardRequest.SessionId) ||
                 string.IsNullOrEmpty(dashboardRequest.ConnectionId) )
             {
                 return TypedResults.BadRequest("Invalid request : Invalid Body");

@@ -6,14 +6,13 @@ using System.Text.Json.Serialization;
 
 namespace VirtualTeacherGenAIDemo.Server.Models.Storage
 {
-    public class Message() : IStorageEntity
-    {
-        //private static readonly JsonSerializerOptions SerializerSettings = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+    public class MessageItem() : IStorageEntity
+    {   
 
         [Required, NotEmptyOrWhitespace]
         public string Id { get; set; } = string.Empty;
 
-        public string ChatId { get; set; } = string.Empty;
+        public string SessionId { get; set; } = string.Empty;
 
         public enum AuthorRoles
         {           
@@ -29,16 +28,8 @@ namespace VirtualTeacherGenAIDemo.Server.Models.Storage
         public AuthorRoles AuthorRole { get; set; }
 
         [JsonIgnore]
-        public string Partition => this.ChatId;
+        public string Partition => this.SessionId;
 
-        //public override string ToString()
-        //{
-        //    return JsonSerializer.Serialize(this, SerializerSettings);
-        //}
-
-        //public static Message? FromString(string json)
-        //{
-        //    return JsonSerializer.Deserialize<Message>(json, SerializerSettings);
-        //}
+       
     }
 }

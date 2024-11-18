@@ -8,7 +8,7 @@ enum AuthorRoles {
 
 export interface IChat {
     id: string;
-    chatId: string;
+    sessionId: string;
     content: string;
     timestamp: string;
     authorRole: AuthorRoles
@@ -28,7 +28,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ conversation }) => {
                     </div>
                     :
                    
-                        <div className="chat-messages">
+                    <div className="chat-messages">
                             {conversation.map((message: IChat) => (
                                 message.content.length !== 0 ?
 

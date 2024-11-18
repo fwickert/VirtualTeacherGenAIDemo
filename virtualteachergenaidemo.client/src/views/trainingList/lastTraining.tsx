@@ -6,20 +6,15 @@ import { Card, CardPreview, CardHeader } from '@fluentui/react-card';
 import { useNavigate } from 'react-router-dom';
 import { ArrowCircleLeft48Filled } from '@fluentui/react-icons';
 import { Button } from '@fluentui/react-button';
-
-interface ILastTraining {
-    id: string;
-    chatId: string;
-    title: string;
-    timestamp: string;
-}
+import { ILastTrainingItem } from '../../models/LastTrainingItem';
 
 const LastTraining: React.FC = () => {
-    const [lastTraining, setLastTraining] = useState<ILastTraining[] | null>();
+    const [lastTraining, setLastTraining] = useState<ILastTrainingItem[] | null>();
     const navigate = useNavigate();
+    const [userId, setUserId] = useState<string>('');
 
-    const navigateDashboard = (chatId: string) => {
-        navigate('/dashboard', { state: { chatId } });
+    const navigateDashboard = (sessionId: string) => {
+        navigate('/dashboard', { state: { sessionId } });
     };
 
     const navigatHome = () => {
@@ -27,43 +22,41 @@ const LastTraining: React.FC = () => {
     };
 
     useEffect(() => {
-        getlastTraining();
+        setUserId('Anonymous');
     }, []);
+
+    useEffect(() => {
+        getlastTraining();
+    }, [userId]);
 
     const formatDate = (timestamp: string) => {
         const date = new Date(timestamp);
         return date.toLocaleDateString();
     };
 
-
-    const contents = lastTraining === undefined ? 
-        <Spinner />    
-        :
-        <div className="list">
-            
+    const contents = lastTraining === undefined ?
+        <Spinner />
+        : lastTraining!.length === 0 ?
+            <Text>No training yet</Text>
+            :
+            <div className="list">
                 {
                     lastTraining!.map(item =>
-                        <section key={item.chatId}>
-                            <Card orientation="horizontal" onClick={navigateDashboard.bind(this, item.chatId)}  >
+                        <section key={item.id}>
+                            <Card orientation="horizontal" onClick={navigateDashboard.bind(this, item.id)}  >
                                 <CardHeader
                                     header={<Text weight="semibold">{formatDate(item.timestamp)}</Text>}
                                 />
                                 <CardPreview className='horizontalCardImage'>
-                                   <span className="htitle"> {item.title}</span>
+                                    <span className="htitle"> {item.title}</span>
                                 </CardPreview>
-
-                               
                             </Card>
                         </section>
-
-
                     )
                 }
-            
-        </div>;
+            </div>;
 
     return (
-
         <div>
             <Button size="large" appearance="transparent" onClick={navigatHome} icon={<ArrowCircleLeft48Filled />} />
             <h1 className="title">Last Training </h1>
@@ -72,7 +65,11 @@ const LastTraining: React.FC = () => {
     );
 
     async function getlastTraining() {
-        const response = await fetch('/api/chat/history');
+        if (userId === '') {
+            return;
+        }
+
+        const response = await fetch(`/api/Session/history/${userId}`);
         const data = await response.json();
         setLastTraining(data);
     }

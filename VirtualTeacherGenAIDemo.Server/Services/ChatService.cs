@@ -13,22 +13,22 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         private readonly ChatResponse _chatResponse;
         private readonly AssistantOption _assistantOption;
         private readonly MessageRepository _messageRepository;
-        private readonly SessionRepository _historyRepository;
+        private readonly SessionRepository _sessionRepository;
 
 
-        public ChatService([FromServices] MessageRepository messageRepository, 
-            [FromServices] SessionRepository historyRepository, 
+        public ChatService([FromServices] MessageRepository messageRepository,
+            [FromServices] SessionRepository sessionRepository,
             [FromServices] ChatResponse chatResponse, 
             IOptions<AssistantOption> option)
         {
             _messageRepository = messageRepository;
-            _historyRepository = historyRepository;
+            _sessionRepository = sessionRepository;
             _chatResponse = chatResponse;
             _assistantOption = option.Value;            
         }
 
         //Creater function to call GetAsync in other thread without asunc/await and with cancellation token in parameters
-        public IResult GetChat(string chatId, ChatHistoryRequest chatHistory, CancellationToken token)
+        public IResult GetChat(ChatHistoryRequest chatHistory, CancellationToken token)
         {
             //Transform ChatHistoryRequest to ChatHistory
             ChatHistory SKHistory = new ChatHistory();
@@ -45,52 +45,25 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 }
             }
 
-            Task.Run(() => _chatResponse.StartChat(_assistantOption.Persona, chatId, SKHistory, _messageRepository, _historyRepository, token), token); 
+            Task.Run(() => _chatResponse.StartChat(_assistantOption.Persona, SKHistory, chatHistory.UserId, chatHistory.Session,  _messageRepository, _sessionRepository, token), token); 
 
             return TypedResults.Ok("Chat requested");
         }
 
-        //Get list of 10 last Conversations
-        public IEnumerable<SessionItem> GetHistory()
-        {
-            return _historyRepository.GetLastHistory(10);
-        }
-
-        public async Task<SessionItem> GetDashboard(string id, string chatId)
-        {
-            return await _historyRepository.FindByIdAsync(id, chatId);
-        }
-
         //return all message from a chatid
-        public async Task<IEnumerable<Message>> GetChatMessages(string chatId)
+        public async Task<IEnumerable<MessageItem>> GetChatMessages(string userId)
         {
-            return await _messageRepository.FindByChatIdAsync(chatId);
+            IEnumerable<MessageItem> messages = await _messageRepository.FindByChatIdAsync(userId);
+
+            return messages;
         }
 
         //Delete a message by id
-        public async Task DeleteMessage(string messageId, string chatid)
+        public async Task DeleteMessage(string messageId, string userId)
         {
-            await _messageRepository.DeleteMessageByIdAsync(messageId, chatid);
+            await _messageRepository.DeleteMessageByIdAsync(messageId, userId);
         }
 
-        //Update the Session to isCompleted = true
-        public async Task CompleteSession(string id, string chatId)
-        {
-            await _historyRepository.CompleteSession(id, chatId);
-            
-        }
-
-        //return 1 session by id
-        public async Task<SessionItem> GetSession(string id, string chatid)
-        {
-            return await _historyRepository.FindByIdAsync(id, chatid);
-        }
-
-        //return all no completed session
-        public IEnumerable<SessionItem> GetNotCompletedSession()
-        {
-            return _historyRepository.GetNotCompleteSession();
-        }
 
     }
 }

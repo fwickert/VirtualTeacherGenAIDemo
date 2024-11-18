@@ -8,21 +8,21 @@ namespace VirtualTeacherGenAIDemo.Server.Storage
         {
         }
 
-        public IEnumerable<SessionItem> GetLastHistory(int limit)
+        public IEnumerable<SessionItem> GetLastHistory(string userId)
         {
-            return base.StorageContext.QueryEntitiesAsync(e => e.Type =="Session" && e.IsCompleted).Result.OrderByDescending(o=>o.Timestamp).Take(limit);
+            return base.StorageContext.QueryEntitiesAsync(e => e.UserId == userId && e.IsCompleted).Result.OrderByDescending(o=>o.Timestamp);
         }
 
         //return Session taht not complete
-        public IEnumerable<SessionItem> GetNotCompleteSession()
+        public IEnumerable<SessionItem> GetNotCompleteSession(string userId)
         {
-            return base.StorageContext.QueryEntitiesAsync(e => e.Type == "Session" && !e.IsCompleted).Result.OrderByDescending(o => o.Timestamp);
+            return base.StorageContext.QueryEntitiesAsync(e => e.UserId == userId && !e.IsCompleted).Result.OrderByDescending(o => o.Timestamp);
         }
 
         //Get one session by Id
-        public async Task<SessionItem> GetSessionById(string id, string chatid)
+        public async Task<SessionItem> GetSessionById(string id, string userId)
         {
-            return await base.FindByIdAsync(id, chatid);
+            return await base.FindByIdAsync(id, userId);
         }
 
         //add function to make IsCompeted true
@@ -35,6 +35,7 @@ namespace VirtualTeacherGenAIDemo.Server.Storage
                 await base.UpsertAsync(session);
             }
         }
+
     }
     
 }

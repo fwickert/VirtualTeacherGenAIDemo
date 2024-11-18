@@ -31,7 +31,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             _pluginsDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
         }
 
-        public async Task GetAsync(string chatId, string id, string whatAbout, Dictionary<string, string> variablesContext, string connectionId, CancellationToken token)
+        public async Task GetAsync(string sessionId, string id, string whatAbout, Dictionary<string, string> variablesContext, string connectionId, CancellationToken token)
         {
             var arguments = new KernelArguments();
 
@@ -40,7 +40,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 arguments[item.Key] = item.Value;
             }
 
-            await StreamResponseToClient(chatId, id, whatAbout, arguments, connectionId, token);
+            await StreamResponseToClient(sessionId, id, whatAbout, arguments, connectionId, token);
         }
 
         public async Task GetCoachAsync(string whatAbout, Dictionary<string, string> variablesContext, string connectionId, CancellationToken token)
@@ -84,7 +84,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             return messageResponse;
         }
 
-        private async Task<MessageResponse> StreamResponseToClient(string chatId, string id, string whatAbout, KernelArguments arguments, string connectionId, CancellationToken token)
+        private async Task<MessageResponse> StreamResponseToClient(string sessionId, string id, string whatAbout, KernelArguments arguments, string connectionId, CancellationToken token)
         {
 
             MessageResponse messageResponse = new MessageResponse
@@ -112,7 +112,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             string NewId = Guid.NewGuid().ToString();
             //Save content in DB
             await this._dashboardRepository.UpsertAsync(new DashboardItem { 
-                ChatId = chatId,
+                SessionId = sessionId,
                 Content = messageResponse.Content,
                 Id = id != null && id != "" ? id : NewId,
                 InfoType = whatAbout

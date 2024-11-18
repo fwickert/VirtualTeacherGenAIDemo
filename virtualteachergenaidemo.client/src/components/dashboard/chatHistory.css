@@ -2,21 +2,20 @@
     background-color: #e1ffc7; /* Example color for user messages */
     border-radius: 5px;
     margin-bottom: 5px;
-    font-size: 2em;
+    
 }
 
 .assistant-message {
     background-color: #f1f0f0; /* Example color for assistant messages */
     border-radius: 5px;
     margin-bottom: 5px;
-    font-size: 2em;
+    
 }
 
 .chat-messages {
     flex: 1;
     padding: 10px;
-    overflow-y: auto;
-    font-size: 2em;
+    overflow-y: auto;    
     text-align: right;
 }
 

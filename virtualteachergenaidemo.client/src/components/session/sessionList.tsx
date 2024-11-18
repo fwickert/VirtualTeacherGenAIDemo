@@ -1,19 +1,18 @@
 import './sessionList.css';
 import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardPreview, CardFooter } from '@fluentui/react-card';
-import { Text, Title2, Body2 } from '@fluentui/react-text';
+import { Title2, Body2 } from '@fluentui/react-text';
 import { Button } from '@fluentui/react-button';
 import { Spinner } from '@fluentui/react-spinner';
 import { makeStyles } from '@fluentui/react-components';
 import { AddCircleRegular, PeopleCommunityFilled, PlayRegular } from '@fluentui/react-icons';
-import { mergeClasses } from '@fluentui/react-components';
 import { tokens } from '@fluentui/tokens';
 import { useNavigate } from 'react-router-dom';
-import { SessionItem } from '../../models/SessionItem';
+import { ISessionItem } from '../../models/SessionItem';
 
 
 interface SessionListProps {
-    onSessionStart: (session: SessionItem) => void;
+    onSessionStart: (session: ISessionItem) => void;
 }
 
 const useStyles = makeStyles({
@@ -75,12 +74,13 @@ const useStyles = makeStyles({
 const SessionList: React.FC<SessionListProps> = ({ onSessionStart }) => {
     const navigate = useNavigate();
     const classes = useStyles();
-    const [sessions, setSessions] = useState<SessionItem[]>([]);
+    const [sessions, setSessions] = useState<ISessionItem[]>([]);
+    const [userId, setUserId] = useState<string>('Anonymous');
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         // Fetch incomplete sessions from the backend using fetch
-        fetch('/api/chat/session/NotCompleted')
+        fetch(`/api/Session/NotCompleted/${userId}`)
             .then(response => response.json())
             .then(data => {
                 const parsedData = data.map((session: any) => ({
@@ -96,9 +96,8 @@ const SessionList: React.FC<SessionListProps> = ({ onSessionStart }) => {
             });
     }, []);
 
-    const handleResume = async (session: SessionItem) => {       
-        if (onSessionStart) {
-            console.log("Session started ! " + session.id);
+    const handleResume = async (session: ISessionItem) => {       
+        if (onSessionStart) {            
             onSessionStart(session);
         }
         

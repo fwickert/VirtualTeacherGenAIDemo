@@ -24,7 +24,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         {
             _dashboardResponse.FunctionName = "Summary";
 
-            Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.ChatId, dashboardRequest.Id, "Summary",
+            Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Summary",
                                new Dictionary<string, string>()
                                {
                     { "conversation", dashboardRequest.Conversation }
@@ -38,7 +38,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         {
             _dashboardResponse.FunctionName = "Products";
 
-            Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.ChatId, dashboardRequest.Id, "Products",
+            Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Products",
                 new Dictionary<string, string>()
                 {
                     { "conversation", dashboardRequest.Conversation }
@@ -53,7 +53,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         {
             _dashboardResponse.FunctionName = "Keywords";
 
-            Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.ChatId, dashboardRequest.Id, "Keywords",
+            Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Keywords",
                 new Dictionary<string, string>()
                 {
                     { "conversation", dashboardRequest.Conversation }
@@ -67,7 +67,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         {
             _dashboardResponse.FunctionName = "Advice";
 
-            Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.ChatId, dashboardRequest.Id, "Advice",
+            Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Advice",
                 new Dictionary<string, string>()
                 {
                     { "conversation", dashboardRequest.Conversation }
@@ -81,7 +81,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         {
             _dashboardResponse.FunctionName = "Example";
 
-            Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.ChatId, dashboardRequest.Id, "Example",
+            Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Example",
                 new Dictionary<string, string>()
                 {
                     { "conversation", dashboardRequest.Conversation }
@@ -95,7 +95,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         {
             _dashboardResponse.FunctionName = "Evaluation";
 
-            Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.ChatId, dashboardRequest.Id, "Evaluation",
+            Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Evaluation",
                 new Dictionary<string, string>()
                 {
                     { "conversation", dashboardRequest.Conversation }
@@ -105,9 +105,9 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         }
 
         //return all info from a dashboard
-        public async Task<IEnumerable<DashboardItem>> GetDashboard(string chatId)
+        public async Task<IEnumerable<DashboardItem>> GetDashboard(string sessionId)
         {
-            return await _dashboardRepository.FindByChatIdAsync(chatId);
+            return await _dashboardRepository.FindByChatIdAsync(sessionId);
         }
 
         public async Task<string> GetPrompt(string functionName, string plugin)
