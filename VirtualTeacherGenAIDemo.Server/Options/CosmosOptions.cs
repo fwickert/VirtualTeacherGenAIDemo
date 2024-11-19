@@ -51,6 +51,9 @@ public class CosmosOptions
     public string SessionContainer { get; set; } = string.Empty;
 
     [Required, NotEmptyOrWhitespace]
+    public string UserContainer { get; set; } = string.Empty;
+
+    [Required, NotEmptyOrWhitespace]
     public string EndPoint { get; set; } = string.Empty;
 
     

@@ -10,6 +10,7 @@ import { tokens } from '@fluentui/tokens';
 import { useNavigate } from 'react-router-dom';
 import { ISessionItem } from '../../models/SessionItem';
 import { useUsername } from '../../auth/UserContext'; 
+
 interface SessionListProps {
     onSessionStart: (session: ISessionItem) => void;
 }

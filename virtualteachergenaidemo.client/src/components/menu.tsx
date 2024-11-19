@@ -1,14 +1,9 @@
 import './menu.css';
-
-
-import {
-
-    Caption1,
-    Text
-} from "@fluentui/react-text";
-
+import {Caption1,Text} from "@fluentui/react-text";
 import { Card, CardPreview, CardHeader } from '@fluentui/react-card';
 import { useNavigate } from 'react-router-dom';
+import { useUserRole } from "../auth/UserRoleContext";
+import { UserRoleEnum } from "../models/UserRoleEnum";
 
 
 const resolveAsset = (asset: string) => {
@@ -21,7 +16,7 @@ const resolveAsset = (asset: string) => {
 
 function Menu() {
     const navigate = useNavigate();
-
+    const { role } = useUserRole();
 
     const navigateTraining = () => {
         navigate('/session');
@@ -105,44 +100,47 @@ function Menu() {
             {/*    </Card>*/}
             {/*</section>*/}
 
-            <section>
-                <Card className="card" orientation="horizontal" onClick={navigateScenarios} >
-                    <CardPreview>
-                        <img className='horizontalCardImage'
-                            src={resolveAsset("scenario.svg")}
-                            alt="App Name Document"
-                        />
-                    </CardPreview>
 
-                    <CardHeader
-                        header={<Text weight="semibold">Scenario</Text>}
-                        description={
-                            <Caption1>Managed your Scenario</Caption1>
-                        }
-                    />
-                </Card>
-            </section>
+            {role == UserRoleEnum.Admin && (
+                <>
+                    <section>
+                        <Card className="card" orientation="horizontal" onClick={navigateScenarios} >
+                            <CardPreview>
+                                <img className='horizontalCardImage'
+                                    src={resolveAsset("scenario.svg")}
+                                    alt="App Name Document"
+                                />
+                            </CardPreview>
 
-            <section>
-                <Card className="card" orientation="horizontal" onClick={navigateAgent} >
-                    <CardPreview>
-                        <img className='horizontalCardImage'
-                            src={resolveAsset("agent.svg")}
-                            alt="App Name Document"
-                        />
-                    </CardPreview>
+                            <CardHeader
+                                header={<Text weight="semibold">Scenario</Text>}
+                                description={
+                                    <Caption1>Managed your Scenario</Caption1>
+                                }
+                            />
+                        </Card>
+                    </section>
 
-                    <CardHeader
-                        header={<Text weight="semibold">Virtual AI Agent</Text>}
-                        description={
-                            <Caption1>Managed your Virtual AI Agent</Caption1>
-                        }
-                    />
-                </Card>
-            </section>
+                    <section>
+                        <Card className="card" orientation="horizontal" onClick={navigateAgent} >
+                            <CardPreview>
+                                <img className='horizontalCardImage'
+                                    src={resolveAsset("agent.svg")}
+                                    alt="App Name Document"
+                                />
+                            </CardPreview>
 
-           
+                            <CardHeader
+                                header={<Text weight="semibold">Virtual AI Agent</Text>}
+                                description={
+                                    <Caption1>Managed your Virtual AI Agent</Caption1>
+                                }
+                            />
+                        </Card>
+                    </section>
 
+                </>
+            )}
         </div>
     )
 };
