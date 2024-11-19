@@ -30,10 +30,9 @@ if (!fs.existsSync(certFilePath) || !fs.existsSync(keyFilePath)) {
     }
 }
 
-const target = process.env.ASPNETCORE_URLS ? process.env.ASPNETCORE_URLS.split(';')[0] : 'https://localhost:7273';
-console.log(`Target URL: ${target}`);
-const hubUrl = target + '/messageRelayHub'; 
+const target = env.ASPNETCORE_URLS ? env.ASPNETCORE_URLS.split(';')[0] : 'https://localhost:7273';
 
+const hubUrl = `${target}/messageRelayHub`;
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -57,6 +56,8 @@ export default defineConfig({
         }       
     },
     define: {
-        "process.env.HUB_URL": JSON.stringify(hubUrl)
-    }
+        'process.env': {
+          HUB_URL: hubUrl
+        }
+      }
 })
