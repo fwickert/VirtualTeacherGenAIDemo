@@ -89,7 +89,7 @@ function AuthenticatedApp(props: any) {
                         throw new Error('Failed to create or get user');
                     }
                     else {
-                        setRole(UserRoleEnum.User.toString());
+                        setRole(UserRoleEnum.User);
                     }
                 } catch (error) {
                     console.error('Error creating user:', error);
