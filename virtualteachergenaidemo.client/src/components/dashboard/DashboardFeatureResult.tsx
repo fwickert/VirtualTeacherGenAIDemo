@@ -10,7 +10,7 @@ interface DashboardFeatureResultProps {
     data: any;
     infoType: string;
     loading: boolean;
-    connection: HubConnection;
+    connection: HubConnection | null;
     conversation: string;
 }
 
@@ -21,7 +21,9 @@ const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({ session
 
 
     useEffect(() => {
+
         if (connection) {
+            
             connection.on(infoType, (updatedData: any) => {
                 setIsLoading(false);
                 setContent(updatedData);
@@ -41,7 +43,7 @@ const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({ session
                 id: item == undefined ? "" :  item.id,
                 sessionId: sessionId,
                 conversation: conversation,
-                connectionId: connection.connectionId!,
+                connectionId: connection?.connectionId,
                 title: feature,
                 prompt: feature
             }

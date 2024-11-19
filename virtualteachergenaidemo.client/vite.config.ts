@@ -57,7 +57,7 @@ export default defineConfig({
     },
     define: {
         'process.env': {
-          HUB_URL: hubUrl
+            HUB_URL: hubUrl
         }
       }
 })

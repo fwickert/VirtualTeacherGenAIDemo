@@ -35,17 +35,15 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
     const currentMessageRef = useRef<string | null>(null);
     const [isSavingSession, setIsSavingSession] = useState<boolean>(false);
     
-
-    const hubUrl = process.env.HUB_URL;
-
     useEffect(() => {
+        const hubUrl = process.env.HUB_URL;
         const newConnection = new HubConnectionBuilder()
             .withUrl(hubUrl!)
             .withAutomaticReconnect()
             .build();
 
         setConnection(newConnection);
-    }, [hubUrl]);
+    }, []);
 
     useEffect(() => {
         if (connection) {

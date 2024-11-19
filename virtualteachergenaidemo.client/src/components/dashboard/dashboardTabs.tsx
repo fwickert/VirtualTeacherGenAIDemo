@@ -2,28 +2,39 @@ import './dashboardTabs.css';
 import React, { useEffect, useState } from 'react';
 import { Tab, TabList } from '@fluentui/react-tabs';
 import { Skeleton3Rows } from '../../components/Utilities/skeleton3rows';
-import * as SignalR from '@microsoft/signalr';
+import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
 import { DashboardFeatureResult } from './DashboardFeatureResult';
+import { connect } from 'http2';
 
 interface DashboardTabsProps {
     sessionId: string;
     conversation: string;
 }
 
-const hubUrl = process.env.HUB_URL;
 
-let connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
-    .withUrl(hubUrl!)
-    .build();
 
-connection.start();
+
 
 const DashboardTabs: React.FC<DashboardTabsProps> = ({ sessionId, conversation }) => {
     const [selectedValue, setSelectedValue] = useState<string>("Summary");
     const [dashboardData, setDashboardData] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [connection, setConnection] = useState<HubConnection | null>(null); 
    
+    useEffect(() => {
+        const hubUrl = process.env.HUB_URL;
+        const newConnection = new HubConnectionBuilder()
+            .withUrl(hubUrl!)
+            .withAutomaticReconnect()
+            .build();            
 
+        newConnection.start().then();
+        setConnection(newConnection);
+        console.log('Connection started:', connection?.connectionId);
+        
+    }, []);
+
+    
     useEffect(() => {
         console.log('Fetching dashboard data for chatId:', sessionId);
         fetchDashboardData(sessionId);
