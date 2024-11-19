@@ -6,6 +6,7 @@ import path from 'path';
 import child_process from 'child_process';
 import { env } from 'process';
 
+
 const isProduction = process.env.NODE_ENV === 'production';
 
 const baseFolder =
@@ -35,7 +36,7 @@ const target = isProduction
     ? process.env.AZURE_WEBSITE_URL 
     : (env.ASPNETCORE_URLS ? env.ASPNETCORE_URLS.split(';')[0] : 'https://localhost:7273');
 
-const hubUrl = `${target}/messageRelayHub`;
+const hubUrl = target === undefined ? "/messageRelayHUb": `${target}/messageRelayHub`;
 
 // https://vitejs.dev/config/
 export default defineConfig({
