@@ -31,7 +31,7 @@ if (!fs.existsSync(certFilePath) || !fs.existsSync(keyFilePath)) {
 }
 
 const target = process.env.ASPNETCORE_URLS ? process.env.ASPNETCORE_URLS.split(';')[0] : 'https://localhost:7273';
-
+console.log(`Target URL: ${target}`);
 const hubUrl = target + '/messageRelayHub'; 
 
 
