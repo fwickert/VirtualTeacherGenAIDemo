@@ -10,6 +10,9 @@ import { makeStyles } from '@fluentui/react-components';
 import { PersonAvailableFilled, AddCircleRegular, EditRegular, PlayRegular } from '@fluentui/react-icons';
 import { mergeClasses } from '@fluentui/react-components';
 import { tokens } from '@fluentui/tokens';
+import { useUserRole } from '../../auth/UserRoleContext';
+import { UserRoleEnum } from '../../models/UserRoleEnum';
+
 
 interface ScenarioListProps {
     onScenarioSelect?: (scenario: ScenarioItem) => void;
@@ -25,6 +28,12 @@ const useStyles = makeStyles({
         maxWidth: '300px',
         minHeight: '280px',
         maxHeight: '280px',
+    },
+    customCardSmall: {
+        minWidth: '400px',
+        maxWidth: '300px',
+        minHeight: '200px',
+        maxHeight: '200px',
     },
     iconGrid: {
         display: 'grid',
@@ -42,7 +51,7 @@ const useStyles = makeStyles({
     },
     iconText: {
         marginTop: '5px',
-        textAlign: 'center',        
+        textAlign: 'center',
     },
     grayColor: {
         color: tokens.colorNeutralForegroundDisabled,
@@ -88,10 +97,12 @@ const getAgentColorClass = (agentType: string, classes: any) => {
 
 const ScenarioList: React.FC<ScenarioListProps> = ({ onScenarioStart }) => {
     const classes = useStyles();
+    const { role } = useUserRole();
     const [scenarios, setScenarios] = useState<ScenarioItem[]>([]);
     const [selectedScenario, setSelectedScenario] = useState<ScenarioItem | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+
 
     useEffect(() => {
         // Fetch scenarios from an API or data source
@@ -163,44 +174,52 @@ const ScenarioList: React.FC<ScenarioListProps> = ({ onScenarioStart }) => {
             {isLoading && <Spinner label="Loading..." />}
             {!isLoading && (
                 <div className="scenario-cards-grid">
+                    {role === UserRoleEnum.Admin && (
                     <Button className={classes.buttonWithIcon} onClick={handleAddScenario}>
                         <AddCircleRegular className={classes.buttonIcon} />
                         Add New Scenario
-                    </Button>
+                        </Button>
+                    )}
                     {scenarios.map(scenario => (
-                        <Card key={scenario.id} className={`${classes.customCard} card`}>
+                        <Card key={scenario.id} className={`${role === UserRoleEnum.Admin ? classes.customCard : classes.customCardSmall} card`}>
                             <CardHeader
                                 header={<Title2>{scenario.name}</Title2>}
                             />
                             <CardPreview className={classes.customPreview}>
                                 <div className={classes.iconGrid}>
                                     <div><Body2>{scenario.description}</Body2></div>
-                                    <div className={classes.iconGrid}>
-                                        {[0, 1, 2].map(index => {
-                                            const agent = scenario.agents[index];
-                                            const colorClass = agent ? getAgentColorClass(agent.type, classes) : classes.grayColor;
-                                            return (
-                                                <div key={index} className={classes.iconItem}>
-                                                    <PersonAvailableFilled
-                                                        className={mergeClasses(classes.icon, colorClass)}
-                                                    />
-                                                    <Text className={mergeClasses(classes.iconText, colorClass)}>
-                                                        {agent ? agent.name : 'Not set'}
-                                                    </Text>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
+
+
+                                    {role === UserRoleEnum.Admin && (
+                                        <div className={classes.iconGrid}>
+                                            {[0, 1, 2].map(index => {
+                                                const agent = scenario.agents[index];
+                                                const colorClass = agent ? getAgentColorClass(agent.type, classes) : classes.grayColor;
+                                                return (
+                                                    <div key={index} className={classes.iconItem}>
+                                                        <PersonAvailableFilled
+                                                            className={mergeClasses(classes.icon, colorClass)}
+                                                        />
+                                                        <Text className={mergeClasses(classes.iconText, colorClass)}>
+                                                            {agent ? agent.name : 'Not set'}
+                                                        </Text>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
                                 </div>
                             </CardPreview>
                             <CardFooter>
 
-                                <Button
-                                    icon={<EditRegular />}
-                                    className={classes.editButton}
-                                    onClick={() => handleEditScenario(scenario)}>
-                                    Edit
-                                </Button>
+                                {role === UserRoleEnum.Admin && (
+                                    <Button
+                                        icon={<EditRegular />}
+                                        className={classes.editButton}
+                                        onClick={() => handleEditScenario(scenario)}>
+                                        Edit
+                                    </Button>
+                                )}
                                 <Button
                                     appearance='primary'
                                     icon={<PlayRegular />}

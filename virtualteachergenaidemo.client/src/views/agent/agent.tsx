@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AgentItem } from '../../models/AgentItem';
 import { AgentDialog } from '../../components/agent/AgentDialog';
 import AgentList from '../../components/agent/AgentList';
@@ -6,12 +6,21 @@ import { mergeStyles } from '@fluentui/react';
 import { Button } from '@fluentui/react-button';
 import { useNavigate } from 'react-router-dom';
 import { ArrowCircleLeft48Filled } from '@fluentui/react-icons';
+import { useUserRole } from '../../auth/UserRoleContext';
+import { UserRoleEnum } from '../../models/UserRoleEnum';
 
 
 const Agent = () => {
     const [agents, setAgents] = useState<AgentItem[]>([]);
     const [dialogType, setDialogType] = useState<string | null>(null);
     const navigate = useNavigate();
+    const { role } = useUserRole();
+
+    useEffect(() => {
+        if (role !== UserRoleEnum.Admin) {
+            navigate('/');
+        }
+    }, [role, navigate]);
 
     const addAgent = (newAgent: AgentItem) => {
         setAgents([...agents, { ...newAgent }]);

@@ -13,7 +13,9 @@ import { initializeMsal } from './auth/msalConfig';
 import { PublicClientApplication } from '@azure/msal-browser';
 import { InteractionType } from '@azure/msal-browser';
 import UserDisplay from './auth/userDisplay';
-import { UserProvider } from './auth/UserContext'; 
+import { UserProvider } from './auth/UserContext';
+import { UserRoleProvider, useUserRole } from './auth/UserRoleContext';
+import { UserRoleEnum } from './models/UserRoleEnum';
 
 function App(props: any) {
     const [msalInstance, setMsalInstance] = useState<PublicClientApplication | null>(null);
@@ -34,7 +36,9 @@ function App(props: any) {
     return (
         <MsalProvider instance={msalInstance}>
             <UserProvider>
-                <AuthenticatedApp title={props.title} />
+                <UserRoleProvider>
+                    <AuthenticatedApp title={props.title} />
+                </UserRoleProvider>
             </UserProvider>
         </MsalProvider>
     );
@@ -43,8 +47,58 @@ function App(props: any) {
 function AuthenticatedApp(props: any) {
     const { accounts } = useMsal();
     const userName = accounts.length > 0 ? accounts[0].name : 'Guest';
+    const email = accounts.length > 0 ? accounts[0].username : 'Guest';
+    const { setRole } = useUserRole();
 
-    console.log('AuthenticatedApp rendered with userName:', userName);
+    useEffect(() => {
+        const fetchUserRole = async () => {
+            if (email) {
+                try {
+                    const response = await fetch(`/api/User/${email}`);
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch user role');
+                    }
+                    const userData = await response.json();
+                    setRole(userData.role);
+                } catch (error) {
+                    console.error('Error fetching user role:', error);
+                }
+            }
+        };
+
+        fetchUserRole();
+    }, [email, setRole]);
+
+    useEffect(() => {
+        const createUserIfNotExists = async () => {
+            if (email) {
+                try {
+                    const response = await fetch('/api/User', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            id: email,
+                            name: email,
+                            role: UserRoleEnum.User,
+                            settings: {}
+                        })
+                    });
+                    if (!response.ok) {
+                        throw new Error('Failed to create or get user');
+                    }
+                    else {
+                        setRole(UserRoleEnum.User.toString());
+                    }
+                } catch (error) {
+                    console.error('Error creating user:', error);
+                }
+            }
+        };
+
+        createUserIfNotExists();
+    }, [userName]);
 
     return (
         <Router>
