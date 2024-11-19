@@ -98,7 +98,7 @@ function AuthenticatedApp(props: any) {
         };
 
         createUserIfNotExists();
-    }, [userName]);
+    }, []);
 
     return (
         <Router>
