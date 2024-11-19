@@ -6,6 +6,7 @@ import path from 'path';
 import child_process from 'child_process';
 import { env } from 'process';
 
+const isProduction = process.env.NODE_ENV === 'production';
 
 const baseFolder =
     env.APPDATA !== undefined && env.APPDATA !== ''
@@ -30,7 +31,9 @@ if (!fs.existsSync(certFilePath) || !fs.existsSync(keyFilePath)) {
     }
 }
 
-const target = env.ASPNETCORE_URLS ? env.ASPNETCORE_URLS.split(';')[0] : 'https://localhost:7273';
+const target = isProduction
+    ? process.env.AZURE_WEBSITE_URL 
+    : (env.ASPNETCORE_URLS ? env.ASPNETCORE_URLS.split(';')[0] : 'https://localhost:7273');
 
 const hubUrl = `${target}/messageRelayHub`;
 
@@ -50,14 +53,14 @@ export default defineConfig({
             }
         },
         port: 5173,
-        https: {
+        https: !isProduction ? {
             key: fs.readFileSync(keyFilePath),
             cert: fs.readFileSync(certFilePath),
-        }       
+        } : undefined       
     },
     define: {
         'process.env': {
             HUB_URL: hubUrl
         }
-      }
+    }
 })
