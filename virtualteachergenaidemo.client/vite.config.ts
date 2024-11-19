@@ -58,8 +58,6 @@ export default defineConfig({
         }       
     },
     define: {
-        "process.env": {
-            HUB_URL: hubUrl
-        }
+        "process.env.HUB_URL": JSON.stringify(hubUrl)
     }
 })
