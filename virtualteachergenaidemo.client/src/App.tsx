@@ -51,54 +51,61 @@ function AuthenticatedApp(props: any) {
     const { setRole } = useUserRole();
 
     useEffect(() => {
-        const fetchUserRole = async () => {
+        const fetchUserRole = () => {
             if (email) {
-                try {
-                    const response = await fetch(`/api/User/${email}`);
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch user role');
-                    }
-                    const userData = await response.json();
-                    setRole(userData.role);
-                } catch (error) {
-                    console.error('Error fetching user role:', error);
-                }
+                fetch(`/api/User/${email}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            if (response.status === 404) {                                
+                                return createUserIfNotExists();
+                            } else {
+                                console.error('Failed to fetch user role:', response.statusText);
+                                return Promise.reject('Failed to fetch user role');
+                            }
+                        }
+                        return response.json();
+                    })
+                    .then(userData => {
+                        if (userData) {
+                            setRole(userData.role);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching user role:', error);
+                    });
+            }
+        };
+
+        const createUserIfNotExists = () => {
+            if (email) {
+                fetch('/api/User', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id: email,
+                        name: email,
+                        role: UserRoleEnum.User,
+                        settings: {}
+                    })
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            console.error('Failed to create or get user:', response.statusText);
+                            return Promise.reject('Failed to create or get user');
+                        } else {
+                            setRole(UserRoleEnum.User);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error creating user:', error);
+                    });
             }
         };
 
         fetchUserRole();
     }, [email, setRole]);
-
-    useEffect(() => {
-        const createUserIfNotExists = async () => {
-            if (email) {
-                try {
-                    const response = await fetch('/api/User', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            id: email,
-                            name: email,
-                            role: UserRoleEnum.User,
-                            settings: {}
-                        })
-                    });
-                    if (!response.ok) {
-                        throw new Error('Failed to create or get user');
-                    }
-                    else {
-                        setRole(UserRoleEnum.User);
-                    }
-                } catch (error) {
-                    console.error('Error creating user:', error);
-                }
-            }
-        };
-
-        createUserIfNotExists();
-    }, []);
 
     return (
         <Router>
