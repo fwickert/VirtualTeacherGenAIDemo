@@ -19,6 +19,7 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
         //getUser
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<UserItem>> Get(string id)
         {
             var user = await _userService.GetUserAsync(id);
