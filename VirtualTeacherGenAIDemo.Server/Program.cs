@@ -1,7 +1,13 @@
+using Microsoft.KernelMemory;
+using System.Reflection.PortableExecutable;
 using VirtualTeacherGenAIDemo.Server.Extensions;
+using VirtualTeacherGenAIDemo.Server.Handler;
 using VirtualTeacherGenAIDemo.Server.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+
 
 // Add services to the container.
 builder.Services
@@ -11,7 +17,11 @@ builder.Services
     .AddAIResponses()
     .AddServices()
     .AddSemanticKernelServices()
-    .AddChatCompletionService();
+.AddChatCompletionService();
+
+
+
+builder.AddKernelMemoryService();
 
 builder.Services.AddSignalR(options => options.MaximumParallelInvocationsPerClient = 10);
 

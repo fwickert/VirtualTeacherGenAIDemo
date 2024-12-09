@@ -17,12 +17,15 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
 
             AddOptions<CosmosOptions>(CosmosOptions.PropertyName);
 
-            // Default AI service configurations for Semantic Kernel
+            AddOptions<KernelMemoryOptions>(KernelMemoryOptions.SectionName);
+
             AddOptions<AIServiceOptions>(AIServiceOptions.PropertyName);
 
             AddOptions<AssistantOption>(AssistantOption.PropertyName);
 
             AddOptions<SpeechOptions>(SpeechOptions.PropertyName);
+
+         
 
             return services;
 
