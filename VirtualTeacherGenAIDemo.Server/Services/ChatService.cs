@@ -18,17 +18,17 @@ namespace VirtualTeacherGenAIDemo.Server.Services
 
         public ChatService([FromServices] MessageRepository messageRepository,
             [FromServices] SessionRepository sessionRepository,
-            [FromServices] ChatResponse chatResponse, 
+            [FromServices] ChatResponse chatResponse,
             IOptions<AssistantOption> option)
         {
             _messageRepository = messageRepository;
             _sessionRepository = sessionRepository;
             _chatResponse = chatResponse;
-            _assistantOption = option.Value;            
+            _assistantOption = option.Value;
         }
 
         //Creater function to call GetAsync in other thread without asunc/await and with cancellation token in parameters
-        public IResult GetChat(ChatHistoryRequest chatHistory, CancellationToken token)
+        public IResult GetChat(ChatHistoryRequest chatHistory, string connectionId, CancellationToken token)
         {
             //Transform ChatHistoryRequest to ChatHistory
             ChatHistory SKHistory = new ChatHistory();
@@ -44,8 +44,11 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                         break;
                 }
             }
+            if (chatHistory.Session != null)
+            {
+                Task.Run(() => _chatResponse.StartChat(connectionId, _assistantOption.Persona, SKHistory, chatHistory.UserId, chatHistory.Session, _messageRepository, _sessionRepository, token), token);
+            }
 
-            Task.Run(() => _chatResponse.StartChat(_assistantOption.Persona, SKHistory, chatHistory.UserId, chatHistory.Session,  _messageRepository, _sessionRepository, token), token); 
 
             return TypedResults.Ok("Chat requested");
         }
@@ -59,9 +62,9 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         }
 
         //Delete a message by id
-        public async Task DeleteMessage(string messageId, string userId)
+        public async Task DeleteMessage(string messageId, string sessionId)
         {
-            await _messageRepository.DeleteMessageByIdAsync(messageId, userId);
+            await _messageRepository.DeleteMessageByIdAsync(messageId, sessionId);
         }
 
 

@@ -8,17 +8,17 @@ import { useState, useEffect } from 'react';
 import ScenarioList from '../../components/scenario/scenarioList';
 import { ScenarioItem } from '../../models/ScenarioItem';
 import { ISessionItem } from '../../models/SessionItem';
-import { Session } from 'inspector';
+
 
 function Training() {
     const navigate = useNavigate();
     const location = useLocation();
-    const [selectedScenario, setSelectedScenario] = useState<ScenarioItem | undefined>(location.state?.scenario);
-    const [session, setSession] = useState<ISessionItem | undefined>();
+    const [selectedScenario, setSelectedScenario] = useState<ScenarioItem | null>(location.state?.scenario);
+    const [session, setSession] = useState<ISessionItem | null>();
 
     const handleBackClick = () => {
-        setSelectedScenario(undefined);
-        setSession(undefined);
+        setSelectedScenario(null);
+        setSession(null);
         navigate(-1); // Navigate back to the previous page
     };
 

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using VirtualTeacherGenAIDemo.Server.Models.Request;
 using VirtualTeacherGenAIDemo.Server.Models.Storage;
 using VirtualTeacherGenAIDemo.Server.Services;
+using VirtualTeacherGenAIDemo.Server.Storage;
 
 namespace VirtualTeacherGenAIDemo.Server.Controllers
 {
@@ -18,7 +19,7 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
         }
 
 
-        [HttpGet("history/{userId}", Name ="history")]
+        [HttpGet("history/{userId}", Name = "history")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IEnumerable<SessionItem> Get(string userId, CancellationToken token)
         {
@@ -34,7 +35,7 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
         }
 
         //Get all not complete session
-        [HttpGet("notCompleted/{userId}", Name ="sessions")]
+        [HttpGet("notCompleted/{userId}", Name = "sessions")]
         public IEnumerable<SessionItem> GetNotCompletedSessions(string userId)
         {
             return _sessionService.GetNotCompletedSession(userId);
@@ -47,5 +48,15 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
         {
             return await _sessionService.GetSession(id, userId);
         }
+
+        [HttpDelete("delete")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> DeleteSession([FromBody] DeleteSessionRequest request, [FromServices] MessageRepository messageRepository, CancellationToken token)
+        {
+            await _sessionService.DeleteSessionAsync(request.SessionId, request.UserId, messageRepository, token);
+            return Ok();
+        }
+
+
     }
 }

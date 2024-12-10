@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Azure;
+using Azure.AI.DocumentIntelligence;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.KernelMemory;
 
 namespace VirtualTeacherGenAIDemo.Server.Controllers
 {
@@ -9,6 +12,13 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
     [ApiController]
     public class FileUploadController : ControllerBase
     {
+        private readonly IKernelMemory _kernelMemory;
+
+        public FileUploadController([FromServices] IKernelMemory kernelMemory)
+        {
+            _kernelMemory = kernelMemory;
+        }
+
         [HttpPost]
         public async Task<IActionResult> UploadFile(IFormFile file)
         {
@@ -17,20 +27,52 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
                 return BadRequest("No file uploaded.");
             }
 
-            var uploadsFolderPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
-            if (!Directory.Exists(uploadsFolderPath))
+            using (var stream = file.OpenReadStream())
             {
-                Directory.CreateDirectory(uploadsFolderPath);
+                // Call the method to parse the uploaded file stream
+                var parseResult = await ParseDocument(stream);
+
+                if (!parseResult)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, "Error parsing the document.");
+                }
             }
 
-            var filePath = Path.Combine(uploadsFolderPath, file.FileName);
+            return Ok();
+        }
 
-            using (var stream = new FileStream(filePath, FileMode.Create))
+        private async Task<bool> ParseDocument(Stream fileStream)
+        {
+            string endpoint = "https://virtualteachdocint.cognitiveservices.azure.com/";
+            string key = "7bANKH6Dm7ZIqfrXl4dd3AwUYaQq8TkTrumeJbL4fXXV5bcy8NQhJQQJ99ALAC5RqLJXJ3w3AAALACOGGNQ4";
+
+            var client = new DocumentIntelligenceClient(new Uri(endpoint), new AzureKeyCredential(key));
+
+            var binaryData = BinaryData.FromStream(fileStream);
+            var content = new AnalyzeDocumentContent() { Base64Source = binaryData };
+
+            int i = 1;
+
+            while (true)
             {
-                await file.CopyToAsync(stream);
+                try
+                {
+                    Operation<AnalyzeResult> operation = await client.AnalyzeDocumentAsync(WaitUntil.Completed, "prebuilt-layout", content, outputContentFormat: ContentFormat.Markdown, pages: i.ToString());
+                    AnalyzeResult result = operation.Value;
+
+                    Console.WriteLine(result.Content);
+
+                    await _kernelMemory.DeleteDocumentAsync(i.ToString(), index: "test");
+                    await _kernelMemory.ImportTextAsync(result.Content, i.ToString(), index: "test");
+                    i++;
+                }
+                catch (Exception)
+                {
+                    break;
+                }
             }
 
-            return Ok(new { FilePath = filePath });
+            return true;
         }
     }
 }
