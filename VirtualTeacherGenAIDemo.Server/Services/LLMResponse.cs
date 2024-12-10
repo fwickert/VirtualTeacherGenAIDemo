@@ -93,7 +93,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                     messageResponse.Content += contentPiece.Content;
                     await this.UpdateMessageOnClient(whatAbout, messageResponse, connectionId, token);
                     Console.Write(contentPiece.Content);
-                    //await Task.Delay(DELAY);
+                    await Task.Delay(DELAY);
                 }
             }
             
