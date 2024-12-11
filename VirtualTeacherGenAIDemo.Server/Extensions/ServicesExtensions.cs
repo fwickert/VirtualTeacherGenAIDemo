@@ -25,6 +25,8 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
 
             AddOptions<SpeechOptions>(SpeechOptions.PropertyName);
 
+            AddOptions<DocumentIntelligentOptions>(DocumentIntelligentOptions.PropertyName);
+
          
 
             return services;
@@ -165,6 +167,7 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
             services.AddScoped<ScenarioService>();
             services.AddScoped<SessionService>();
             services.AddScoped<UserService>();
+            services.AddScoped<FileUploadService>();
             return services;
         }
     }

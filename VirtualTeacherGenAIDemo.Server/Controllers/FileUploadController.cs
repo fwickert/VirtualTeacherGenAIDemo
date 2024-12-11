@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Azure;
-using Azure.AI.DocumentIntelligence;
+using System.Collections.Concurrent;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.KernelMemory;
+using VirtualTeacherGenAIDemo.Server.Services;
 
 namespace VirtualTeacherGenAIDemo.Server.Controllers
 {
@@ -12,67 +12,62 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
     [ApiController]
     public class FileUploadController : ControllerBase
     {
-        private readonly IKernelMemory _kernelMemory;
+        private readonly FileUploadService _fileUploadService;
+        private readonly ConcurrentDictionary<string, ConcurrentDictionary<int, byte[]>> _fileChunks = new();
 
-        public FileUploadController([FromServices] IKernelMemory kernelMemory)
+        public FileUploadController([FromServices] FileUploadService fileUploadService)
         {
-            _kernelMemory = kernelMemory;
+            _fileUploadService = fileUploadService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> UploadFile(IFormFile file)
+        [HttpPost("")]
+        public async Task<IActionResult> UploadFile(string connectionId, IFormFile fileStream, int chunkIndex, int totalChunks, CancellationToken token)
         {
-            if (file == null || file.Length == 0)
+            if (fileStream == null || fileStream.Length == 0)
             {
                 return BadRequest("No file uploaded.");
             }
 
-            using (var stream = file.OpenReadStream())
+            if (!_fileChunks.ContainsKey(connectionId))
             {
-                // Call the method to parse the uploaded file stream
-                var parseResult = await ParseDocument(stream);
+                _fileChunks[connectionId] = new ConcurrentDictionary<int, byte[]>();
+            }
 
-                if (!parseResult)
+            using (var memoryStream = new MemoryStream())
+            {
+                await fileStream.CopyToAsync(memoryStream, token);
+                _fileChunks[connectionId][chunkIndex] = memoryStream.ToArray();
+            }
+
+            if (_fileChunks[connectionId].Count == totalChunks)
+            {
+                // All chunks uploaded, assemble the file
+                using (var finalMemoryStream = new MemoryStream())
                 {
-                    return StatusCode(StatusCodes.Status500InternalServerError, "Error parsing the document.");
+                    for (int i = 0; i < totalChunks; i++)
+                    {
+                        if (_fileChunks[connectionId].TryGetValue(i, out var chunk))
+                        {
+                            await finalMemoryStream.WriteAsync(chunk, 0, chunk.Length, token);
+                        }
+                        else
+                        {
+                            return NoContent(); // Missing chunk
+                        }
+                    }
+
+                    finalMemoryStream.Position = 0;
+                    var parseResult = await _fileUploadService.ParseDocument(finalMemoryStream, connectionId, token);
+                    if (!parseResult)
+                    {
+                        return StatusCode(StatusCodes.Status500InternalServerError, "Error parsing the document.");
+                    }
                 }
+
+                _fileChunks.TryRemove(connectionId, out _); // Clean up chunks
             }
 
             return Ok();
-        }
-
-        private async Task<bool> ParseDocument(Stream fileStream)
-        {
-            string endpoint = "https://virtualteachdocint.cognitiveservices.azure.com/";
-            string key = "7bANKH6Dm7ZIqfrXl4dd3AwUYaQq8TkTrumeJbL4fXXV5bcy8NQhJQQJ99ALAC5RqLJXJ3w3AAALACOGGNQ4";
-
-            var client = new DocumentIntelligenceClient(new Uri(endpoint), new AzureKeyCredential(key));
-
-            var binaryData = BinaryData.FromStream(fileStream);
-            var content = new AnalyzeDocumentContent() { Base64Source = binaryData };
-
-            int i = 1;
-
-            while (true)
-            {
-                try
-                {
-                    Operation<AnalyzeResult> operation = await client.AnalyzeDocumentAsync(WaitUntil.Completed, "prebuilt-layout", content, outputContentFormat: ContentFormat.Markdown, pages: i.ToString());
-                    AnalyzeResult result = operation.Value;
-
-                    Console.WriteLine(result.Content);
-
-                    await _kernelMemory.DeleteDocumentAsync(i.ToString(), index: "test");
-                    await _kernelMemory.ImportTextAsync(result.Content, i.ToString(), index: "test");
-                    i++;
-                }
-                catch (Exception)
-                {
-                    break;
-                }
-            }
-
-            return true;
         }
     }
 }
