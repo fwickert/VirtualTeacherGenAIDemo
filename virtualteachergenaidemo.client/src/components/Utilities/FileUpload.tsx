@@ -63,7 +63,8 @@ export const FileUpload = ({ onFileUpload, fileName }: FileUploadProps) => {
         formData.append('totalChunks', totalChunks.toString());
         formData.append('fileId', fileId); // Include the unique file ID
 
-        const response = await fetch(`/api/FileUpload?connectionId=${connection?.connectionId || ''}`, {
+        const agentId = 'your-agent-id'; // Replace with actual agentId
+        const response = await fetch(`/api/FileUpload?connectionId=${connection?.connectionId || ''}&agentId=${agentId}`, {
             method: 'POST',
             body: formData
         });

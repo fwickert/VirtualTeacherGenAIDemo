@@ -25,7 +25,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             _messageRelayHubContext = messageRelayHubContext;
         }
 
-        public async Task<bool> ParseDocument(Stream fileStream, string connectionId, CancellationToken token)
+        public async Task<bool> ParseDocument(Stream fileStream, string agentId, string connectionId, CancellationToken token)
         {
             var client = new DocumentIntelligenceClient(new Uri(_options.Endpoint), new AzureKeyCredential(_options.Key));
 
@@ -41,10 +41,12 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                     Operation<AnalyzeResult> operation = await client.AnalyzeDocumentAsync(WaitUntil.Completed, "prebuilt-layout", content, outputContentFormat: ContentFormat.Markdown, pages: i.ToString());
                     AnalyzeResult result = operation.Value;
 
-                    Console.WriteLine(result.Content);
+                    TagCollection tags = new TagCollection();
+                    tags.Add("agentId", agentId);
 
-                    await _kernelMemory.DeleteDocumentAsync(i.ToString(), index: _options.IndexName);
-                    await _kernelMemory.ImportTextAsync(result.Content, i.ToString(), index: _options.IndexName);
+                    string docuId = $"{agentId}:{i.ToString()}";
+                    await _kernelMemory.DeleteDocumentAsync(docuId, index: _options.IndexName); // Need to test if need to delete
+                    await _kernelMemory.ImportTextAsync(result.Content, docuId, index: _options.IndexName, tags:tags);
 
                     
                     string toSend = $"Page {i} parsed successfully.";
