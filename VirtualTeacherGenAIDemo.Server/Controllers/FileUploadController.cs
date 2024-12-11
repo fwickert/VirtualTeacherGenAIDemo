@@ -13,58 +13,29 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
     public class FileUploadController : ControllerBase
     {
         private readonly FileUploadService _fileUploadService;
-        private readonly ConcurrentDictionary<string, ConcurrentDictionary<int, byte[]>> _fileChunks = new();
+        private static readonly ConcurrentDictionary<string, MemoryStream> _fileStreams = new();
 
         public FileUploadController([FromServices] FileUploadService fileUploadService)
         {
             _fileUploadService = fileUploadService;
         }
 
-        [HttpPost("")]
-        public async Task<IActionResult> UploadFile(string connectionId, IFormFile fileStream, int chunkIndex, int totalChunks, CancellationToken token)
+        [HttpPost()]
+        public async Task<IActionResult> UploadFile(string connectionId, IFormFile file, [FromForm] string fileId, [FromForm] int chunkIndex, [FromForm] int totalChunks, CancellationToken token)
         {
-            if (fileStream == null || fileStream.Length == 0)
+            if (!_fileStreams.ContainsKey(fileId))
             {
-                return BadRequest("No file uploaded.");
+                _fileStreams[fileId] = new MemoryStream();
             }
 
-            if (!_fileChunks.ContainsKey(connectionId))
+            var fileStream = _fileStreams[fileId];
+            await file.CopyToAsync(fileStream, token);
+
+            if (chunkIndex == totalChunks - 1)
             {
-                _fileChunks[connectionId] = new ConcurrentDictionary<int, byte[]>();
-            }
-
-            using (var memoryStream = new MemoryStream())
-            {
-                await fileStream.CopyToAsync(memoryStream, token);
-                _fileChunks[connectionId][chunkIndex] = memoryStream.ToArray();
-            }
-
-            if (_fileChunks[connectionId].Count == totalChunks)
-            {
-                // All chunks uploaded, assemble the file
-                using (var finalMemoryStream = new MemoryStream())
-                {
-                    for (int i = 0; i < totalChunks; i++)
-                    {
-                        if (_fileChunks[connectionId].TryGetValue(i, out var chunk))
-                        {
-                            await finalMemoryStream.WriteAsync(chunk, 0, chunk.Length, token);
-                        }
-                        else
-                        {
-                            return NoContent(); // Missing chunk
-                        }
-                    }
-
-                    finalMemoryStream.Position = 0;
-                    var parseResult = await _fileUploadService.ParseDocument(finalMemoryStream, connectionId, token);
-                    if (!parseResult)
-                    {
-                        return StatusCode(StatusCodes.Status500InternalServerError, "Error parsing the document.");
-                    }
-                }
-
-                _fileChunks.TryRemove(connectionId, out _); // Clean up chunks
+                fileStream.Position = 0;
+                _ = Task.Run(() => _fileUploadService.ParseDocument(fileStream, connectionId, token));
+                _fileStreams.TryRemove(fileId, out _);
             }
 
             return Ok();

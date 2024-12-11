@@ -52,8 +52,9 @@ namespace VirtualTeacherGenAIDemo.Server.Services
 
                     i++;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    await UpdateMessageOnClient("DocumentParsedUpdate", $"Error : {ex.Message}", connectionId, token);
                     break;
                 }
             }

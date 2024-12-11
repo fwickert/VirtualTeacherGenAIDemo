@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@fluentui/react-button';
 import { Field } from '@fluentui/react-field';
 import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
+import { v4 as uuidv4 } from 'uuid';
 
 interface FileUploadProps {
     onFileUpload: (fileName: string) => void;
@@ -9,15 +10,16 @@ interface FileUploadProps {
 }
 
 export const FileUpload = ({ onFileUpload, fileName }: FileUploadProps) => {
-    const [file, setFile] = useState<File | null>(null);
-    const [fileError, setFileError] = useState<string>('');
-    const [displayFileName, setDisplayFileName] = useState<string>(fileName || '');
+    const [files, setFiles] = useState<File[]>([]);
+    const [fileErrors, setFileErrors] = useState<string[]>([]);
+    const [displayFileNames, setDisplayFileNames] = useState<string[]>(fileName ? [fileName] : []);
     const [connection, setConnection] = useState<HubConnection | null>(null);
     const [status, setStatus] = useState<string>('');
+    const [fileIds, setFileIds] = useState<string[]>([]);
 
     useEffect(() => {
         if (fileName) {
-            setDisplayFileName(fileName);
+            setDisplayFileNames([fileName]);
         }
     }, [fileName]);
 
@@ -44,24 +46,23 @@ export const FileUpload = ({ onFileUpload, fileName }: FileUploadProps) => {
     }, [connection]);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFile = event.target.files?.[0] || null;
-        setFile(selectedFile);
-        setFileError('');
-        if (selectedFile) {
-            setDisplayFileName(selectedFile.name);
-            onFileUpload(selectedFile.name);
-        }
+        const selectedFiles = Array.from(event.target.files || []);
+        setFiles(selectedFiles);
+        setFileErrors([]);
+        setDisplayFileNames(selectedFiles.map(file => file.name));
+        setFileIds(selectedFiles.map(() => uuidv4())); // Generate unique IDs for each file
+        selectedFiles.forEach(file => onFileUpload(file.name));
     };
 
     const CHUNK_SIZE = 2 * 1024 * 1024; // 2MB
 
-    const uploadChunk = async (chunk: Blob, chunkIndex: number, totalChunks: number) => {
+    const uploadChunk = async (chunk: Blob, chunkIndex: number, totalChunks: number, fileId: string) => {
         const formData = new FormData();
-        formData.append('fileStream', chunk);
+        formData.append('file', chunk);
         formData.append('chunkIndex', chunkIndex.toString());
         formData.append('totalChunks', totalChunks.toString());
+        formData.append('fileId', fileId); // Include the unique file ID
 
-        
         const response = await fetch(`/api/FileUpload?connectionId=${connection?.connectionId || ''}`, {
             method: 'POST',
             body: formData
@@ -73,37 +74,42 @@ export const FileUpload = ({ onFileUpload, fileName }: FileUploadProps) => {
     };
 
     const handleUploadClick = async () => {
-        if (!file) {
-            setFileError('Please select a file to upload.');
+        if (files.length === 0) {
+            setFileErrors(['Please select files to upload.']);
             return;
         }
 
-        const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
-        
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const fileId = fileIds[i];
+            const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
 
-        for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
-            const start = chunkIndex * CHUNK_SIZE;
-            const end = Math.min(start + CHUNK_SIZE, file.size);
-            const chunk = file.slice(start, end);
+            for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+                const start = chunkIndex * CHUNK_SIZE;
+                const end = Math.min(start + CHUNK_SIZE, file.size);
+                const chunk = file.slice(start, end);
 
-            try {
-                await uploadChunk(chunk, chunkIndex, totalChunks);
-            } catch (error) {
-                setFileError('File upload failed. Please try again.');
-                return;
+                try {
+                    await uploadChunk(chunk, chunkIndex, totalChunks, fileId);
+                } catch (error) {
+                    setFileErrors(prevErrors => [...prevErrors, `File upload failed for ${file.name}. Please try again.`]);
+                    return;
+                }
             }
-        }
 
-        onFileUpload(file.name);
+            onFileUpload(file.name);
+        }
     };
 
     return (
         <div className="file-upload">
-            <Field label="Upload File" required validationMessage={fileError}>
-                <input type="file" onChange={handleFileChange} />
+            <Field label="Upload Files" required validationMessage={fileErrors.join(', ')}>
+                <input type="file" multiple onChange={handleFileChange} />
             </Field>
             <Button appearance="primary" onClick={handleUploadClick}>Upload</Button>
-            {displayFileName && <p>File: {displayFileName}</p>}
+            {displayFileNames.map((name, index) => (
+                <p key={index}>File: {name}</p>
+            ))}
             <span>{status}</span>
         </div>
     );
