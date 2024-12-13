@@ -42,16 +42,15 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
     const [promptError, setPromptError] = useState('');
     const [isOpen, setIsOpen] = useState<boolean>(true);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
-    
-
-    const [fileName, setFileName] = useState<string>(agent?.fileName || '');
+    const [fileNames, setFileNames] = useState<string[]>();
+    const [fileName, setFileName] = useState<string>();
 
     useEffect(() => {
         if (agent) {
             setName(agent.name);
             setDescription(agent.description);
             setPrompt(agent.prompt);
-            setFileName(agent.fileName || '');
+            setFileNames(agent.fileNames.split(","))
         }
     }, [agent]);
 
@@ -87,7 +86,16 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
 
         if (!valid) return;
 
-        const newAgent = { name, description, prompt, type, id: agent?.id || "", fileName };
+        
+
+        const newAgent: AgentItem = {
+            name,
+            description,
+            prompt,
+            type,
+            id: agent?.id || "",
+            fileNames: fileNames ? fileNames.join(",") : ''
+        };
 
         const apiUrl = agent ? `/api/agent/${agent.id}` : '/api/agent';
         const method = agent ? 'PUT' : 'POST';
@@ -97,7 +105,7 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(agent),
+            body: JSON.stringify(newAgent),
         })
             .then(response => {
                 if (response.status === 204) {
@@ -110,13 +118,14 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
                 if (!agent) {
                     newAgent.id = data.id;
                 }
-                onAddAgent(newAgent)
+                onAddAgent(newAgent);
             })
             .catch(error => console.error('Error:', error));
 
         setIsOpen(false);
         onClose();
     };
+
 
     const handleDeleteAgent = () => {
         if (!agent) return;
@@ -146,6 +155,12 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
         setIsOpen(data.open);
         if (!data.open) {
             onClose();
+        }
+    };
+
+    const handleFilesChange = (files: string[]) => {
+        if (files.length > 0) {
+            setFileNames(files);
         }
     };
 
@@ -185,7 +200,7 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
                             </div>
 
                             <div className="formcard">
-                                <FileUpload onFileUpload={handleFileUpload} fileName={fileName} agentId={agent?.id } />
+                                <FileUpload onFileUpload={handleFileUpload} agentId={agent?.id} onChange={handleFilesChange} />
                             </div>
                         </DialogContent>
                         <DialogActions>

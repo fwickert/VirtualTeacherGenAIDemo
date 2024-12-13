@@ -5,24 +5,24 @@ import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
 import { v4 as uuidv4 } from 'uuid';
 
 interface FileUploadProps {
-    onFileUpload: (fileName: string) => void;
-    fileName?: string;
+    onFileUpload: (fileName: string) => void;    
     agentId: string | undefined;
+    onChange?: (fileNames: string[]) => void;
 }
 
-export const FileUpload = ({ onFileUpload, fileName, agentId }: FileUploadProps) => {
+export const FileUpload = ({ onFileUpload, fileNames, agentId, onChange }: FileUploadProps) => {
     const [files, setFiles] = useState<File[]>([]);
     const [fileErrors, setFileErrors] = useState<string[]>([]);
-    const [displayFileNames, setDisplayFileNames] = useState<string[]>(fileName ? [fileName] : []);
+    const [displayFileNames, setDisplayFileNames] = useState<string[]>(fileNames ? [fileNames] : []);
     const [connection, setConnection] = useState<HubConnection | null>(null);
     const [status, setStatus] = useState<string>('');
     const [fileIds, setFileIds] = useState<string[]>([]);
 
     useEffect(() => {
-        if (fileName) {
-            setDisplayFileNames([fileName]);
+        if (fileNames) {
+            setDisplayFileNames([fileNames]);
         }
-    }, [fileName]);
+    }, [fileNames]);
 
     useEffect(() => {
         const hubUrl = process.env.HUB_URL;
@@ -52,6 +52,9 @@ export const FileUpload = ({ onFileUpload, fileName, agentId }: FileUploadProps)
         setFileErrors([]);
         setDisplayFileNames(selectedFiles.map(file => file.name));
         setFileIds(selectedFiles.map(() => uuidv4())); // Generate unique IDs for each file
+        if (onChange) {
+            onChange(selectedFiles.map(file => file.name));
+        }
         selectedFiles.forEach(file => onFileUpload(file.name));
     };
 

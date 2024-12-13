@@ -11,21 +11,13 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
     {
         public static IServiceCollection AddOptions(this IServiceCollection services, ConfigurationManager configuration)
         {
-
             // General configuration
             AddOptions<ServiceOptions>(ServiceOptions.PropertyName);
-
             AddOptions<CosmosOptions>(CosmosOptions.PropertyName);
-
             AddOptions<KernelMemoryOptions>(KernelMemoryOptions.SectionName);
-
-            AddOptions<AIServiceOptions>(AIServiceOptions.PropertyName);            
-
+            AddOptions<AIServiceOptions>(AIServiceOptions.PropertyName);
             AddOptions<SpeechOptions>(SpeechOptions.PropertyName);
-
             AddOptions<DocumentIntelligentOptions>(DocumentIntelligentOptions.PropertyName);
-
-         
 
             return services;
 
@@ -63,7 +55,7 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
                             policy.WithOrigins(allowedOrigins)
                                 .WithMethods("GET", "POST", "DELETE")
                                 .AllowAnyHeader()
-                                .AllowCredentials();                                
+                                .AllowCredentials();
                         });
                 });
             }
@@ -73,35 +65,29 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
 
         internal static IServiceCollection AddStorageContext(this IServiceCollection services)
         {
-            IStorageContext<MessageItem> messageStorageContext;
-            CosmosOptions cosmosConfig = services.BuildServiceProvider().GetRequiredService<IOptions<CosmosOptions>>().Value;
-            messageStorageContext = new CosmosDbContext<MessageItem>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.MessageContainer);
+            var serviceProvider = services.BuildServiceProvider();
+            var cosmosOptions = serviceProvider.GetRequiredService<IOptions<CosmosOptions>>().Value;
+
+            IStorageContext<MessageItem> messageStorageContext = new CosmosDbContext<MessageItem>(cosmosOptions, cosmosOptions.MessageContainer, cosmosOptions.MessagePartitionKey);
             services.AddSingleton<MessageRepository>(new MessageRepository(messageStorageContext));
 
-            IStorageContext<SessionItem> sessionStorageContext; 
-            sessionStorageContext = new CosmosDbContext<SessionItem>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.SessionContainer);
-            services.AddSingleton<SessionRepository>(new SessionRepository(sessionStorageContext));            
-            
-            IStorageContext<DashboardItem> dashboardStorageContext;
-            dashboardStorageContext = new CosmosDbContext<DashboardItem>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.DashboardContainer);
+            IStorageContext<SessionItem> sessionStorageContext = new CosmosDbContext<SessionItem>(cosmosOptions, cosmosOptions.SessionContainer, cosmosOptions.SessionPartitionKey);
+            services.AddSingleton<SessionRepository>(new SessionRepository(sessionStorageContext));
+
+            IStorageContext<DashboardItem> dashboardStorageContext = new CosmosDbContext<DashboardItem>(cosmosOptions, cosmosOptions.DashboardContainer, cosmosOptions.DashboardPartitionKey);
             services.AddSingleton<DashboardRepository>(new DashboardRepository(dashboardStorageContext));
 
-            IStorageContext<AgentItem> agentStorageContext;
-            agentStorageContext = new CosmosDbContext<AgentItem>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.AgentContainer);
+            IStorageContext<AgentItem> agentStorageContext = new CosmosDbContext<AgentItem>(cosmosOptions, cosmosOptions.AgentContainer, cosmosOptions.AgentPartitionKey);
             services.AddSingleton<AgentRepository>(new AgentRepository(agentStorageContext));
 
-            IStorageContext<ScenarioItem> scenarioStorageContext;
-            scenarioStorageContext = new CosmosDbContext<ScenarioItem>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.ScenarioContainer);
+            IStorageContext<ScenarioItem> scenarioStorageContext = new CosmosDbContext<ScenarioItem>(cosmosOptions, cosmosOptions.ScenarioContainer, cosmosOptions.ScenarioPartitionKey);
             services.AddSingleton<ScenarioRepository>(new ScenarioRepository(scenarioStorageContext));
 
-            IStorageContext<UserItem> userStorageContext;
-            userStorageContext = new CosmosDbContext<UserItem>(cosmosConfig.EndPoint, cosmosConfig.Database, cosmosConfig.UserContainer);
+            IStorageContext<UserItem> userStorageContext = new CosmosDbContext<UserItem>(cosmosOptions, cosmosOptions.UserContainer, cosmosOptions.UserPartitionKey);
             services.AddSingleton<UserRepository>(new UserRepository(userStorageContext));
 
-
             return services;
-
-        }   
+        }
 
         internal static IServiceCollection AddAIResponses(this IServiceCollection services)
         {
@@ -154,7 +140,6 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
                 }
             }
         }
-
 
         internal static IServiceCollection AddServices(this IServiceCollection services)
         {
