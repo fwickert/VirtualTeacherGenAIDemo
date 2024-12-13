@@ -150,7 +150,8 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
             scenarioDescription: scenarioDescription || '',
             agents: currentScenario?.map(agent => ({
                 prompt: agent.prompt,
-                type: agent.type
+                type: agent.type,
+                id: agent.id
             })) || []
         };
 
@@ -162,13 +163,13 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
         ]);
         console.log(chatHistory);
 
-        await callLLMApi(chatHistory);
+        await callLLMApi(chatHistory, rolePlayAgent?.id);
     };
 
-    const callLLMApi = async (chatHistory: ChatHistoryRequest) => {
+    const callLLMApi = async (chatHistory: ChatHistoryRequest, agentId: string | undefined) => {
         console.log(chatHistory);
         try {
-            const response = await fetch(`/api/chat/message?connectionId=${connection?.connectionId}`, {
+            const response = await fetch(`/api/chat/message?agentId=${agentId}&connectionId=${connection?.connectionId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -180,7 +181,6 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
             console.error('Error calling Chat:', error);
         }
     };
-
     const handleDeleteMessage = async (id: string) => {
         //stop the audio
         cancelSpeech();

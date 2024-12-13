@@ -7,9 +7,10 @@ import { v4 as uuidv4 } from 'uuid';
 interface FileUploadProps {
     onFileUpload: (fileName: string) => void;
     fileName?: string;
+    agentId: string | undefined;
 }
 
-export const FileUpload = ({ onFileUpload, fileName }: FileUploadProps) => {
+export const FileUpload = ({ onFileUpload, fileName, agentId }: FileUploadProps) => {
     const [files, setFiles] = useState<File[]>([]);
     const [fileErrors, setFileErrors] = useState<string[]>([]);
     const [displayFileNames, setDisplayFileNames] = useState<string[]>(fileName ? [fileName] : []);
@@ -56,14 +57,14 @@ export const FileUpload = ({ onFileUpload, fileName }: FileUploadProps) => {
 
     const CHUNK_SIZE = 2 * 1024 * 1024; // 2MB
 
-    const uploadChunk = async (chunk: Blob, chunkIndex: number, totalChunks: number, fileId: string) => {
+    const uploadChunk = async (chunk: Blob, chunkIndex: number, totalChunks: number, fileId: string, fileName:string) => {
         const formData = new FormData();
         formData.append('file', chunk);
         formData.append('chunkIndex', chunkIndex.toString());
         formData.append('totalChunks', totalChunks.toString());
-        formData.append('fileId', fileId); // Include the unique file ID
+        formData.append('fileId', fileId); 
+        formData.append('fileName', fileName);
 
-        const agentId = 'your-agent-id'; // Replace with actual agentId
         const response = await fetch(`/api/FileUpload?connectionId=${connection?.connectionId || ''}&agentId=${agentId}`, {
             method: 'POST',
             body: formData
@@ -91,7 +92,7 @@ export const FileUpload = ({ onFileUpload, fileName }: FileUploadProps) => {
                 const chunk = file.slice(start, end);
 
                 try {
-                    await uploadChunk(chunk, chunkIndex, totalChunks, fileId);
+                    await uploadChunk(chunk, chunkIndex, totalChunks, fileId, files[i].name);
                 } catch (error) {
                     setFileErrors(prevErrors => [...prevErrors, `File upload failed for ${file.name}. Please try again.`]);
                     return;

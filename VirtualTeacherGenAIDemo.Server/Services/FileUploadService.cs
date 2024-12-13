@@ -25,7 +25,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             _messageRelayHubContext = messageRelayHubContext;
         }
 
-        public async Task<bool> ParseDocument(Stream fileStream, string agentId, string connectionId, CancellationToken token)
+        public async Task<bool> ParseDocument(Stream fileStream, string fileName, string agentId, string connectionId, CancellationToken token)
         {
             var client = new DocumentIntelligenceClient(new Uri(_options.Endpoint), new AzureKeyCredential(_options.Key));
 
@@ -44,14 +44,17 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                     TagCollection tags = new TagCollection();
                     tags.Add("agentId", agentId);
 
-                    string docuId = $"{agentId}:{i.ToString()}";
-                    await _kernelMemory.DeleteDocumentAsync(docuId, index: _options.IndexName); // Need to test if need to delete
-                    await _kernelMemory.ImportTextAsync(result.Content, docuId, index: _options.IndexName, tags:tags);
+                    string docuId = $"{agentId}_file_{fileName.Replace(" ", "-")}_id_{i.ToString()}";                    
 
+                    if (!string.IsNullOrWhiteSpace(result.Content))
+                    {
+                        //await _kernelMemory.DeleteDocumentAsync(docuId, index: _options.IndexName); // Need to test if need to delete
+                        await _kernelMemory.ImportTextAsync(result.Content, docuId, index: _options.IndexName, tags: tags);
+
+                        string toSend = $"Page {i} parsed successfully.";
+                        await UpdateMessageOnClient("DocumentParsedUpdate", toSend, connectionId, token);
+                    }
                     
-                    string toSend = $"Page {i} parsed successfully.";
-                    await UpdateMessageOnClient("DocumentParsedUpdate", toSend, connectionId, token);
-
                     i++;
                 }
                 catch (Exception ex)

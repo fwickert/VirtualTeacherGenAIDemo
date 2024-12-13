@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
 using VirtualTeacherGenAIDemo.Server.Hubs;
 using VirtualTeacherGenAIDemo.Server.Models.Response;
 using VirtualTeacherGenAIDemo.Server.Models.Storage;
@@ -14,20 +15,22 @@ namespace VirtualTeacherGenAIDemo.Server.Services
     {
         private readonly ILogger<ChatResponse> _logger;
         private readonly IHubContext<MessageRelayHub> _messageRelayHubContext;
-        private readonly AzureOpenAIChatCompletionService _chat;
+        private readonly IChatCompletionService _chat;
+        private readonly Kernel _kernel;
         private readonly int DELAY = 25;
 
-        public ChatResponse(ILogger<ChatResponse> logger,
-            [FromServices] AzureOpenAIChatCompletionService chat,
-            [FromServices] IHubContext<MessageRelayHub> messageRelayHubContext)
+        public ChatResponse(ILogger<ChatResponse> logger,            
+            [FromServices] IHubContext<MessageRelayHub> messageRelayHubContext,
+            [FromServices] Kernel kernel)
         {
             _logger = logger;
-
-            _chat = chat;
+            _kernel = kernel;
+            _chat = _kernel.GetRequiredService<IChatCompletionService>();
             _messageRelayHubContext = messageRelayHubContext;
+            
         }
 
-        public async Task StartChat(string connectionId, string persona,
+        public async Task StartChat(string connectionId,
             ChatHistory chatHistory,
             string userId,
             SessionItem session,
@@ -36,15 +39,6 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             CancellationToken token)
         {
 
-
-            ChatMessageContent promptSystem = chatHistory.FirstOrDefault(q => q.Role == AuthorRole.System)!;
-            if (promptSystem != null)
-            {
-                if (string.IsNullOrEmpty(promptSystem.Content))
-                {
-                    promptSystem.Content = persona;
-                }
-            }
 
             if (string.IsNullOrEmpty(session.Id))
             {
@@ -80,7 +74,16 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             };
             await this.UpdateMessageOnClient("StartMessageUpdate", response, connectionId, token);
 
-            await foreach (StreamingChatMessageContent chatUpdate in _chat.GetStreamingChatMessageContentsAsync(chatHistory, cancellationToken: token))
+            OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
+            {
+                ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
+            };
+
+            
+            await foreach (StreamingChatMessageContent chatUpdate in _chat.GetStreamingChatMessageContentsAsync(chatHistory, 
+                executionSettings: openAIPromptExecutionSettings, 
+                kernel: _kernel,  
+                cancellationToken: token))
             {
                 if (!string.IsNullOrEmpty(chatUpdate.Content))
                 {                    
@@ -138,6 +141,8 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             await this.UpdateMessageOnClient("EndMessageUpdate", response, connectionId, token);
 
         }
+
+
 
         /// <summary>
         /// Update the response on the client.

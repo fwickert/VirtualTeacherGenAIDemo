@@ -185,7 +185,7 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
                             </div>
 
                             <div className="formcard">
-                                <FileUpload onFileUpload={handleFileUpload} fileName={fileName} />
+                                <FileUpload onFileUpload={handleFileUpload} fileName={fileName} agentId={agent?.id } />
                             </div>
                         </DialogContent>
                         <DialogActions>

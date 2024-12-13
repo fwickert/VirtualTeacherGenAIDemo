@@ -9,7 +9,7 @@ export class SessionItem {
     agents: SessionAgent[];
 
     
-    constructor(id: string, title: string, isComplete: boolean, timestamp: Date, userId: string, scenarioName: string, scenarioDescription: string, agents: ISessionAgent[]) {
+    constructor(id: string, title: string, isComplete: boolean, timestamp: Date, userId: string, scenarioName: string, scenarioDescription: string, agents: SessionAgent[]) {
         this.id = id;
         this.title = title;
         this.isComplete = isComplete;
@@ -22,12 +22,14 @@ export class SessionItem {
 }
 
 export class SessionAgent {
+    id:string
     prompt: string;
     type: string;
 
     
-    constructor(prompt: string, type: string) {
+    constructor(id:string, prompt: string, type: string) {
         this.prompt = prompt;
         this.type = type;
+        this.id = id;
     }
 }

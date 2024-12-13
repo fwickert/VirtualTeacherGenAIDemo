@@ -4,6 +4,8 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
 using VirtualTeacherGenAIDemo.Server.AI;
 using VirtualTeacherGenAIDemo.Server.Options;
+using VirtualTeacherGenAIDemo.Server.Services;
+using VirtualTeacherGenAIDemo.Server.Tools;
 
 namespace VirtualTeacherGenAIDemo.Server.Extensions
 {
@@ -27,8 +29,13 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
                 builder.Services.AddLogging(c => c.AddConsole().SetMinimumLevel(LogLevel.Information));
                 builder.WithCompletionBackend(sp.GetRequiredService<IOptions<AIServiceOptions>>().Value, serviceID);
                 builder.Services.AddHttpClient();
-                Kernel kernel = builder.Build();
 
+
+                var searchTool = new SearchTool(sp.GetRequiredService<SearchService>());
+                builder.Plugins.AddFromObject(searchTool);
+
+
+                Kernel kernel = builder.Build();
                 sp.GetRequiredService<RegisterPluginsWithKernel>()(sp, kernel);
                 return kernel;
             });

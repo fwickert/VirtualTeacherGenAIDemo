@@ -19,9 +19,7 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
 
             AddOptions<KernelMemoryOptions>(KernelMemoryOptions.SectionName);
 
-            AddOptions<AIServiceOptions>(AIServiceOptions.PropertyName);
-
-            AddOptions<AssistantOption>(AssistantOption.PropertyName);
+            AddOptions<AIServiceOptions>(AIServiceOptions.PropertyName);            
 
             AddOptions<SpeechOptions>(SpeechOptions.PropertyName);
 
@@ -168,6 +166,7 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
             services.AddScoped<SessionService>();
             services.AddScoped<UserService>();
             services.AddScoped<FileUploadService>();
+            services.AddScoped<SearchService>();
             return services;
         }
     }
