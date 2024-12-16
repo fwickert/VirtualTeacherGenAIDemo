@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch: # This allows manual triggering of the workflow
 
 jobs:
   terraform:
@@ -20,6 +21,11 @@ jobs:
       uses: hashicorp/setup-terraform@v2
       with:
         terraform_version: 1.0.11
+
+    - name: Set up Azure credentials
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Initialize Terraform
       run: terraform init
