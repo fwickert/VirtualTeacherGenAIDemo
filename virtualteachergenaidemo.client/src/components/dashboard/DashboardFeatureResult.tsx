@@ -26,7 +26,8 @@ const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({ session
             
             connection.on(infoType, (updatedData: any) => {
                 setIsLoading(false);
-                setContent(updatedData);
+                
+                setContent(updatedData.content);
             });
 
             return () => {

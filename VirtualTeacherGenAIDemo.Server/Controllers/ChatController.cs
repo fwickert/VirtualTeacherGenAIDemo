@@ -22,9 +22,9 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
 
         [HttpPost("message",Name = "message")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IResult Post([FromBody] ChatHistoryRequest chatHistory, CancellationToken token)
+        public IResult Post([FromBody] ChatHistoryRequest chatHistory,string agentId, string connectionId, CancellationToken token)
         {
-            return _chatService.GetChat(chatHistory, token);
+            return _chatService.GetChat(chatHistory,agentId,connectionId, token);
         }
 
 
@@ -41,9 +41,9 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
         //Delete chat message
         [HttpDelete("message/{messageId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task DeleteMessage(string messageId, string chatid,  CancellationToken token)
+        public async Task DeleteMessage([FromBody] DeleteMessageRequest message,  CancellationToken token)
         {
-            await _chatService.DeleteMessage(messageId, chatid);
+            await _chatService.DeleteMessage(message.MessageId, message.SessionId);
 
         }
 

@@ -40,14 +40,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.AI.DocumentIntelligence" Version="1.0.0-beta.3" />
     <PackageReference Include="Azure.Identity" Version="1.13.1" />
     <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
       <Version>8.0.11</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.45.2" />
-    <PackageReference Include="Microsoft.SemanticKernel" Version="1.28.0" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.46.0" />
+    <PackageReference Include="Microsoft.KernelMemory" Version="0.94.241201.1" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.32.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
   </ItemGroup>
 
   <ItemGroup>
