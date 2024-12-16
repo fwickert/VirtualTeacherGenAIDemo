@@ -30,11 +30,11 @@ const useStyles = makeStyles({
     fileListColumn: {
         display: 'flex',
         flexDirection: 'column',
-        gap: '10x', // Add some space between tags
+        gap: '10x', 
     },
     tag: {
         width: '100%',
-        display: 'block', // Ensure each tag takes the full width
+        display: 'block', 
     },
 });
 

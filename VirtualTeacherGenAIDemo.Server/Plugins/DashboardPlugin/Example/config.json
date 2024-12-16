@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "description": "To improve conversation between customer and sales, give a example of response taht sales could have made",
+  "description": "To improve conversation between customer and sales, give a example of response that beauty advisor could have made",
   "execution_settings": {
     "default": {
       "max_tokens": 3000,
@@ -14,6 +14,11 @@
     {
       "name": "conversation",
       "description": "the conversattion to make example",
+      "default": ""
+    },
+    {
+      "name": "userPrompt",
+      "description": "the user give it's own prompt'",
       "default": ""
     }
   ]

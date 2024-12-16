@@ -14,13 +14,25 @@ import { AgentDialog } from './AgentDialog'; // Import AgentDialog
 
 const useStyles = makeStyles({
     customPreview: {
-        padding: '10px',
+        padding: '5px',
     },
     customCard: {
         minWidth: '400px',
         maxWidth: '300px',
         minHeight: '200px',
-        maxHeight: '200px',
+        maxHeight: '200px',    
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+    },
+    cardFooter: {
+        display: 'flex',
+        justifyContent: 'flex-end',
+        alignItems: 'flex-end',
+        marginTop: 'auto',
+    },
+    editButton: {
+        marginLeft: 'auto',
     },
     iconGrid: {
         display: 'grid',
@@ -64,9 +76,17 @@ const useStyles = makeStyles({
     buttonIcon: {
         fontSize: '48px',
         marginBottom: '5px',
+    },  
+    headerText: {
+        fontSize: '20px',
+        lineHeight: 'var(--lineHeightBase400)',
     },
-    editButton: {
-        marginLeft: 'auto',
+    truncatedText: {
+        display: '-webkit-box',
+        WebkitLineClamp: 2,
+        WebkitBoxOrient: 'vertical',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
     },
 });
 
@@ -143,15 +163,13 @@ const AgentList: FC = () => {
             .map(agent => (
                 <Card key={agent.id} className={`${classes.customCard} card`} >
                     <CardHeader
-                        header={<Title2>{agent.name}</Title2>}
+                        header={<Title2 className={classes.headerText}>{agent.name}</Title2>}
                         action={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass(agent.type, classes))} />}
                     />
                     <CardPreview className={classes.customPreview}>
-                        <div className={classes.iconGrid}>
-                            <div><Body2>{agent.description}</Body2></div>                            
-                        </div>
+                        <div><Body2 className={classes.truncatedText}>{agent.description}</Body2></div>
                     </CardPreview>
-                    <CardFooter>
+                    <CardFooter className={classes.cardFooter}>
                         <Button
                             icon={<EditRegular />}
                             className={classes.editButton}

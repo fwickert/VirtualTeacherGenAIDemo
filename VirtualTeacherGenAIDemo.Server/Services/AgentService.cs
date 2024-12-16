@@ -13,10 +13,10 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         }
 
         public async Task<IEnumerable<AgentItem>> GetByTypeAsync(string type)
-        {        
-            return await _agentRepository.GetAgentsByTypeAsync(type);            
+        {
+            return await _agentRepository.GetAgentsByTypeAsync(type);
         }
-        
+
         public async Task<IEnumerable<AgentItem>> GetAgentsAndSystemAsync(string type)
         {
             return await _agentRepository.GetAgentsAndSystemAsync(type);
@@ -45,6 +45,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         public async Task UpdateAgentAsync(AgentItem agent)
         {
             await _agentRepository.UpdateAgentAsync(agent);
+
         }
 
         public async Task DeleteAgentAsync(AgentItem agent)

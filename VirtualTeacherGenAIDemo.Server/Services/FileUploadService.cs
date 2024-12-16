@@ -37,6 +37,8 @@ namespace VirtualTeacherGenAIDemo.Server.Services
 
             int i = 1;
             await UpdateMessageOnClient("DocumentParsedUpdate", "Process started...", connectionId, token);
+
+
             while (true)
             {
                 try
@@ -50,7 +52,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                     tags.Add("docName", fileName);
 
 
-                    string docuId = $"{agentId}_file_{fileName.Replace(" ", "-")}_id_{i.ToString()}";                    
+                    string docuId = $"{agentId}_file_{fileName.Replace(" ", "-")}_id_{i.ToString()}";
 
                     if (!string.IsNullOrWhiteSpace(result.Content))
                     {
@@ -60,7 +62,12 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                         string toSend = $"Page {i} parsed successfully.";
                         await UpdateMessageOnClient("DocumentParsedUpdate", toSend, connectionId, token);
                     }
-                    
+
+                    if (!fileName.EndsWith("pdf") && result.Pages.Count == i)
+                    {
+                        break;
+                    }
+
                     i++;
                 }
                 catch (Exception ex)
@@ -106,10 +113,17 @@ namespace VirtualTeacherGenAIDemo.Server.Services
 
             await UpdateMessageOnClient("DeleteFileUpdate", "Delete file started...", connectionId, token);
 
-            foreach (var item in result.Results) {
-                await _kernelMemory.DeleteDocumentAsync(item.DocumentId,index:_options.IndexName);
+            while (result.Results.Count > 0)
+            {
+                foreach (var item in result.Results)
+                {
+                    await _kernelMemory.DeleteDocumentAsync(item.DocumentId, index: _options.IndexName);
+                }
+                // Assuming you need to re-fetch the results after deletion
+                result = await _kernelMemory.SearchAsync("", index: _options.IndexName, filter);
             }
-            
+
+
 
             // Remove file name from agent's file list
             if (agent.FileNames.Contains(fileName))
