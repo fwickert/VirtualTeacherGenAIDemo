@@ -1,4 +1,4 @@
-.formcard{
+.formcard {
     margin-top: 20px;
     margin-bottom: 20px;
     padding: 20px;
@@ -10,7 +10,7 @@
 .delete-button-container {
     display: flex;
     justify-content: flex-start;
-    flex-grow: 1;    
+    flex-grow: 1;
 }
 
 

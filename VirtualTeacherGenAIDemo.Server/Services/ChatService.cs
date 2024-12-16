@@ -10,25 +10,23 @@ namespace VirtualTeacherGenAIDemo.Server.Services
 {
     public class ChatService
     {
-        private readonly ChatResponse _chatResponse;
-        private readonly AssistantOption _assistantOption;
+        private readonly ChatResponse _chatResponse;        
         private readonly MessageRepository _messageRepository;
         private readonly SessionRepository _sessionRepository;
 
 
         public ChatService([FromServices] MessageRepository messageRepository,
             [FromServices] SessionRepository sessionRepository,
-            [FromServices] ChatResponse chatResponse, 
-            IOptions<AssistantOption> option)
+            [FromServices] ChatResponse chatResponse)
         {
             _messageRepository = messageRepository;
             _sessionRepository = sessionRepository;
             _chatResponse = chatResponse;
-            _assistantOption = option.Value;            
+         
         }
 
         //Creater function to call GetAsync in other thread without asunc/await and with cancellation token in parameters
-        public IResult GetChat(ChatHistoryRequest chatHistory, CancellationToken token)
+        public IResult GetChat(ChatHistoryRequest chatHistory, string agentId, string connectionId, CancellationToken token)
         {
             //Transform ChatHistoryRequest to ChatHistory
             ChatHistory SKHistory = new ChatHistory();
@@ -37,18 +35,23 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 switch (message.Role)
                 {
                     case "User":
-                        SKHistory.AddUserMessage(message.Content);
+                        SKHistory.AddUserMessage(message.Content + "\r\nUse the seach tool to find information.");
                         break;
                     case "System":
-                        SKHistory.AddSystemMessage(message.Content);
+                        SKHistory.AddSystemMessage($"agentId:{agentId}\n" + message.Content);
                         break;
                 }
             }
+            if (chatHistory.Session != null)
+            {
+                Task.Run(() => _chatResponse.StartChat(connectionId, SKHistory, chatHistory.UserId, chatHistory.Session, _messageRepository, _sessionRepository, token), token);
+            }
 
-            Task.Run(() => _chatResponse.StartChat(_assistantOption.Persona, SKHistory, chatHistory.UserId, chatHistory.Session,  _messageRepository, _sessionRepository, token), token); 
 
             return TypedResults.Ok("Chat requested");
         }
+
+
 
         //return all message from a chatid
         public async Task<IEnumerable<MessageItem>> GetChatMessages(string userId)
@@ -59,9 +62,9 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         }
 
         //Delete a message by id
-        public async Task DeleteMessage(string messageId, string userId)
+        public async Task DeleteMessage(string messageId, string sessionId)
         {
-            await _messageRepository.DeleteMessageByIdAsync(messageId, userId);
+            await _messageRepository.DeleteMessageByIdAsync(messageId, sessionId);
         }
 
 

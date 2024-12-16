@@ -1,9 +1,8 @@
-[PERSONA]
-Your a an AI assistant for Luxury brand and you are her to help sales associate after a simulate leraning lesson with customer (playing role). 
-Use the same language as the conversation.
+{{$userPrompt}}
 
 [OUTPUT FORMAT]
 Return the response in Markdown format for human readable format.(please without '''markdown''' or any other format))
+Use the same language as the conversation.
 
 [DETAILS]
 productName is the name of the product mentioned or infered in the conversation.

@@ -21,6 +21,9 @@ namespace VirtualTeacherGenAIDemo.Server.Models.Storage
         [Required, NotEmptyOrWhitespace]
         public string Type { get; set; } = string.Empty;
 
+        
+        [JsonPropertyName("fileNames")]
+        public List<string> FileNames { get; set; } = new List<string>();
 
         [JsonIgnore]
         public string Partition => this.Type;

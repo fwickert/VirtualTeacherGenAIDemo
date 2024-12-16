@@ -1,7 +1,11 @@
 ﻿using Microsoft.Extensions.Options;
+using Microsoft.KernelMemory;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
+using VirtualTeacherGenAIDemo.Server.AI;
 using VirtualTeacherGenAIDemo.Server.Options;
+using VirtualTeacherGenAIDemo.Server.Services;
+using VirtualTeacherGenAIDemo.Server.Tools;
 
 namespace VirtualTeacherGenAIDemo.Server.Extensions
 {
@@ -25,8 +29,13 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
                 builder.Services.AddLogging(c => c.AddConsole().SetMinimumLevel(LogLevel.Information));
                 builder.WithCompletionBackend(sp.GetRequiredService<IOptions<AIServiceOptions>>().Value, serviceID);
                 builder.Services.AddHttpClient();
-                Kernel kernel = builder.Build();
 
+
+                var searchTool = new SearchTool(sp.GetRequiredService<SearchService>());
+                builder.Plugins.AddFromObject(searchTool);
+
+
+                Kernel kernel = builder.Build();
                 sp.GetRequiredService<RegisterPluginsWithKernel>()(sp, kernel);
                 return kernel;
             });
@@ -54,7 +63,60 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
         }
 
 
-        
+        internal static void AddKernelMemoryService(this WebApplicationBuilder appBuilder)
+        {
+            var servicesProvider = appBuilder.Services.BuildServiceProvider();
+            var options = servicesProvider.GetRequiredService<IOptions<KernelMemoryOptions>>().Value;
+
+
+            var azureOpenAIEmbeddingConfig = new AzureOpenAIConfig
+            {
+                Auth = options.Services.AzureOpenAIEmbedding.Auth,
+                Endpoint = options.Services.AzureOpenAIEmbedding.Endpoint,
+                APIKey = options.Services.AzureOpenAIEmbedding.APIKey,
+                Deployment = options.Services.AzureOpenAIEmbedding.Deployment,
+                MaxTokenTotal = options.Services.AzureOpenAIEmbedding.MaxTokenTotal,
+                EmbeddingDimensions = options.Services.AzureOpenAIEmbedding.EmbeddingDimensions,
+                MaxEmbeddingBatchSize = options.Services.AzureOpenAIEmbedding.MaxEmbeddingBatchSize,
+                MaxRetries = options.Services.AzureOpenAIEmbedding.MaxRetries
+            };
+
+            var azureOpenAITextConfig = new AzureOpenAIConfig
+            {
+                Auth = options.Services.AzureOpenAIText.Auth,
+                Endpoint = options.Services.AzureOpenAIText.Endpoint,
+                APIKey = options.Services.AzureOpenAIText.APIKey,
+                Deployment = options.Services.AzureOpenAIText.Deployment,
+                MaxTokenTotal = options.Services.AzureOpenAIText.MaxTokenTotal,
+                APIType = options.Services.AzureOpenAIText.APIType,
+                MaxRetries = options.Services.AzureOpenAIText.MaxRetries
+            };
+
+            var azureAISearchConfig = new AzureAISearchConfig
+            {
+                Auth = options.Services.AzureAISearch.Auth,
+                Endpoint = options.Services.AzureAISearch.Endpoint,
+                APIKey = options.Services.AzureAISearch.APIKey,
+                UseHybridSearch = options.Services.AzureAISearch.UseHybridSearch,
+                UseStickySessions = options.Services.AzureAISearch.UseStickySessions
+            };
+
+            //azureAISearchConfig.UseHybridSearch = true;
+
+            var builder = new KernelMemoryBuilder(appBuilder.Services)
+
+                .WithAzureOpenAITextEmbeddingGeneration(azureOpenAIEmbeddingConfig)
+                .WithAzureOpenAITextGeneration(azureOpenAITextConfig)
+                .WithAzureAISearchMemoryDb(azureAISearchConfig)
+                .WithSearchClientConfig(new SearchClientConfig { Temperature = 0, TopP = 0 })
+                .WithCustomImageOcr(new DocIntOCREngine()); ;
+
+
+
+            builder.Services.AddSingleton<IKernelMemory>(builder.Build());
+
+
+        }
 
 
         /// <summary>

@@ -26,8 +26,8 @@ const useStyles = makeStyles({
     customCard: {
         minWidth: '400px',
         maxWidth: '300px',
-        minHeight: '280px',
-        maxHeight: '280px',
+        minHeight: '260px',
+        maxHeight: '260px',
     },
     customCardSmall: {
         minWidth: '400px',
@@ -44,13 +44,13 @@ const useStyles = makeStyles({
         display: 'grid',
         justifyItems: 'center',
         alignItems: 'center',
-        marginTop: '10px',
+        marginTop: '5px',
     },
     icon: {
-        fontSize: '35px',
+        fontSize: '30px',
     },
     iconText: {
-        marginTop: '5px',
+        marginTop: '0px',
         textAlign: 'center',
     },
     grayColor: {
@@ -81,6 +81,17 @@ const useStyles = makeStyles({
     },
     editButton: {
         marginLeft: 'auto',
+    },
+    headerText: {
+        fontSize: '20px',
+    },
+    description: {
+        display: '-webkit-box',
+        WebkitBoxOrient: 'vertical',
+        WebkitLineClamp: 2,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        height: '3em', // Adjust based on line height to ensure consistent height
     },
 });
 
@@ -183,13 +194,11 @@ const ScenarioList: React.FC<ScenarioListProps> = ({ onScenarioStart }) => {
                     {scenarios.map(scenario => (
                         <Card key={scenario.id} className={`${role === UserRoleEnum.Admin ? classes.customCard : classes.customCardSmall} card`}>
                             <CardHeader
-                                header={<Title2>{scenario.name}</Title2>}
+                                header={<Title2 className={classes.headerText}>{scenario.name}</Title2>} 
                             />
                             <CardPreview className={classes.customPreview}>
                                 <div className={classes.iconGrid}>
-                                    <div><Body2>{scenario.description}</Body2></div>
-
-
+                                    <div className={classes.description}><Body2>{scenario.description}</Body2></div>
                                     {role === UserRoleEnum.Admin && (
                                         <div className={classes.iconGrid}>
                                             {[0, 1, 2].map(index => {
@@ -197,11 +206,9 @@ const ScenarioList: React.FC<ScenarioListProps> = ({ onScenarioStart }) => {
                                                 const colorClass = agent ? getAgentColorClass(agent.type, classes) : classes.grayColor;
                                                 return (
                                                     <div key={index} className={classes.iconItem}>
-                                                        <PersonAvailableFilled
-                                                            className={mergeClasses(classes.icon, colorClass)}
-                                                        />
+                                                        <PersonAvailableFilled className={mergeClasses(classes.icon, colorClass)} />
                                                         <Text className={mergeClasses(classes.iconText, colorClass)}>
-                                                            {agent ? agent.name : 'Not set'}
+                                                            {agent ? agent.name.split(' ').slice(0, 3).join(' ') + (agent.name.split(' ').length > 3 ? '...' : '') : 'Not set'}
                                                         </Text>
                                                     </div>
                                                 );
@@ -210,6 +217,7 @@ const ScenarioList: React.FC<ScenarioListProps> = ({ onScenarioStart }) => {
                                     )}
                                 </div>
                             </CardPreview>
+
                             <CardFooter>
 
                                 {role === UserRoleEnum.Admin && (

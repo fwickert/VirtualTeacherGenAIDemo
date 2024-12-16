@@ -10,38 +10,51 @@ namespace VirtualTeacherGenAIDemo.Server.Services
     {
         private readonly LLMResponse _dashboardResponse;
         private readonly DashboardRepository _dashboardRepository;
+        private readonly SessionRepository _sessionRepository;
         private readonly string _pluginsDirectory;
+        private readonly SearchService _searchService;
 
-        public DashboardService([FromServices] LLMResponse dashboardResponse, [FromServices] DashboardRepository dashboardRepository)
+        public DashboardService([FromServices] LLMResponse dashboardResponse,
+            [FromServices] DashboardRepository dashboardRepository,
+            [FromServices] SessionRepository sessionRepository,
+            [FromServices] SearchService searchService)
         {
             _dashboardResponse = dashboardResponse;
             _dashboardRepository = dashboardRepository;
             _dashboardResponse.PluginName = "DashboardPlugin";
             _pluginsDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
+            _sessionRepository = sessionRepository;
+            _searchService = searchService;
         }
 
-        public IResult GetSummarize(DashboardRequest dashboardRequest, CancellationToken token)
+        public async Task<IResult> GetSummarize(DashboardRequest dashboardRequest, string sessionId, string userName, CancellationToken token)
         {
             _dashboardResponse.FunctionName = "Summary";
 
-            Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Summary",
+            SessionAgent agentTeacher = await GetAgent(sessionId, userName);
+
+            _ = Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Summary",
                                new Dictionary<string, string>()
                                {
-                    { "conversation", dashboardRequest.Conversation }
+                    { "conversation", dashboardRequest.Conversation },
+                    { "userPrompt", agentTeacher.Prompt }
             }, dashboardRequest.ConnectionId, token), token);
 
             return TypedResults.Ok("Summarize requested");
         }
 
         //return products
-        public IResult GetProducts(DashboardRequest dashboardRequest, CancellationToken token)
+        public async Task<IResult> GetProducts(DashboardRequest dashboardRequest, string sessionId, string userName, CancellationToken token)
         {
             _dashboardResponse.FunctionName = "Products";
 
-            Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Products",
+            SessionAgent agentTeacher = await GetAgent(sessionId, userName);
+
+            _ = Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Products",
                 new Dictionary<string, string>()
                 {
-                    { "conversation", dashboardRequest.Conversation }
+                    { "conversation", dashboardRequest.Conversation },
+                    { "userPrompt", agentTeacher.Prompt }
                 }
                 , dashboardRequest.ConnectionId, token), token);
 
@@ -49,56 +62,79 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         }
 
         //Get Keywords
-        public IResult GetKeywords(DashboardRequest dashboardRequest, CancellationToken token)
+        public async Task<IResult> GetKeywords(DashboardRequest dashboardRequest, string sessionId, string userName, CancellationToken token)
         {
             _dashboardResponse.FunctionName = "Keywords";
 
-            Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Keywords",
+            SessionAgent agentTeacher = await GetAgent(sessionId, userName);
+
+
+            _ = Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Keywords",
                 new Dictionary<string, string>()
                 {
-                    { "conversation", dashboardRequest.Conversation }
+                    { "conversation", dashboardRequest.Conversation },
+                    { "userPrompt", agentTeacher.Prompt }
                 }, dashboardRequest.ConnectionId, token), token);
 
             return TypedResults.Ok("Keywords requested");
         }
 
         //get advice
-        public IResult GetAdvice(DashboardRequest dashboardRequest, CancellationToken token)
+        public async Task<IResult> GetAdvice(DashboardRequest dashboardRequest, string sessionId, string userName, CancellationToken token)
         {
             _dashboardResponse.FunctionName = "Advice";
 
-            Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Advice",
+            SessionAgent agentTeacher = await GetAgent(sessionId, userName);
+
+            //take the content of knowledge by searching with agentId
+            string search = await _searchService.SearchByAgent("", agentTeacher.Id, "teacher");
+
+            _ = Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Advice",
                 new Dictionary<string, string>()
                 {
-                    { "conversation", dashboardRequest.Conversation }
+                    { "conversation", dashboardRequest.Conversation },
+                    { "userPrompt", agentTeacher.Prompt },
+                    {"knowledge", search }
                 }, dashboardRequest.ConnectionId, token), token);
 
             return TypedResults.Ok("Advice requested");
         }
 
+     
+
         //for Example
-        public IResult GetExample(DashboardRequest dashboardRequest, CancellationToken token)
+        public async Task<IResult> GetExample(DashboardRequest dashboardRequest, string sessionId, string userName, CancellationToken token)
         {
             _dashboardResponse.FunctionName = "Example";
 
-            Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Example",
+            SessionAgent agentTeacher = await GetAgent(sessionId, userName);
+
+            _ = Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Example",
                 new Dictionary<string, string>()
                 {
-                    { "conversation", dashboardRequest.Conversation }
+                    { "conversation", dashboardRequest.Conversation },
+                    { "userPrompt", agentTeacher.Prompt }
                 }, dashboardRequest.ConnectionId, token), token);
 
             return TypedResults.Ok("Example requested");
         }
 
         //for evaluation
-        public IResult GetEvaluation(DashboardRequest dashboardRequest, CancellationToken token)
+        public async Task<IResult> GetEvaluation(DashboardRequest dashboardRequest, string sessionId, string userName, CancellationToken token)
         {
             _dashboardResponse.FunctionName = "Evaluation";
 
-            Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Evaluation",
+            SessionAgent agentTeacher = await GetAgent(sessionId, userName);
+
+            //take the content of knowledge by searching with agentId
+            string search = await _searchService.SearchByAgent("", agentTeacher.Id, "teacher");
+
+            _ = Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Evaluation",
                 new Dictionary<string, string>()
                 {
-                    { "conversation", dashboardRequest.Conversation }
+                    { "conversation", dashboardRequest.Conversation },
+                    { "userPrompt", agentTeacher.Prompt },
+                    { "knowledge", search }
                 }, dashboardRequest.ConnectionId, token), token);
 
             return TypedResults.Ok("Evaluation requested");
@@ -121,6 +157,14 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             string? promptStream = await ReadFunction.Read(Path.Combine(_pluginsDirectory, plugin, functionName),
                 FunctionFileType.Prompt);
             return promptStream!;
+        }
+
+        private async Task<SessionAgent> GetAgent(string sessionId, string userName)
+        {
+            //take the agent teacher intruction from user for userPrompt properties
+            SessionItem session = await _sessionRepository.GetSessionById(sessionId, userName);
+            SessionAgent? agentTeacher = session.Agents.Single(q => q.Type == "teacher");
+            return agentTeacher;
         }
     }
 }

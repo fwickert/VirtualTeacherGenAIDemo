@@ -4,18 +4,19 @@ import { Tab, TabList } from '@fluentui/react-tabs';
 import { Skeleton3Rows } from '../../components/Utilities/skeleton3rows';
 import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
 import { DashboardFeatureResult } from './DashboardFeatureResult';
-import { connect } from 'http2';
+
 
 interface DashboardTabsProps {
     sessionId: string;
     conversation: string;
+    userName: string;
 }
 
 
 
 
 
-const DashboardTabs: React.FC<DashboardTabsProps> = ({ sessionId, conversation }) => {
+const DashboardTabs: React.FC<DashboardTabsProps> = ({ sessionId, conversation, userName }) => {
     const [selectedValue, setSelectedValue] = useState<string>("Summary");
     const [dashboardData, setDashboardData] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -76,6 +77,7 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ sessionId, conversation }
                     infoType={infoType}
                     connection={connection}
                     conversation={conversation}
+                    userName={userName}
                 ></DashboardFeatureResult>
             </div>
         )

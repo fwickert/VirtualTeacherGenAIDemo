@@ -397,3 +397,4 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 /VirtualTeacherGenAIDemo.Server/appsettings.Development.json
+/VirtualTeacherGenAIDemo.Server/Properties/ServiceDependencies/VirtualTeacher - Web Deploy/profile.arm.json

@@ -5,6 +5,7 @@ import ChatHistory, { IChat } from '../../components/dashboard/chatHistory';
 import { ArrowCircleLeft48Filled } from '@fluentui/react-icons';
 import { Button } from '@fluentui/react-button';
 import DashboardTabs from '../../components/dashboard/dashboardTabs';
+import { useUsername } from '../../auth/UserContext'; 
 
 enum AuthorRoles {
     User = 0,
@@ -18,6 +19,7 @@ function Dashboard() {
     const { sessionId } = location.state;
     const [conversation, setConversation] = useState<IChat[]>([]);
     const [formattedConversation, setFormattedConversation] = useState<string>("");
+    const userName = useUsername();
 
     const handleBackClick = () => {
         navigate('/lastTraining');
@@ -56,7 +58,7 @@ function Dashboard() {
                 <ChatHistory conversation={conversation}  />
             </div>
             <div className="dashboard">
-                <DashboardTabs sessionId={sessionId} conversation={formattedConversation} />
+                <DashboardTabs sessionId={sessionId} conversation={formattedConversation} userName={userName} />
             </div>
         </div>
     );

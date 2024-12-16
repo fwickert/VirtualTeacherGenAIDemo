@@ -12,10 +12,11 @@ interface DashboardFeatureResultProps {
     loading: boolean;
     connection: HubConnection | null;
     conversation: string;
+    userName: string;
 }
 
 
-const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({ sessionId, data, infoType, loading, conversation, connection }) => {
+const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({ sessionId, data, infoType, loading, conversation, connection, userName }) => {
     const [content, setContent] = useState(data?.content || '');
     const [isLoading, setIsLoading] = useState(loading);
 
@@ -26,7 +27,8 @@ const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({ session
             
             connection.on(infoType, (updatedData: any) => {
                 setIsLoading(false);
-                setContent(updatedData);
+                
+                setContent(updatedData.content);
             });
 
             return () => {
@@ -48,7 +50,7 @@ const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({ session
                 prompt: feature
             }
             console.log(`Calling API for ${feature} with body:`, body);
-            const response = await fetch(`/api/dashboard/${feature}`, {
+            const response = await fetch(`/api/dashboard/${feature}?sessionId=${sessionId}&userName=${userName}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

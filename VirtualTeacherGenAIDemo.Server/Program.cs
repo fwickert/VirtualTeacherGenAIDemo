@@ -1,7 +1,11 @@
+using Microsoft.AspNetCore.Http.Features;
 using VirtualTeacherGenAIDemo.Server.Extensions;
 using VirtualTeacherGenAIDemo.Server.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+
 
 // Add services to the container.
 builder.Services
@@ -11,7 +15,17 @@ builder.Services
     .AddAIResponses()
     .AddServices()
     .AddSemanticKernelServices()
-    .AddChatCompletionService();
+.AddChatCompletionService();
+
+
+
+builder.AddKernelMemoryService();
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 100 * 1024 * 1024; // 100 MB
+});
+
 
 builder.Services.AddSignalR(options => options.MaximumParallelInvocationsPerClient = 10);
 

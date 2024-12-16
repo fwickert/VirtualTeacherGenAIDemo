@@ -8,11 +8,11 @@ import { makeStyles } from '@fluentui/react-components';
 import { AddCircleRegular, PeopleCommunityFilled, PlayRegular } from '@fluentui/react-icons';
 import { tokens } from '@fluentui/tokens';
 import { useNavigate } from 'react-router-dom';
-import { ISessionItem } from '../../models/SessionItem';
+import { SessionItem } from '../../models/SessionItem';
 import { useUsername } from '../../auth/UserContext'; 
 
 interface SessionListProps {
-    onSessionStart: (session: ISessionItem) => void;
+    onSessionStart: (session: SessionItem) => void;
 }
 
 const useStyles = makeStyles({
@@ -75,7 +75,7 @@ const SessionList: React.FC<SessionListProps> = ({ onSessionStart }) => {
     const navigate = useNavigate();
     const classes = useStyles();
     const userName = useUsername();
-    const [sessions, setSessions] = useState<ISessionItem[]>([]);    
+    const [sessions, setSessions] = useState<SessionItem[]>([]);    
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -96,7 +96,7 @@ const SessionList: React.FC<SessionListProps> = ({ onSessionStart }) => {
             });
     }, []);
 
-    const handleResume = async (session: ISessionItem) => {       
+    const handleResume = async (session: SessionItem) => {       
         if (onSessionStart) {            
             onSessionStart(session);
         }
