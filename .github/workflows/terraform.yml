@@ -1,0 +1,39 @@
+name: Terraform
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.0.11
+
+    - name: Initialize Terraform
+      run: terraform init
+      working-directory: ./deploy
+
+    - name: Validate Terraform
+      run: terraform validate
+      working-directory: ./deploy
+
+    - name: Plan Terraform
+      run: terraform plan
+      working-directory: ./deploy
+
+    - name: Apply Terraform
+      if: github.ref == 'refs/heads/main'
+      run: terraform apply -auto-approve
+      working-directory: ./deploy
