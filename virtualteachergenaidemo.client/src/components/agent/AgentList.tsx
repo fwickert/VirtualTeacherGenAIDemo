@@ -1,7 +1,7 @@
 import './agentList.css';
 import { useState, useEffect, FC } from 'react';
 import { Card, CardHeader, CardPreview, CardFooter } from '@fluentui/react-card';
-import { Text, Title2, Body2 } from '@fluentui/react-text';
+import { Title2, Body2 } from '@fluentui/react-text';
 import { Spinner } from '@fluentui/react';
 import { Tab, TabList } from '@fluentui/react-tabs';
 import { AgentItem } from '../../models/AgentItem';
