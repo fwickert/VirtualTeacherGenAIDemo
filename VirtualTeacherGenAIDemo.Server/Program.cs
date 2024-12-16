@@ -53,6 +53,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors();
+// Comment to disable Azure Add Auth
 app.UseAuthorization();
 
 app.MapFallbackToFile("/index.html");
@@ -61,6 +62,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+// Comment to disable Azure AD authentication
 app.MapGet("/api/auth-config", (IConfiguration config) => new
 {
     TenantId = config["AzureAd:TenantId"],
