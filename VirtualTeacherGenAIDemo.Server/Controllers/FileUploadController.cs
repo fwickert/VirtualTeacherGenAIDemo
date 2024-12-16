@@ -21,7 +21,7 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
         }
 
         [HttpPost()]
-        public async Task<IActionResult> UploadFile(string connectionId, string agentId, IFormFile file, [FromForm] string fileName, [FromForm] string fileId, [FromForm] int chunkIndex, [FromForm] int totalChunks, CancellationToken token)
+        public async Task<IActionResult> UploadFile(string connectionId, string agentId, string type, IFormFile file, [FromForm] string fileName, [FromForm] string fileId, [FromForm] int chunkIndex, [FromForm] int totalChunks, CancellationToken token)
         {
             if (!_fileStreams.ContainsKey(fileId))
             {
@@ -34,9 +34,18 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
             if (chunkIndex == totalChunks - 1)
             {
                 fileStream.Position = 0;
-                _ = Task.Run(() => _fileUploadService.ParseDocument(fileStream, fileName , agentId, connectionId, token));
+                _ = Task.Run(() => _fileUploadService.ParseDocument(fileStream, fileName , agentId, type ,connectionId, token));
                 _fileStreams.TryRemove(fileId, out _);
             }
+
+            return Ok();
+        }
+
+        //Add delete
+        [HttpDelete]
+        public async Task<IActionResult> DeleteFile(string connectionId, string agentId, string filename, string type, CancellationToken token)
+        {
+            _ = Task.Run(() => _fileUploadService.DeleteFileInformation(filename, agentId, type, connectionId, token));
 
             return Ok();
         }

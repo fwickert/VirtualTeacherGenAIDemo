@@ -10,7 +10,6 @@ import { makeStyles } from '@fluentui/react-components';
 import { tokens } from '@fluentui/tokens';
 import { FileUpload } from '../Utilities/FileUpload';
 
-
 interface AgentDialogProps {
     onAddAgent: (agent: AgentItem) => void;
     onDeleteAgent: (agentId: string) => void;
@@ -18,8 +17,6 @@ interface AgentDialogProps {
     onClose: () => void;
     agent?: AgentItem;
 }
-
-
 
 const useStyles = makeStyles({
     deleteButton: {
@@ -29,6 +26,15 @@ const useStyles = makeStyles({
             backgroundColor: tokens.colorPaletteRedForeground1,
             color: 'white',
         },
+    },
+    fileListColumn: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10x', // Add some space between tags
+    },
+    tag: {
+        width: '100%',
+        display: 'block', // Ensure each tag takes the full width
     },
 });
 
@@ -42,23 +48,19 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
     const [promptError, setPromptError] = useState('');
     const [isOpen, setIsOpen] = useState<boolean>(true);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
-    const [fileNames, setFileNames] = useState<string[]>();
-    const [fileName, setFileName] = useState<string>();
+    const [fileNames, setFileNames] = useState<string[]>(agent?.fileNames || []);
 
     useEffect(() => {
         if (agent) {
             setName(agent.name);
             setDescription(agent.description);
             setPrompt(agent.prompt);
-            setFileNames(agent.fileNames.split(","))
+            setFileNames(agent.fileNames || []);
         }
     }, [agent]);
 
-   
-
-    const handleFileUpload = (uploadedFileName: string) => {
-        
-        setFileName(uploadedFileName);
+    const handleFileUpload = (fileName: string) => {
+        setFileNames(prevFileNames => [...prevFileNames, fileName]);
     };
 
     const handleUpsertAgent = () => {
@@ -86,15 +88,13 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
 
         if (!valid) return;
 
-        
-
         const newAgent: AgentItem = {
             name,
             description,
             prompt,
             type,
             id: agent?.id || "",
-            fileNames: fileNames ? fileNames.join(",") : ''
+            fileNames
         };
 
         const apiUrl = agent ? `/api/agent/${agent.id}` : '/api/agent';
@@ -126,7 +126,6 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
         onClose();
     };
 
-
     const handleDeleteAgent = () => {
         if (!agent) return;
 
@@ -155,12 +154,6 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
         setIsOpen(data.open);
         if (!data.open) {
             onClose();
-        }
-    };
-
-    const handleFilesChange = (files: string[]) => {
-        if (files.length > 0) {
-            setFileNames(files);
         }
     };
 
@@ -200,7 +193,10 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
                             </div>
 
                             <div className="formcard">
-                                <FileUpload onFileUpload={handleFileUpload} agentId={agent?.id} onChange={handleFilesChange} />
+                                <label>Knowledge</label>
+
+                                <FileUpload agentId={agent?.id} initialFileNames={fileNames} type={agent?.type} onFileUpload={handleFileUpload} />
+
                             </div>
                         </DialogContent>
                         <DialogActions>
@@ -209,7 +205,6 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
                             )}
                             <Button appearance="primary" onClick={handleUpsertAgent}>{agent ? 'Save' : 'Add'}</Button>
                             <Button appearance="secondary" onClick={() => { setIsOpen(false); onClose(); }}>Cancel</Button>
-
                         </DialogActions>
                     </DialogBody>
                 </DialogSurface>

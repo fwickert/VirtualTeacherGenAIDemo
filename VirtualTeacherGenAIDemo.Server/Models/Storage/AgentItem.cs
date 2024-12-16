@@ -23,7 +23,7 @@ namespace VirtualTeacherGenAIDemo.Server.Models.Storage
 
         
         [JsonPropertyName("fileNames")]
-        public string FileNames { get; set; } = string.Empty;
+        public List<string> FileNames { get; set; } = new List<string>();
 
         [JsonIgnore]
         public string Partition => this.Type;
