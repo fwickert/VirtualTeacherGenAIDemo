@@ -44,5 +44,23 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         {
             return _sessionRepository.GetNotCompleteSession(userId);
         }
+
+        public async Task DeleteSessionAsync(string sessionId, string userId, MessageRepository messageRepository, CancellationToken token)
+        {
+            // Delete all messages associated with the session
+            var messages = await messageRepository.FindByChatIdAsync(sessionId);
+            foreach (var message in messages)
+            {
+                await messageRepository.DeleteAsync(message);
+            }
+
+            // Delete the session
+            var session = await _sessionRepository.GetSessionById(sessionId, userId);
+            if (session != null)
+            {
+                await _sessionRepository.DeleteAsync(session);
+            }
+        }
+
     }
 }

@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { AgentItem } from '../../models/AgentItem';
 import { makeStyles } from '@fluentui/react-components';
 import { tokens } from '@fluentui/tokens';
-
+import { FileUpload } from '../Utilities/FileUpload';
 
 
 interface AgentDialogProps {
@@ -19,13 +19,15 @@ interface AgentDialogProps {
     agent?: AgentItem;
 }
 
+
+
 const useStyles = makeStyles({
     deleteButton: {
         backgroundColor: tokens.colorPaletteRedBackground3,
         color: "white",
         ':hover': {
             backgroundColor: tokens.colorPaletteRedForeground1,
-            color:'white',
+            color: 'white',
         },
     },
 });
@@ -40,16 +42,26 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
     const [promptError, setPromptError] = useState('');
     const [isOpen, setIsOpen] = useState<boolean>(true);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
+    const [fileNames, setFileNames] = useState<string[]>();
+    const [fileName, setFileName] = useState<string>();
 
     useEffect(() => {
         if (agent) {
             setName(agent.name);
             setDescription(agent.description);
             setPrompt(agent.prompt);
+            setFileNames(agent.fileNames.split(","))
         }
     }, [agent]);
 
-    const handleAddAgent = () => {
+   
+
+    const handleFileUpload = (uploadedFileName: string) => {
+        
+        setFileName(uploadedFileName);
+    };
+
+    const handleUpsertAgent = () => {
         let valid = true;
         if (name.trim() === '') {
             setNameError('Name is required.');
@@ -74,7 +86,16 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
 
         if (!valid) return;
 
-        const newAgent = { name, description, prompt, type, id: agent?.id || "" };
+        
+
+        const newAgent: AgentItem = {
+            name,
+            description,
+            prompt,
+            type,
+            id: agent?.id || "",
+            fileNames: fileNames ? fileNames.join(",") : ''
+        };
 
         const apiUrl = agent ? `/api/agent/${agent.id}` : '/api/agent';
         const method = agent ? 'PUT' : 'POST';
@@ -88,22 +109,23 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
         })
             .then(response => {
                 if (response.status === 204) {
-                    return null; // No content to parse
+                    return null;
                 }
                 return response.json();
             })
             .then(data => {
                 console.log('Success:', data);
                 if (!agent) {
-                    newAgent.id = data.id; // Assuming the API returns the new agent's ID                    
+                    newAgent.id = data.id;
                 }
-                onAddAgent(newAgent)
+                onAddAgent(newAgent);
             })
             .catch(error => console.error('Error:', error));
 
-        setIsOpen(false); // Close the dialog
+        setIsOpen(false);
         onClose();
     };
+
 
     const handleDeleteAgent = () => {
         if (!agent) return;
@@ -133,6 +155,12 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
         setIsOpen(data.open);
         if (!data.open) {
             onClose();
+        }
+    };
+
+    const handleFilesChange = (files: string[]) => {
+        if (files.length > 0) {
+            setFileNames(files);
         }
     };
 
@@ -170,12 +198,16 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
                                     />
                                 </Field>
                             </div>
+
+                            <div className="formcard">
+                                <FileUpload onFileUpload={handleFileUpload} agentId={agent?.id} onChange={handleFilesChange} />
+                            </div>
                         </DialogContent>
                         <DialogActions>
                             {agent && (
                                 <Button className={styles.deleteButton} onClick={() => setIsDeleteConfirmOpen(true)}>Delete</Button>
                             )}
-                            <Button appearance="primary" onClick={handleAddAgent}>{agent ? 'Save' : 'Add'}</Button>
+                            <Button appearance="primary" onClick={handleUpsertAgent}>{agent ? 'Save' : 'Add'}</Button>
                             <Button appearance="secondary" onClick={() => { setIsOpen(false); onClose(); }}>Cancel</Button>
 
                         </DialogActions>

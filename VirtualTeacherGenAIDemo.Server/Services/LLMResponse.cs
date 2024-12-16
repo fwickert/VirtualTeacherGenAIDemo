@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.SemanticKernel;
 using VirtualTeacherGenAIDemo.Server.Hubs;
-using VirtualTeacherGenAIDemo.Server.Models;
+using VirtualTeacherGenAIDemo.Server.Models.Response;
 using VirtualTeacherGenAIDemo.Server.Models.Storage;
 using VirtualTeacherGenAIDemo.Server.Storage;
 
@@ -60,54 +60,43 @@ namespace VirtualTeacherGenAIDemo.Server.Services
 
             MessageResponse messageResponse = new MessageResponse
             {
-                State = "Start",
-                Content = "",
-                WhatAbout = whatAbout
+                Content = string.Empty,                
             };
 
             await foreach (StreamingChatMessageContent contentPiece in _kernel.InvokeStreamingAsync<StreamingChatMessageContent>(_kernel.Plugins[this.PluginName][this.FunctionName], arguments, token))
             {
-                await this.UpdateMessageOnClient(messageResponse, connectionId, token);
-                messageResponse.State = "InProgress";
-
                 if (!string.IsNullOrEmpty(contentPiece.Content))
                 {
                     messageResponse.Content += contentPiece.Content;
-                    await this.UpdateMessageOnClient(messageResponse, connectionId, token);
+                    await this.UpdateMessageOnClient("InProgressMessageUpdate", messageResponse, connectionId, token);
                     Console.Write(contentPiece.Content);
                     await Task.Delay(DELAY);
                 }
             }
-            messageResponse.State = "End";
 
-            await this.UpdateMessageOnClient(messageResponse, connectionId, token);
+            await this.UpdateMessageOnClient("EndMessageUpdate", messageResponse, connectionId, token);
             return messageResponse;
         }
 
-        private async Task<MessageResponse> StreamResponseToClient(string sessionId, string id, string whatAbout, KernelArguments arguments, string connectionId, CancellationToken token)
+        private async Task StreamResponseToClient(string sessionId, string id, string whatAbout, KernelArguments arguments, string connectionId, CancellationToken token)
         {
 
             MessageResponse messageResponse = new MessageResponse
-            {
-                State = "Start",
-                Content = "",
-                WhatAbout = whatAbout
+            {  
+                Content = "",               
             };
 
             await foreach (StreamingChatMessageContent contentPiece in _kernel.InvokeStreamingAsync<StreamingChatMessageContent>(_kernel.Plugins[this.PluginName][this.FunctionName], arguments, token))
             {
-                await this.UpdateMessageOnClient( messageResponse, connectionId, token);
-                messageResponse.State = "InProgress";
-
                 if (!string.IsNullOrEmpty(contentPiece.Content))
                 {
                     messageResponse.Content += contentPiece.Content;
-                    await this.UpdateMessageOnClient( messageResponse, connectionId, token);
+                    await this.UpdateMessageOnClient(whatAbout, messageResponse, connectionId, token);
                     Console.Write(contentPiece.Content);
                     await Task.Delay(DELAY);
                 }
             }
-            messageResponse.State = "End";
+            
 
             string NewId = Guid.NewGuid().ToString();
             //Save content in DB
@@ -119,16 +108,16 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             });
             
             //await this.UpdateMessageOnClient( messageResponse, connectionId, token);
-            return messageResponse;
+            
         }
 
         /// <summary>
         /// Update the response on the client.
         /// </summary>
         /// <param name="message">The message</param>
-        private async Task UpdateMessageOnClient(MessageResponse message, string connectionId, CancellationToken token)
+        private async Task UpdateMessageOnClient(string hubconnection, MessageResponse message, string connectionId, CancellationToken token)
         {
-            await this._messageRelayHubContext.Clients.Client(connectionId).SendAsync(message.WhatAbout, message.Content, token);
+            await this._messageRelayHubContext.Clients.Client(connectionId).SendAsync(hubconnection, message, token);
         }
 
     }

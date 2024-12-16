@@ -1,12 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Azure.Identity;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Extensions.Options;
+using VirtualTeacherGenAIDemo.Server.Options;
 
 namespace VirtualTeacherGenAIDemo.Server.Storage;
 
@@ -28,21 +28,41 @@ public class CosmosDbContext<T> : IStorageContext<T>, IDisposable where T : ISto
     /// <summary>
     /// Initializes a new instance of the CosmosDbContext class.
     /// </summary>
-    /// <param name="connectionString">The CosmosDB connection string.</param>
-    /// <param name="database">The CosmosDB database name.</param>
-    /// <param name="container">The CosmosDB container name.</param>
-    public CosmosDbContext(string connectionString, string database, string container)
+    /// <param name="cosmosOptions">The CosmosDB options.</param>
+    /// <param name="containerName">The CosmosDB container name.</param>
+    public CosmosDbContext(CosmosOptions cosmosOptions, string containerName, string partitionKey)
     {
+        
+
         // Configure JsonSerializerOptions
-        var options = new CosmosClientOptions
+        var clientOptions = new CosmosClientOptions
         {
             SerializerOptions = new CosmosSerializationOptions
             {
                 PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
             },
         };
-        this._client = new CosmosClient(connectionString, new DefaultAzureCredential() , options);
-        this._container = this._client.GetContainer(database, container);
+
+        if (cosmosOptions.AuthMethod == "Key")
+        {
+            this._client = new CosmosClient(cosmosOptions.ConnectionString, clientOptions);
+        }
+        else if (cosmosOptions.AuthMethod == "ManagedIdentity")
+        {
+            this._client = new CosmosClient(cosmosOptions.EndPoint, new DefaultAzureCredential(), clientOptions);
+        }
+        else
+        {
+            throw new InvalidOperationException("Invalid CosmosDB authentication method specified.");
+        }
+
+        // Create database if it does not exist
+        var databaseResponse = this._client.CreateDatabaseIfNotExistsAsync(cosmosOptions.Database).GetAwaiter().GetResult();
+        var databaseInstance = databaseResponse.Database;
+
+        // Create container if it does not exist
+        var containerResponse = databaseInstance.CreateContainerIfNotExistsAsync(containerName, $"/{partitionKey}").GetAwaiter().GetResult();
+        this._container = containerResponse.Container;
     }
 
     /// <inheritdoc/>
