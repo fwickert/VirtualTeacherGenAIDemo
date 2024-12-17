@@ -21,7 +21,7 @@ jobs:
       uses: Azure/get-keyvault-secrets@v1
       with:
         keyvault: "kvvirtualteacher"
-        secrets: 'subscription-id, appService-clientId, appService-clientSecret' # comma separated list of secret keys that need to be fetched from the Key Vault 
+        secrets: 'subscription-id' # comma separated list of secret keys that need to be fetched from the Key Vault 
 
     - name: Set up Terraform
       uses: hashicorp/setup-terraform@v1
@@ -39,9 +39,9 @@ jobs:
     - name: Login to Azure
       uses: azure/login@v2
       with:
-        client-id: ${{ steps.keyvault.outputs.appService-clientId }}
-        tenant-id: ${{ steps.keyvault.outputs.appService-tenantId }}
-        subscription-id: ${{ steps.keyvault.outputs.subscription-id }}
+        client-id: ${{ secrets.AZURE_CREDENTIALS.clientId }}
+        tenant-id: ${{ secrets.AZURE_CREDENTIALS.tenantId }}
+        subscription-id: ${{ secrets.AZURE_CREDENTIALS.subscriptionId }}
 
     - name: Deploy to Azure Web App
       id: deploy-to-webapp
