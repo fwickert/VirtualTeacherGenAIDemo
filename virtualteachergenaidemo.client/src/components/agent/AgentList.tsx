@@ -10,7 +10,8 @@ import { PersonAvailableFilled, AddCircleRegular, EditRegular } from '@fluentui/
 import { mergeClasses } from '@fluentui/react-components';
 import { tokens } from '@fluentui/tokens';
 import { Button } from '@fluentui/react-button';
-import { AgentDialog } from './AgentDialog'; // Import AgentDialog
+import { AgentDialog } from './AgentDialog';
+import { useLocalization } from '../../contexts/LocalizationContext';
 
 const useStyles = makeStyles({
     customPreview: {
@@ -109,6 +110,7 @@ const AgentList: FC = () => {
     const [editingAgent, setEditingAgent] = useState<AgentItem | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [dialogType, setDialogType] = useState<string>('');
+    const { getTranslation } = useLocalization();
 
     useEffect(() => {
         // Fetch agents from an API or data source
@@ -178,7 +180,7 @@ const AgentList: FC = () => {
                                 setDialogType(agent.type);
                                 setIsDialogOpen(true);
                             }}>
-                            Edit
+                            {getTranslation("Edit")}
                         </Button>
                     </CardFooter>
                 </Card>
@@ -186,22 +188,22 @@ const AgentList: FC = () => {
     };
 
     if (loading) {
-        return <Spinner label="Loading agents..." />;
+        return <Spinner label={getTranslation("Loading")} />;
     }
 
     return (
         <div className="tabcontainer">
             <TabList selectedValue={selectedTab} onTabSelect={onTabSelect} appearance='subtle-circular' size='large'>
-                <Tab value="RolePlay" icon={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass('rolePlay', classes))} />}>RolePlay</Tab>
-                <Tab value="Teacher" icon={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass("teacher", classes))} />}>Teacher</Tab>
-                <Tab value="System" icon={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass("system", classes))} />}>System</Tab>
+                <Tab value="RolePlay" icon={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass('rolePlay', classes))} />}>{ getTranslation("RolePlayTabLabel") }</Tab>
+                <Tab value="Teacher" icon={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass("teacher", classes))} />}>{ getTranslation("TeacherTabLabel") }</Tab>
+                <Tab value="System" icon={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass("system", classes))} />}>{getTranslation("SystemTabLabel")}</Tab>
             </TabList>
             <div className="agent-cards-grid">
                 {selectedTab === 'RolePlay' && (
                     <>
                         <Button className={classes.buttonWithIcon} onClick={() => handleAddAgent('rolePlay')}>
                             <AddCircleRegular className={classes.buttonIcon} />
-                            Add Roleplay Agent
+                            { getTranslation("AddAgentButton") }
                         </Button>
                         {renderAgents('rolePlay')}
                     </>
@@ -210,7 +212,7 @@ const AgentList: FC = () => {
                     <>
                         <Button className={classes.buttonWithIcon} onClick={() => handleAddAgent('teacher')}>
                             <AddCircleRegular className={classes.buttonIcon} />
-                            Add Teacher Agent
+                            {getTranslation("AddAgentButton")}
                         </Button>
                         {renderAgents('teacher')}
                     </>
@@ -219,7 +221,7 @@ const AgentList: FC = () => {
                     <>
                         <Button className={classes.buttonWithIcon} onClick={() => handleAddAgent('system')}>
                             <AddCircleRegular className={classes.buttonIcon} />
-                            Add System Agent
+                            {getTranslation("AddAgentButton")}
                         </Button>
                         {renderAgents('system')}
                     </>

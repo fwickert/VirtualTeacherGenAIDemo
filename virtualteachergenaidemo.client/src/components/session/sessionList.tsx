@@ -10,6 +10,7 @@ import { tokens } from '@fluentui/tokens';
 import { useNavigate } from 'react-router-dom';
 import { SessionItem } from '../../models/SessionItem';
 import { useUsername } from '../../auth/UserContext'; 
+import { useLocalization } from '../../contexts/LocalizationContext';
 
 interface SessionListProps {
     onSessionStart: (session: SessionItem) => void;
@@ -77,6 +78,7 @@ const SessionList: React.FC<SessionListProps> = ({ onSessionStart }) => {
     const userName = useUsername();
     const [sessions, setSessions] = useState<SessionItem[]>([]);    
     const [isLoading, setIsLoading] = useState(true);
+    const { getTranslation } = useLocalization();
 
     useEffect(() => {
         // Fetch incomplete sessions from the backend using fetch
@@ -90,8 +92,7 @@ const SessionList: React.FC<SessionListProps> = ({ onSessionStart }) => {
                 setSessions(parsedData);
                 setIsLoading(false);
             })
-            .catch(error => {
-                console.error('There was an error fetching the sessions!', error);
+            .catch(error => {                
                 setIsLoading(false);
             });
     }, []);
@@ -114,12 +115,12 @@ const SessionList: React.FC<SessionListProps> = ({ onSessionStart }) => {
 
     return (
         <div className={classes.centerContainer}>
-            {isLoading && <Spinner label="Loading..." />}
+            {isLoading && <Spinner label={getTranslation("loading")} />}
             {!isLoading && (
                 <div className="session-cards-grid">
                     <Button className={classes.buttonWithIcon} onClick={handleAddSession}>
                         <AddCircleRegular className={classes.buttonIcon} />
-                        Add New Session
+                        { getTranslation("NewSession") }
                     </Button>
                     {sessions.map(session => (
                         <Card key={session.id} className={`${classes.customCard} card`}>
@@ -137,7 +138,7 @@ const SessionList: React.FC<SessionListProps> = ({ onSessionStart }) => {
                                     className={classes.resumeButton}
                                     icon={<PlayRegular />}
                                     onClick={() => handleResume(session)}>
-                                    Resume
+                                    {getTranslation("Resume") }
                                 </Button>
                             </CardFooter>
                         </Card>

@@ -3,6 +3,7 @@ import { Button } from '@fluentui/react-button';
 import { Card, CardHeader, CardPreview } from '@fluentui/react-card';
 import { useState, useEffect } from 'react';
 import { Agent } from '../../models/ScenarioItem';
+import { useLocalization } from '../../contexts/LocalizationContext';
 
 interface AgentSelectionDialogProps {
     onSelectAgent: (agent: Agent) => void;
@@ -13,6 +14,7 @@ interface AgentSelectionDialogProps {
 
 export const AgentSelectionDialog = ({ onSelectAgent, onClose, isOpen, type }: AgentSelectionDialogProps) => {
     const [agents, setAgents] = useState<Agent[]>([]);
+    const { getTranslation } = useLocalization();
 
     useEffect(() => {
         // Fetch agents with the specified type from API
@@ -26,7 +28,7 @@ export const AgentSelectionDialog = ({ onSelectAgent, onClose, isOpen, type }: A
         <Dialog open={isOpen} onOpenChange={(_event, data) => !data.open && onClose()}>
             <DialogSurface>
                 <DialogBody>
-                    <DialogTitle>Select {type.charAt(0).toUpperCase() + type.slice(1)} Agent</DialogTitle>
+                    <DialogTitle>{getTranslation("Select")} {type.charAt(0).toUpperCase() + type.slice(1)} {getTranslation("Agent")}</DialogTitle>
                     <DialogContent>
                         {agents.map(agent => (
                             <Card key={agent.id} onClick={() => onSelectAgent(agent)} style={{ cursor: 'pointer', marginBottom: '10px' }}>
@@ -39,7 +41,7 @@ export const AgentSelectionDialog = ({ onSelectAgent, onClose, isOpen, type }: A
                         ))}
                     </DialogContent>
                     <DialogActions>
-                        <Button appearance="secondary" onClick={onClose}>Cancel</Button>
+                        <Button appearance="secondary" onClick={onClose}>{getTranslation("CancelButton")}</Button>
                     </DialogActions>
                 </DialogBody>
             </DialogSurface>

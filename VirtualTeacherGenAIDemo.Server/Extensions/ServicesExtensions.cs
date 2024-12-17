@@ -85,6 +85,9 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
 
             IStorageContext<UserItem> userStorageContext = new CosmosDbContext<UserItem>(cosmosOptions, cosmosOptions.UserContainer, cosmosOptions.UserPartitionKey);
             services.AddSingleton<UserRepository>(new UserRepository(userStorageContext));
+                        
+            IStorageContext<LocaleItem> localeStorageContext = new CosmosDbContext<LocaleItem>(cosmosOptions, cosmosOptions.LocaleContainer, cosmosOptions.LocalePartitionKey);
+            services.AddSingleton<LocaleRepository>(new LocaleRepository(localeStorageContext));
 
             return services;
         }
@@ -152,6 +155,7 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
             services.AddScoped<UserService>();
             services.AddScoped<FileUploadService>();
             services.AddScoped<SearchService>();
+            services.AddScoped<LocalizationService>();
             return services;
         }
     }

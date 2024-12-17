@@ -100,6 +100,19 @@ public class CosmosOptions
     public string UserPartitionKey { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the Cosmos container for locales.
+    /// </summary>  
+    [Required, NotEmptyOrWhitespace]
+    public string LocaleContainer { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the partition key for the Locales container.
+    /// </summary>
+    [Required, NotEmptyOrWhitespace]
+    public string LocalePartitionKey { get; set; } = string.Empty;
+
+
+    /// <summary>
     /// Gets or sets the Cosmos endpoint.
     /// </summary>  
     [Required, NotEmptyOrWhitespace]

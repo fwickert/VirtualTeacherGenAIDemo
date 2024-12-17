@@ -7,14 +7,15 @@ import { ArrowCircleLeft48Filled } from '@fluentui/react-icons';
 import { useState, useEffect } from 'react';
 import ScenarioList from '../../components/scenario/scenarioList';
 import { ScenarioItem } from '../../models/ScenarioItem';
-import { ISessionItem } from '../../models/SessionItem';
-
+import { SessionItem } from '../../models/SessionItem';
+import { useLocalization } from '../../contexts/LocalizationContext';
 
 function Training() {
     const navigate = useNavigate();
     const location = useLocation();
     const [selectedScenario, setSelectedScenario] = useState<ScenarioItem | null>(location.state?.scenario);
-    const [session, setSession] = useState<ISessionItem | null>();
+    const [session, setSession] = useState<SessionItem | null>();
+    const { getTranslation } = useLocalization();
 
     const handleBackClick = () => {
         setSelectedScenario(null);
@@ -54,7 +55,7 @@ function Training() {
             </Text>
 
 
-            {(selectedScenario || session) && <ChatWindow scenario={selectedScenario} session={session} />}
+            {(selectedScenario || session) && <ChatWindow scenario={selectedScenario} session={session!} />}
 
         </div>
     );

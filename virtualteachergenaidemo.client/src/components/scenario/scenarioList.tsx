@@ -12,6 +12,7 @@ import { mergeClasses } from '@fluentui/react-components';
 import { tokens } from '@fluentui/tokens';
 import { useUserRole } from '../../auth/UserRoleContext';
 import { UserRoleEnum } from '../../models/UserRoleEnum';
+import { useLocalization } from '../../contexts/LocalizationContext';
 
 
 interface ScenarioListProps {
@@ -113,7 +114,7 @@ const ScenarioList: React.FC<ScenarioListProps> = ({ onScenarioStart }) => {
     const [selectedScenario, setSelectedScenario] = useState<ScenarioItem | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-
+    const { getTranslation } = useLocalization();
 
     useEffect(() => {
         // Fetch scenarios from an API or data source
@@ -182,13 +183,13 @@ const ScenarioList: React.FC<ScenarioListProps> = ({ onScenarioStart }) => {
 
     return (
         <div className={classes.centerContainer}>
-            {isLoading && <Spinner label="Loading..." />}
+            {isLoading && <Spinner label={getTranslation("Loading")} />}
             {!isLoading && (
                 <div className="scenario-cards-grid">
                     {role === UserRoleEnum.Admin && (
                     <Button className={classes.buttonWithIcon} onClick={handleAddScenario}>
                         <AddCircleRegular className={classes.buttonIcon} />
-                        Add New Scenario
+                            {getTranslation("NewScenario") }
                         </Button>
                     )}
                     {scenarios.map(scenario => (
@@ -208,7 +209,7 @@ const ScenarioList: React.FC<ScenarioListProps> = ({ onScenarioStart }) => {
                                                     <div key={index} className={classes.iconItem}>
                                                         <PersonAvailableFilled className={mergeClasses(classes.icon, colorClass)} />
                                                         <Text className={mergeClasses(classes.iconText, colorClass)}>
-                                                            {agent ? agent.name.split(' ').slice(0, 3).join(' ') + (agent.name.split(' ').length > 3 ? '...' : '') : 'Not set'}
+                                                            {agent ? agent.name.split(' ').slice(0, 3).join(' ') + (agent.name.split(' ').length > 3 ? '...' : '') : getTranslation("NoSet")}
                                                         </Text>
                                                     </div>
                                                 );
@@ -225,14 +226,14 @@ const ScenarioList: React.FC<ScenarioListProps> = ({ onScenarioStart }) => {
                                         icon={<EditRegular />}
                                         className={classes.editButton}
                                         onClick={() => handleEditScenario(scenario)}>
-                                        Edit
+                                        { getTranslation("Edit") }
                                     </Button>
                                 )}
                                 <Button
                                     appearance='primary'
                                     icon={<PlayRegular />}
                                     onClick={() => handleStartClick(scenario)}
-                                    disabled={!areAllAgentsSet(scenario)}>Start
+                                    disabled={!areAllAgentsSet(scenario)}>{getTranslation("Start") }
                                 </Button>
                             </CardFooter>
                         </Card>

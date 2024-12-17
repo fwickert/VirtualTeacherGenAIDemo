@@ -10,6 +10,7 @@ import { makeStyles } from '@fluentui/react-components';
 import AgentSelectionDialog from '../agent/AgentSelectionDialog';
 import { Add24Regular } from '@fluentui/react-icons';
 import { tokens } from '@fluentui/tokens';
+import { useLocalization } from '../../contexts/LocalizationContext';
 
 const useStyles = makeStyles({
     customDialogSurface: {
@@ -72,6 +73,7 @@ export const ScenarioDialog = ({ onAddScenario, onDeleteScenario, onClose, isOpe
     const [isAgentDialogOpen, setIsAgentDialogOpen] = useState<boolean>(false);
     const [agentType, setAgentType] = useState<'system' | 'rolePlay' | 'teacher'>('system');
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
+    const { getTranslation } = useLocalization();
 
     useEffect(() => {
         if (scenario) {
@@ -87,35 +89,35 @@ export const ScenarioDialog = ({ onAddScenario, onDeleteScenario, onClose, isOpe
     const handleAddScenario = () => {
         let valid = true;
         if (name.trim() === '') {
-            setNameError('Name is required.');
+            setNameError(getTranslation("NameRequired"));
             valid = false;
         } else {
             setNameError('');
         }
 
         if (description.trim() === '') {
-            setDescriptionError('Description is required.');
+            setDescriptionError(getTranslation("DescriptionRequired"));
             valid = false;
         } else {
             setDescriptionError('');
         }
 
         if (!systemAgent) {
-            setSystemAgentError('System Agent is required.');
+            setSystemAgentError(getTranslation("SystemAgentRequired"));
             valid = false;
         } else {
             setSystemAgentError('');
         }
 
         if (!rolePlayAgent) {
-            setRolePlayAgentError('RolePlay Agent is required.');
+            setRolePlayAgentError(getTranslation("RolePlayAgentRequired"));
             valid = false;
         } else {
             setRolePlayAgentError('');
         }
 
         if (!teacherAgent) {
-            setTeacherAgentError('Teacher Agent is required.');
+            setTeacherAgentError(getTranslation("TeacherAgentRequired"));
             valid = false;
         } else {
             setTeacherAgentError('');
@@ -196,52 +198,52 @@ export const ScenarioDialog = ({ onAddScenario, onDeleteScenario, onClose, isOpe
             <Dialog open={isOpen} onOpenChange={handleOpenChange}>
                 <DialogSurface className={styles.customDialogSurface}>
                     <DialogBody>
-                        <DialogTitle>{scenario ? 'Edit Scenario' : 'Add New Scenario'}</DialogTitle>
+                        <DialogTitle>{scenario ? getTranslation("EditScenario") : getTranslation("NewScenario") }</DialogTitle>
                         <DialogContent className={styles.dialogContent}>
                             <div className="formcard">
-                                <Field label="Name" required validationMessage={nameError}>
+                                <Field label={getTranslation("NameLabel")} required validationMessage={nameError}>
                                     <Input
-                                        placeholder="Name your scenario"
+                                        placeholder={getTranslation("NamePlaceholderScenario")}
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
                                     />
                                 </Field>
-                                <Field label="Description" required validationMessage={descriptionError}>
+                                <Field label={getTranslation("DescriptionLabel")} required validationMessage={descriptionError}>
                                     <Textarea
-                                        placeholder="Describe your scenario"
+                                        placeholder={getTranslation("DescriptionPlaceholderScenario")}
                                         value={description}
                                         rows={3}
                                         onChange={(e) => setDescription(e.target.value)}
                                     />
                                 </Field>
                                 <div className={styles.buttonGrid}>
-                                    <Field label="System Agent" required validationMessage={systemAgentError}>
+                                    <Field label={getTranslation("SystemAgentLabel")} required validationMessage={systemAgentError}>
                                         <Button className={styles.circularButton} onClick={() => { setAgentType('system'); setIsAgentDialogOpen(true); }}>
                                             <Add24Regular />
                                         </Button>
-                                        <span className={styles.agentName}>{systemAgent ? systemAgent.name : 'No agent selected'}</span>
+                                        <span className={styles.agentName}>{systemAgent ? systemAgent.name : getTranslation("NoAgentError")}</span>
                                     </Field>
-                                    <Field label="RolePlay Agent" required validationMessage={rolePlayAgentError}>
+                                    <Field label={getTranslation("RolePlayAgentLabel")} required validationMessage={rolePlayAgentError}>
                                         <Button className={styles.circularButton} onClick={() => { setAgentType('rolePlay'); setIsAgentDialogOpen(true); }}>
                                             <Add24Regular />
                                         </Button>
-                                        <span className={styles.agentName}>{rolePlayAgent ? rolePlayAgent.name : 'No agent selected'}</span>
+                                        <span className={styles.agentName}>{rolePlayAgent ? rolePlayAgent.name : getTranslation("NoAgentError")}</span>
                                     </Field>
-                                    <Field label="Teacher Agent" required validationMessage={teacherAgentError}>
+                                    <Field label={getTranslation("TeacherAgentLabel")} required validationMessage={teacherAgentError}>
                                         <Button className={styles.circularButton} onClick={() => { setAgentType('teacher'); setIsAgentDialogOpen(true); }}>
                                             <Add24Regular />
                                         </Button>
-                                        <span className={styles.agentName}>{teacherAgent ? teacherAgent.name : 'No agent selected'}</span>
+                                        <span className={styles.agentName}>{teacherAgent ? teacherAgent.name : getTranslation("NoAgentError")}</span>
                                     </Field>
                                 </div>
                             </div>
                         </DialogContent>
                         <DialogActions>
                             {scenario && (
-                                <Button className={styles.deleteButton} onClick={() => setIsDeleteConfirmOpen(true)}>Delete</Button>
+                                <Button className={styles.deleteButton} onClick={() => setIsDeleteConfirmOpen(true)}>{getTranslation("DeleteButton")}</Button>
                             )}
-                            <Button appearance="primary" onClick={handleAddScenario}>{scenario ? 'Save' : 'Add'}</Button>
-                            <Button appearance="secondary" onClick={onClose}>Cancel</Button>
+                            <Button appearance="primary" onClick={handleAddScenario}>{scenario ? getTranslation("SaveButton") : getTranslation("AddButton")}</Button>
+                            <Button appearance="secondary" onClick={onClose}>{getTranslation("CancelButton") }</Button>
                         </DialogActions>
                     </DialogBody>
                 </DialogSurface>
@@ -250,13 +252,13 @@ export const ScenarioDialog = ({ onAddScenario, onDeleteScenario, onClose, isOpe
             <Dialog open={isDeleteConfirmOpen} onOpenChange={(_event, data) => setIsDeleteConfirmOpen(data.open)}>
                 <DialogSurface>
                     <DialogBody>
-                        <DialogTitle>Confirm Delete</DialogTitle>
+                        <DialogTitle>{ getTranslation("DeleteAskTitle")}</DialogTitle>
                         <DialogContent>
-                            <p>Are you sure you want to delete this agent? This action is irreversible.</p>
+                            <p>{getTranslation("DeleteScenarioAskMessage") }</p>
                         </DialogContent>
                         <DialogActions>
-                            <Button className={styles.deleteButton} onClick={handleDeleteScenario}>Delete</Button>
-                            <Button appearance="secondary" onClick={() => setIsDeleteConfirmOpen(false)}>Cancel</Button>
+                            <Button className={styles.deleteButton} onClick={handleDeleteScenario}>{getTranslation("DeleteButton")}</Button>
+                            <Button appearance="secondary" onClick={() => setIsDeleteConfirmOpen(false)}>{getTranslation("CancelButton")}</Button>
                         </DialogActions>
                     </DialogBody>
                 </DialogSurface>
