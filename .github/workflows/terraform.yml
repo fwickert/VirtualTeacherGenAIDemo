@@ -8,14 +8,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # checkout the repo
-    - uses: actions/checkout@master
-    - uses: Azure/login@v1
+    - name: Checkout repository
+      uses: actions/checkout@master
+
+    - name: Set up Azure credentials
+      uses: Azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }} 
-    - uses: Azure/get-keyvault-secrets@v1
+
+    - name: Get secrets from Azure Key Vault
+      id: keyvault
+      uses: Azure/get-keyvault-secrets@v1
       with:
         keyvault: "kvvirtualteacher"
         secrets: 'subscription-id'  # comma separated list of secret keys that need to be fetched from the Key Vault 
-      id: myGetSecretAction
-    - run : echo ${{ steps.myGetSecretAction.outputs.subscription-id }}
+    - run : echo ${{ steps.keyvault.outputs.subscription-id }}
         
