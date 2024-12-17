@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Windows 
+name: Deploy web app to a windows App Service 
 
 on:
   push:
@@ -22,11 +22,10 @@ jobs:
           dotnet-version: 8.0.402
 
       - name: Create target directory for HTTPS developer certificate
-        run: mkdir -p %appdata/ASP.NET/https
+        run:  mkdir -p ${{ env.APPDATA }}/ASP.NET/https
 
       - name: Change directory to HTTPS certificate folder
-        run: cd %appdata/ASP.NET/https
-
+        run: cd ${{ env.APPDATA }}/ASP.NET/https
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
