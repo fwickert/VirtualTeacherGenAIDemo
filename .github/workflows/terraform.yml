@@ -21,6 +21,32 @@ jobs:
       uses: Azure/get-keyvault-secrets@v1
       with:
         keyvault: "kvvirtualteacher"
-        secrets: 'subscription-id'  # comma separated list of secret keys that need to be fetched from the Key Vault 
-    - run : echo ${{ steps.keyvault.outputs.subscription-id }}
-        
+        secrets: 'subscription-id, appService-clientId, appService-clientSecret' # comma separated list of secret keys that need to be fetched from the Key Vault 
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 1.0.11
+
+    - name: Initialize Terraform
+      run: terraform init
+      working-directory: ./deploy
+
+    - name: Apply Terraform
+      run: terraform apply -auto-approve
+      working-directory: ./deploy
+
+    - name: Login to Azure
+      uses: azure/login@v2
+      with:
+        client-id: ${{ steps.keyvault.outputs.appService-clientId }}
+        tenant-id: ${{ steps.keyvault.outputs.appService-tenantId }}
+        subscription-id: ${{ steps.keyvault.outputs.subscription-id }}
+
+    - name: Deploy to Azure Web App
+      id: deploy-to-webapp
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: 'virtual-teacher-webapp-wus'
+        slot-name: 'Production'
+        package: .
