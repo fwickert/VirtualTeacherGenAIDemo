@@ -24,9 +24,6 @@ jobs:
       - name: Create target directory for HTTPS developer certificate
         run: mkdir %appdata/ASP.NET/https
 
-      - name: Change directory to HTTPS certificate folder
-        run: cd %appdata/ASP.NET/https
-
       - name: Build with dotnet
         run: dotnet build --configuration Release
 
