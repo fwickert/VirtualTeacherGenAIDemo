@@ -11,6 +11,7 @@ import { Button } from '@fluentui/react-button';
 import { useUsername } from '../../auth/UserContext';
 import { DeleteSessionRequest } from '../../models/Request/DeleteSessionRequest';
 import { DeleteMessageRequest } from '../../models/Request/DeleteMessageRequest';
+import { getMessages, sendMessage, deleteMessage, saveSession, deleteSession as deleteSessionService } from '../../services/ChatService';
 
 enum AuthorRole {
     User,
@@ -67,15 +68,15 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
 
                         //affiche le dernier message de messages
                         console.log("messages: ", messages[messages.length - 1]);
-                        
+
                     });
 
                     connection.on('InProgressMessageUpdate', (message: any) => {
                         setMessages(prevMessages => {
-                                    const updatedMessages = [...prevMessages];
-                                    updatedMessages[updatedMessages.length - 1] = {id:message.id, sessionId: message.sessionId, content: message.content, authorRole: AuthorRole.Assistant }
-                                    return updatedMessages;
-                                });
+                            const updatedMessages = [...prevMessages];
+                            updatedMessages[updatedMessages.length - 1] = { id: message.id, sessionId: message.sessionId, content: message.content, authorRole: AuthorRole.Assistant }
+                            return updatedMessages;
+                        });
 
                     });
 
@@ -94,7 +95,7 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
                             const updatedMessages = [...prevMessages];
                             const lastUserMessage = updatedMessages.find(msg => msg.authorRole === AuthorRole.User);
                             if (lastUserMessage !== null && lastUserMessage !== undefined) {
-                                lastUserMessage.id = message.id;                                
+                                lastUserMessage.id = message.id;
                             }
                             return updatedMessages;
                         });
@@ -107,8 +108,7 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
 
     useEffect(() => {
         if (session) {
-            fetch(`/api/chat/messages/${session.id}`)
-                .then(response => response.json())
+            getMessages(session.id)
                 .then(data => {
                     const fetchedMessages = data
                         .filter((msg: Message) => msg.content !== "")
@@ -128,10 +128,8 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
         }
     }, [session]);
 
-
     const handleNewMessage = async (message: string) => {
         setMessages(prevMessages => [...prevMessages, { id: "", sessionId: sessionId, content: message, authorRole: AuthorRole.User }]);
-
 
         const currentScenario = scenario?.agents || session?.agents;
         const agent = currentScenario?.find(agent => agent.type === 'system');
@@ -155,7 +153,6 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
             })) || []
         };
 
-
         const chatHistory = new ChatHistoryRequest(userName, sessionItem, [
             new ChatMessage("", "System", promptSystem),
             ...messages.map(msg => new ChatMessage("", msg.authorRole.toString(), msg.content)),
@@ -163,24 +160,9 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
         ]);
         console.log(chatHistory);
 
-        await callLLMApi(chatHistory, rolePlayAgent?.id);
+        await sendMessage(chatHistory, rolePlayAgent?.id, connection?.connectionId);
     };
 
-    const callLLMApi = async (chatHistory: ChatHistoryRequest, agentId: string | undefined) => {
-        console.log(chatHistory);
-        try {
-            const response = await fetch(`/api/chat/message?agentId=${agentId}&connectionId=${connection?.connectionId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(chatHistory),
-            });
-            await response.json();
-        } catch (error) {
-            console.error('Error calling Chat:', error);
-        }
-    };
     const handleDeleteMessage = async (id: string) => {
         //stop the audio
         cancelSpeech();
@@ -190,40 +172,18 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
             const deleteRequest = new DeleteMessageRequest(messageToDelete.id, messageToDelete.sessionId!);
 
             try {
-                const response = await fetch(`/api/chat/message/${messageToDelete.id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(deleteRequest),
-                });
-
-                if (response.ok) {
-                    setMessages(prevMessages => prevMessages.filter(msg => msg.id !== id));
-                } else {
-                    console.error('Failed to delete message');
-                }
+                await deleteMessage(deleteRequest);
+                setMessages(prevMessages => prevMessages.filter(msg => msg.id !== id));
             } catch (error) {
                 console.error('Error deleting message:', error);
             }
         }
-
     };
 
     const handleSaveSession = async (sessionId: string | undefined) => {
         try {
-            const response = await fetch(`/api/Session/CompleteSession`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ sessionId, userId: userName }),
-            });
-            if (response.ok) {
-                console.log('Session saved successfully');
-            } else {
-                console.error('Failed to save session');
-            }
+            await saveSession(sessionId, userName);
+            console.log('Session saved successfully');
         } catch (error) {
             console.error('Error saving session:', error);
         } finally {
@@ -231,34 +191,20 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
         }
     };
 
-
     const deleteSession = async () => {
         if (!session) return;
 
         const deleteRequest = new DeleteSessionRequest(session.id, session.userId);
 
         try {
-            const response = await fetch(`/api/session/delete`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(deleteRequest),
-            });
-
-            if (response.ok) {
-                alert('Session deleted successfully');
-                setMessages([]);
-            } else {
-                console.error('Failed to delete session');
-                alert('Failed to delete session');
-            }
+            await deleteSessionService(deleteRequest);
+            alert('Session deleted successfully');
+            setMessages([]);
         } catch (error) {
             console.error('Error deleting session:', error);
             alert('Failed to delete session');
         }
     };
-
 
     return (
         <div className="chat-container">
@@ -292,15 +238,14 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
             <div className="grid-column">
                 {/*<AudioVisualizer useMicrophone />*/}
             </div>
-            
-                <Button appearance='primary' onClick={() => handleSaveSession(session?.id)} disabled={isSavingSession}>Validate Session</Button>
-            
-                <Button appearance='secondary' onClick={() => deleteSession()}>Delete session</Button>
-            
+
+            <Button appearance='primary' onClick={() => handleSaveSession(session?.id)} disabled={isSavingSession}>Validate Session</Button>
+
+            <Button appearance='secondary' onClick={() => deleteSession()}>Delete session</Button>
+
 
         </div>
     );
 }
 
 export default ChatWindow;
-

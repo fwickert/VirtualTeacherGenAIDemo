@@ -7,6 +7,7 @@ import { TagGroup, Tag, TagGroupProps } from '@fluentui/react-tags';
 import { makeStyles } from '@fluentui/react-components';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocalization } from '../../contexts/LocalizationContext';
+import { uploadChunk, deleteFileFromServer } from '../../services/FileService';
 
 interface FileUploadProps {
     agentId: string | undefined;
@@ -41,6 +42,8 @@ const truncateFileName = (fileName: string, maxLength: number) => {
     }
     return fileName;
 };
+
+const CHUNK_SIZE = 2 * 1024 * 1024; // 2MB
 
 export const FileUpload = ({ agentId, type, initialFileNames, onFileUpload }: FileUploadProps) => {
     const styles = useStyles();
@@ -87,26 +90,6 @@ export const FileUpload = ({ agentId, type, initialFileNames, onFileUpload }: Fi
         setFileErrors([]);
     };
 
-    const CHUNK_SIZE = 2 * 1024 * 1024; // 2MB
-
-    const uploadChunk = async (chunk: Blob, chunkIndex: number, totalChunks: number, fileId: string, fileName: string) => {
-        const formData = new FormData();
-        formData.append('file', chunk);
-        formData.append('chunkIndex', chunkIndex.toString());
-        formData.append('totalChunks', totalChunks.toString());
-        formData.append('fileId', fileId);
-        formData.append('fileName', fileName);
-
-        const response = await fetch(`/api/FileUpload?connectionId=${connection?.connectionId || ''}&agentId=${agentId}&type=${type}`, {
-            method: 'POST',
-            body: formData
-        });
-
-        if (!response.ok) {
-            throw new Error('Chunk upload failed');
-        }
-    };
-
     const handleUploadClick = async () => {
         if (newFiles.length === 0) {
             setFileErrors([getTranslation("UploadRequired")]);
@@ -124,7 +107,7 @@ export const FileUpload = ({ agentId, type, initialFileNames, onFileUpload }: Fi
                 const chunk = file.slice(start, end);
 
                 try {
-                    await uploadChunk(chunk, chunkIndex, totalChunks, fileId, file.name);
+                    await uploadChunk(chunk, chunkIndex, totalChunks, fileId, file.name, connection?.connectionId || '', agentId, type);
                     onFileUpload(file.name); // Call the callback function with the new file name
                 } catch (error) {
                     setFileErrors(prevErrors => [...prevErrors, `File upload failed for ${file.name}. Please try again.`]);
@@ -145,20 +128,10 @@ export const FileUpload = ({ agentId, type, initialFileNames, onFileUpload }: Fi
         setIsDialogVisible(true);
     };
 
-    const deleteFileFromServer = async (fileName: string) => {
-        const response = await fetch(`/api/FileUpload?fileName=${fileName}&agentId=${agentId}&type=${type}&connectionId=${connection?.connectionId}`, {
-            method: 'DELETE',
-        });
-
-        if (!response.ok) {
-            throw new Error('File delete failed');
-        }
-    };
-
     const confirmDeleteFile = async () => {
         if (fileToDelete) {
             try {
-                await deleteFileFromServer(fileToDelete);
+                await deleteFileFromServer(fileToDelete, connection?.connectionId || '', agentId, type);
                 const newFiles = files.filter(file => file.name !== fileToDelete);
                 setFiles(newFiles);
                 setNewFiles(newFiles.filter(file => !initialFileNames.includes(file.name)));
@@ -192,9 +165,9 @@ export const FileUpload = ({ agentId, type, initialFileNames, onFileUpload }: Fi
                 <div className={styles.fileUploadControls}>
                     <Field validationMessage={fileErrors.join(', ')}>
                         <input type="file" multiple onChange={handleFileChange} className="file-input" ref={inputRef} />
-                        <Button appearance="secondary" onClick={handleButtonClick}>{ getTranslation("SelectFileButton") }</Button>
+                        <Button appearance="secondary" onClick={handleButtonClick}>{getTranslation("SelectFileButton")}</Button>
                     </Field>
-                    <Button appearance="primary" onClick={handleUploadClick}>{getTranslation("UploadFileButton") }</Button>
+                    <Button appearance="primary" onClick={handleUploadClick}>{getTranslation("UploadFileButton")}</Button>
                     <span>{status}</span>
                 </div>
                 <TagGroup className={styles.tagContainer} onDismiss={handleDeleteFile}>
@@ -214,13 +187,13 @@ export const FileUpload = ({ agentId, type, initialFileNames, onFileUpload }: Fi
             <Dialog open={isDialogVisible} onOpenChange={handleDialogOpenChange} modalType="non-modal">
                 <DialogSurface>
                     <DialogBody>
-                        <DialogTitle>{ getTranslation("DeleteAskTitle")}</DialogTitle>
+                        <DialogTitle>{getTranslation("DeleteAskTitle")}</DialogTitle>
                         <DialogContent>
-                            <p>{getTranslation("DeleteFileAskMessage") }</p>
+                            <p>{getTranslation("DeleteFileAskMessage")}</p>
                         </DialogContent>
                         <DialogActions>
-                            <Button onClick={confirmDeleteFile} appearance="primary">{ getTranslation("DeleteButton")}</Button>
-                            <Button onClick={cancelDeleteFile} appearance="secondary">{ getTranslation("CancelButton") }</Button>
+                            <Button onClick={confirmDeleteFile} appearance="primary">{getTranslation("DeleteButton")}</Button>
+                            <Button onClick={cancelDeleteFile} appearance="secondary">{getTranslation("CancelButton")}</Button>
                         </DialogActions>
                     </DialogBody>
                 </DialogSurface>

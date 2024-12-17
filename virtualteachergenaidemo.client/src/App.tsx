@@ -15,7 +15,7 @@ import { InteractionType } from '@azure/msal-browser';
 import UserDisplay from './auth/userDisplay';
 import { UserProvider } from './auth/UserContext';
 import { UserRoleProvider, useUserRole } from './auth/UserRoleContext';
-import { getUserRole, createUser } from './services/userService';
+import { getUserRole, createUser } from './services/UserService';
 import { LocalizationProvider, useLocalization } from './contexts/LocalizationContext';
 
 function App(props: any) {

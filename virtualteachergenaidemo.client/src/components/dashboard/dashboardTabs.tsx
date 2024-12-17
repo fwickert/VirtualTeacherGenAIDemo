@@ -4,7 +4,7 @@ import { Tab, TabList } from '@fluentui/react-tabs';
 import { Skeleton3Rows } from '../../components/Utilities/skeleton3rows';
 import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
 import { DashboardFeatureResult } from './DashboardFeatureResult';
-
+import DashboardService from '../../services/DashboardService';
 
 interface DashboardTabsProps {
     sessionId: string;
@@ -12,43 +12,33 @@ interface DashboardTabsProps {
     userName: string;
 }
 
-
-
-
-
 const DashboardTabs: React.FC<DashboardTabsProps> = ({ sessionId, conversation, userName }) => {
     const [selectedValue, setSelectedValue] = useState<string>("Summary");
     const [dashboardData, setDashboardData] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [connection, setConnection] = useState<HubConnection | null>(null); 
-   
+    const [connection, setConnection] = useState<HubConnection | null>(null);
+
     useEffect(() => {
         const hubUrl = process.env.HUB_URL;
         const newConnection = new HubConnectionBuilder()
             .withUrl(hubUrl!)
             .withAutomaticReconnect()
-            .build();            
+            .build();
 
         newConnection.start().then();
         setConnection(newConnection);
         console.log('Connection started:', connection?.connectionId);
-        
+
     }, []);
 
-    
     useEffect(() => {
         console.log('Fetching dashboard data for chatId:', sessionId);
-        fetchDashboardData(sessionId);
+        loadDashboardData(sessionId);
     }, [sessionId]);
 
-    const fetchDashboardData = async (chatId: string) => {
+    const loadDashboardData = async (chatId: string) => {
         try {
-            const response = await fetch('/api/dashboard?chatId=' + chatId);
-            if (!response.ok) {
-                console.error('Failed to fetch dashboard data:', response.statusText);
-                return;
-            }
-            const data = await response.json();
+            const data = await DashboardService.getDashboardData(chatId);
             console.log('Fetched dashboard data:', data);
             setDashboardData(data);
         } catch (error) {
@@ -63,13 +53,11 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ sessionId, conversation, 
         setSelectedValue(data.value);
     };
 
-   
-
     const getTabContent = (infoType: string, _title: string) => {
         const item = dashboardData.find((data: any) => data.infoType === infoType);
-        
+
         return (
-            <div role="tabpanel" aria-labelledby={infoType} className="tabpanel">               
+            <div role="tabpanel" aria-labelledby={infoType} className="tabpanel">
                 <DashboardFeatureResult
                     sessionId={sessionId}
                     data={item}

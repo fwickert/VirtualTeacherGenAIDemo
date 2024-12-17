@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { fetchLanguageData } from '../services/localizationService';
+import { fetchLanguageData } from '../services/LocalizationService';
 import { LocaleItem } from '../models/LocaleItem';
 
 interface LocalizationContextProps {
@@ -14,8 +14,7 @@ export const LocalizationProvider: React.FC<{ lang: string, children: React.Reac
 
     useEffect(() => {
         const loadTranslations = async () => {
-            const data = await fetchLanguageData(lang);
-            console.log(data);
+            const data = await fetchLanguageData(lang);            
             setTranslations(data);
         };
 

@@ -2,29 +2,17 @@ import { Dialog, DialogTrigger, DialogSurface, DialogTitle, DialogBody, DialogAc
 import { Button } from '@fluentui/react-button';
 import { Prompt20Filled } from '@fluentui/react-icons';
 import { useEffect, useState } from 'react';
-
-
-
+import PromptService from '../../services/PromptService'; 
 
 export const DialogPrompt = (props: any) => {
     const [prompt, setPrompt] = useState<string>();
 
-    useEffect(() => {      
-            getPrompt(props.title);
-    }, []);
+    useEffect(() => {
+        fetchPrompt(props.title);
+    }, [props.title]);
 
-    async function getPrompt(prompt: string) {
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                functionName: prompt,
-                plugin: 'DashboardPlugin'
-            }),
-        };
-
-        const response = await fetch('/api/prompt', requestOptions);
-        const data = await response.text();
+    async function fetchPrompt(prompt: string) {
+        const data = await PromptService.getPrompt(prompt);
         setPrompt(data);
     }
 
@@ -44,9 +32,7 @@ export const DialogPrompt = (props: any) => {
                             <Button appearance="primary">Close</Button>
                         </DialogTrigger>
                     </DialogActions>
-
                 </DialogBody>
-
             </DialogSurface>
         </Dialog>
     );
