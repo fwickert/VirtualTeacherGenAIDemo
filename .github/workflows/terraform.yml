@@ -1,44 +1,21 @@
-name: Terraform
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+# File: .github/workflows/workflow.yml
+
+on: [push]
 
 jobs:
-  terraform:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Set up Terraform
-      uses: hashicorp/setup-terraform@v2
+      # checkout the repo
+    - uses: actions/checkout@master
+    - uses: Azure/login@v1
       with:
-        terraform_version: 1.0.11
-
-    - name: Set up Azure credentials
-      uses: azure/login@v1
+        creds: ${{ secrets.AZURE_CREDENTIALS }} 
+    - uses: Azure/get-keyvault-secrets@v1
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: Initialize Terraform
-      run: terraform init
-      working-directory: ./deploy
-
-    - name: Validate Terraform
-      run: terraform validate
-      working-directory: ./deploy
-
-    - name: Plan Terraform
-      run: terraform plan
-      working-directory: ./deploy
-
-    - name: Apply Terraform
-      if: github.ref == 'refs/heads/main'
-      run: terraform apply -auto-approve
-      working-directory: ./deploy
+        keyvault: "kvvirtualteacher"
+        secrets: 'subscription-id'  # comma separated list of secret keys that need to be fetched from the Key Vault 
+      id: myGetSecretAction
+    - run : echo ${{ steps.myGetSecretAction.outputs.subscription-id }}
+        
