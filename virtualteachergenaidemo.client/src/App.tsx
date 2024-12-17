@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './views/home';
 import LastTraining from './views/trainingList/lastTraining';
@@ -15,10 +15,12 @@ import { InteractionType } from '@azure/msal-browser';
 import UserDisplay from './auth/userDisplay';
 import { UserProvider } from './auth/UserContext';
 import { UserRoleProvider, useUserRole } from './auth/UserRoleContext';
-import { UserRoleEnum } from './models/UserRoleEnum';
+import { getUserRole, createUser } from './services/userService';
+import { LocalizationProvider, useLocalization } from './contexts/LocalizationContext';
 
 function App(props: any) {
     const [msalInstance, setMsalInstance] = useState<PublicClientApplication | null>(null);
+    
 
     useEffect(() => {
         const initMsal = async () => {
@@ -37,7 +39,9 @@ function App(props: any) {
         <MsalProvider instance={msalInstance}>
             <UserProvider>
                 <UserRoleProvider>
-                    <AuthenticatedApp title={props.title} />
+                    <LocalizationProvider lang="fr-FR">
+                        <AuthenticatedApp title={props.title} />
+                    </LocalizationProvider>
                 </UserRoleProvider>
             </UserProvider>
         </MsalProvider>
@@ -49,58 +53,20 @@ function AuthenticatedApp(props: any) {
     const userName = accounts.length > 0 ? accounts[0].name : 'Guest';
     const email = accounts.length > 0 ? accounts[0].username : 'Guest';
     const { setRole } = useUserRole();
+    const { getTranslation } = useLocalization();
 
     useEffect(() => {
-        const fetchUserRole = () => {
+        const fetchUserRole = async () => {
             if (email) {
-                fetch(`/api/User/${email}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            if (response.status === 404) {                                
-                                return createUserIfNotExists();
-                            } else {
-                                console.error('Failed to fetch user role:', response.statusText);
-                                return Promise.reject('Failed to fetch user role');
-                            }
-                        }
-                        return response.json();
-                    })
-                    .then(userData => {
-                        if (userData) {
-                            setRole(userData.role);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching user role:', error);
-                    });
-            }
-        };
-
-        const createUserIfNotExists = () => {
-            if (email) {
-                fetch('/api/User', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        id: email,
-                        name: email,
-                        role: UserRoleEnum.User,
-                        settings: {}
-                    })
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            console.error('Failed to create or get user:', response.statusText);
-                            return Promise.reject('Failed to create or get user');
-                        } else {
-                            setRole(UserRoleEnum.User);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error creating user:', error);
-                    });
+                try {
+                    let userData = await getUserRole(email);
+                    if (!userData) {
+                        userData = await createUser(email);
+                    }
+                    setRole(userData.role);
+                } catch (error) {
+                    console.error('Error fetching or creating user:', error);
+                }
             }
         };
 
@@ -119,7 +85,7 @@ function AuthenticatedApp(props: any) {
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/coach" element={<Coach />} />
                     <Route path="/agent" element={<Agent />} />
-                    <Route path="/scenarios" element={<Scenario title="Scenarios List" isForSimulation={false} />} />
+                    <Route path="/scenarios" element={<Scenario title={getTranslation("ScenarioTitle") } isForSimulation={false} />} />
                 </Routes>
             </MsalAuthenticationTemplate>
         </Router>

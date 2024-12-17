@@ -6,6 +6,7 @@ import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
 import { TagGroup, Tag, TagGroupProps } from '@fluentui/react-tags';
 import { makeStyles } from '@fluentui/react-components';
 import { v4 as uuidv4 } from 'uuid';
+import { useLocalization } from '../../contexts/LocalizationContext';
 
 interface FileUploadProps {
     agentId: string | undefined;
@@ -23,6 +24,7 @@ const useStyles = makeStyles({
     fileUploadControls: {
         display: 'flex',
         flexDirection: 'column',
+        padding: '5px',
         gap: '8px',
     },
     tagContainer: {
@@ -50,6 +52,7 @@ export const FileUpload = ({ agentId, type, initialFileNames, onFileUpload }: Fi
     const [isDialogVisible, setIsDialogVisible] = useState(false);
     const [fileToDelete, setFileToDelete] = useState<string | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const { getTranslation } = useLocalization();
 
     useEffect(() => {
         const hubUrl = process.env.HUB_URL;
@@ -106,7 +109,7 @@ export const FileUpload = ({ agentId, type, initialFileNames, onFileUpload }: Fi
 
     const handleUploadClick = async () => {
         if (newFiles.length === 0) {
-            setFileErrors(['Please select files to upload.']);
+            setFileErrors([getTranslation("UploadRequired")]);
             return;
         }
 
@@ -187,11 +190,11 @@ export const FileUpload = ({ agentId, type, initialFileNames, onFileUpload }: Fi
         <div className="file-upload">
             <div className={styles.fileUploadGrid}>
                 <div className={styles.fileUploadControls}>
-                    <Field label="Upload Files" validationMessage={fileErrors.join(', ')}>
+                    <Field validationMessage={fileErrors.join(', ')}>
                         <input type="file" multiple onChange={handleFileChange} className="file-input" ref={inputRef} />
-                        <Button appearance="secondary" onClick={handleButtonClick}>Select Files</Button>
+                        <Button appearance="secondary" onClick={handleButtonClick}>{ getTranslation("SelectFileButton") }</Button>
                     </Field>
-                    <Button appearance="primary" onClick={handleUploadClick}>Upload</Button>
+                    <Button appearance="primary" onClick={handleUploadClick}>{getTranslation("UploadFileButton") }</Button>
                     <span>{status}</span>
                 </div>
                 <TagGroup className={styles.tagContainer} onDismiss={handleDeleteFile}>
@@ -211,13 +214,13 @@ export const FileUpload = ({ agentId, type, initialFileNames, onFileUpload }: Fi
             <Dialog open={isDialogVisible} onOpenChange={handleDialogOpenChange} modalType="non-modal">
                 <DialogSurface>
                     <DialogBody>
-                        <DialogTitle>Delete this file?</DialogTitle>
+                        <DialogTitle>{ getTranslation("DeleteAskTitle")}</DialogTitle>
                         <DialogContent>
-                            <p>Are you sure you want to delete the file "{fileToDelete}"? This action is irreversible.</p>
+                            <p>{getTranslation("DeleteFileAskMessage") }</p>
                         </DialogContent>
                         <DialogActions>
-                            <Button onClick={confirmDeleteFile} appearance="primary">Delete</Button>
-                            <Button onClick={cancelDeleteFile} appearance="secondary">Cancel</Button>
+                            <Button onClick={confirmDeleteFile} appearance="primary">{ getTranslation("DeleteButton")}</Button>
+                            <Button onClick={cancelDeleteFile} appearance="secondary">{ getTranslation("CancelButton") }</Button>
                         </DialogActions>
                     </DialogBody>
                 </DialogSurface>

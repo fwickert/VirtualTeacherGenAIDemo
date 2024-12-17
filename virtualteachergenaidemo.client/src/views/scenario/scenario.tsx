@@ -6,6 +6,7 @@ import { mergeStyles } from '@fluentui/react';
 import { Button } from '@fluentui/react-button';
 import { useNavigate } from 'react-router-dom';
 import { ArrowCircleLeft48Filled } from '@fluentui/react-icons';
+import { useLocalization } from '../../contexts/LocalizationContext';
 
 interface ScenarioProps {
     title: string;
@@ -16,6 +17,7 @@ const Scenario = ({ title }: ScenarioProps) => {
     const [scenarios, setScenarios] = useState<ScenarioItem[]>([]);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const navigate = useNavigate();
+    const { getTranslation } = useLocalization();
 
     const addScenario = (newScenario: { name: string, description: string, agents: Agent[] }) => {
         setScenarios([...scenarios, { id: "", ...newScenario }]);
@@ -23,6 +25,7 @@ const Scenario = ({ title }: ScenarioProps) => {
 
     const handleBackClick = () => {
         navigate('/');
+        
     };
 
     const handleScenarioStart = (scenario: ScenarioItem) => {        
@@ -44,8 +47,7 @@ const Scenario = ({ title }: ScenarioProps) => {
                     </div>
                     <h1 className='title'>{title}</h1>
                     <p className="intro">
-                        A scenario allows the user to choose a scenario to start a simulation. It includes the agents used in the simulation.
-                        Your personal dashboard will display all information about a simulation. You can review the discussion, the summary, advice, and feedback.
+                        {getTranslation("ScenarioDescription") }
                     </p>
                 </section>
             </div>

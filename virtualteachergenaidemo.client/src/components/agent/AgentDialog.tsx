@@ -9,6 +9,7 @@ import { AgentItem } from '../../models/AgentItem';
 import { makeStyles } from '@fluentui/react-components';
 import { tokens } from '@fluentui/tokens';
 import { FileUpload } from '../Utilities/FileUpload';
+import { useLocalization } from '../../contexts/LocalizationContext';
 
 interface AgentDialogProps {
     onAddAgent: (agent: AgentItem) => void;
@@ -49,6 +50,7 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
     const [isOpen, setIsOpen] = useState<boolean>(true);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
     const [fileNames, setFileNames] = useState<string[]>(agent?.fileNames || []);
+    const { getTranslation } = useLocalization();
 
     useEffect(() => {
         if (agent) {
@@ -71,21 +73,21 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
     const handleUpsertAgent = () => {
         let valid = true;
         if (name.trim() === '') {
-            setNameError('Name is required.');
+            setNameError(getTranslation("NameRequired"));
             valid = false;
         } else {
             setNameError('');
         }
 
         if (description.trim() === '') {
-            setDescriptionError('Description is required.');
+            setDescriptionError(getTranslation("DescriptionRequired"));
             valid = false;
         } else {
             setDescriptionError('');
         }
 
         if (prompt.trim() === '') {
-            setPromptError('Instruction is required.');
+            setPromptError(getTranslation("PromptRequired"));
             valid = false;
         } else {
             setPromptError('');
@@ -167,19 +169,19 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
             <Dialog open={isOpen} onOpenChange={handleOpenChange}>
                 <DialogSurface>
                     <DialogBody>
-                        <DialogTitle>{agent ? 'Edit Agent' : 'Add New Agent'}</DialogTitle>
+                        <DialogTitle>{agent ? getTranslation("EditAgentButton") : getTranslation("AddAgentButton")}</DialogTitle>
                         <DialogContent>
                             <div className="formcard">
-                                <Field label="Name" required validationMessage={nameError}>
+                                <Field label={getTranslation("NameLabel")} required validationMessage={nameError}>
                                     <Input
-                                        placeholder="Name your agent"
+                                        placeholder={getTranslation("NamePlaceholderAgent")}
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
                                     />
                                 </Field>
-                                <Field label="Description" required validationMessage={descriptionError}>
+                                <Field label={getTranslation("DescriptionLabel")} required validationMessage={descriptionError}>
                                     <Textarea
-                                        placeholder="Describe your agent"
+                                        placeholder={getTranslation("DescriptionPlaceholderAgent")}
                                         value={description}
                                         rows={3}
                                         onChange={(e) => setDescription(e.target.value)}
@@ -187,9 +189,9 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
                                 </Field>
                             </div>
                             <div className="formcard">
-                                <Field label="Instruction" required validationMessage={promptError}>
+                                <Field label={getTranslation("PromptLabel")} required validationMessage={promptError}>
                                     <Textarea
-                                        placeholder="Give instruction to your agent"
+                                        placeholder={getTranslation("PromptPlaceholderAgent")}
                                         value={prompt}
                                         rows={10}
                                         onChange={(e) => setPrompt(e.target.value)}
@@ -198,7 +200,7 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
                             </div>
 
                             <div className="formcard">
-                                <label>Knowledge</label>
+                                <label>{getTranslation("KnowledgeLabel")}</label>
 
                                 <FileUpload agentId={agent?.id} initialFileNames={fileNames} type={agent?.type} onFileUpload={handleFileUpload} />
 
@@ -206,10 +208,10 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
                         </DialogContent>
                         <DialogActions>
                             {agent && (
-                                <Button className={styles.deleteButton} onClick={() => setIsDeleteConfirmOpen(true)}>Delete</Button>
+                                <Button className={styles.deleteButton} onClick={() => setIsDeleteConfirmOpen(true)}>{ getTranslation("DeleteButton") }</Button>
                             )}
-                            <Button appearance="primary" onClick={handleUpsertAgent}>{agent ? 'Save' : 'Add'}</Button>
-                            <Button appearance="secondary" onClick={() => { setIsOpen(false); onClose(); }}>Cancel</Button>
+                            <Button appearance="primary" onClick={handleUpsertAgent}>{agent ? getTranslation("SaveButton") : getTranslation("AddButton")}</Button>
+                            <Button appearance="secondary" onClick={() => { setIsOpen(false); onClose(); }}>{ getTranslation("CancelButton") }</Button>
                         </DialogActions>
                     </DialogBody>
                 </DialogSurface>
@@ -218,13 +220,13 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
             <Dialog open={isDeleteConfirmOpen} onOpenChange={(_event, data) => setIsDeleteConfirmOpen(data.open)}>
                 <DialogSurface>
                     <DialogBody>
-                        <DialogTitle>Confirm Delete</DialogTitle>
+                        <DialogTitle>{ getTranslation("DeleteAskTitle") }</DialogTitle>
                         <DialogContent>
-                            <p>Are you sure you want to delete this agent? This action is irreversible.</p>
+                            <p>{ getTranslation("DeleteAgentAskMessage") }</p>
                         </DialogContent>
                         <DialogActions>
-                            <Button className={styles.deleteButton} onClick={handleDeleteAgent}>Delete</Button>
-                            <Button appearance="secondary" onClick={() => setIsDeleteConfirmOpen(false)}>Cancel</Button>
+                            <Button className={styles.deleteButton} onClick={handleDeleteAgent}>{ getTranslation("DeleteButton") }</Button>
+                            <Button appearance="secondary" onClick={() => setIsDeleteConfirmOpen(false)}>{ getTranslation("CancelButton") }</Button>
                         </DialogActions>
                     </DialogBody>
                 </DialogSurface>
