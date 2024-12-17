@@ -21,6 +21,12 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.x'
+      
+      - name: Create target directory for HTTPS developer certificate
+        run: mkdir -p ~/.aspnet/https
+
+      - name: Change directory to HTTPS certificate folder
+        run: cd ~/.aspnet/https
 
       - name: Create target directory for HTTPS developer certificate
         run: mkdir -p ${{env.DOTNET_ROOT}}/myapp
