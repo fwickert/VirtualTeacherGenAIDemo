@@ -27,26 +27,3 @@ jobs:
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: 1.0.11
-
-    - name: Initialize Terraform
-      run: terraform init
-      working-directory: ./deploy
-
-    - name: Apply Terraform
-      run: terraform apply -auto-approve
-      working-directory: ./deploy
-
-    - name: Login to Azure
-      uses: azure/login@v2
-      with:
-        client-id: ${{ secrets.AZURE_CREDENTIALS.clientId }}
-        tenant-id: ${{ secrets.AZURE_CREDENTIALS.tenantId }}
-        subscription-id: ${{ secrets.AZURE_CREDENTIALS.subscriptionId }}
-
-    - name: Deploy to Azure Web App
-      id: deploy-to-webapp
-      uses: azure/webapps-deploy@v3
-      with:
-        app-name: 'virtual-teacher-webapp-wus'
-        slot-name: 'Production'
-        package: .

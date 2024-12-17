@@ -2,7 +2,8 @@
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
 name: Build and deploy ASP.Net Core app to Azure Web App - webapp-virtual-teacher
-
+env:
+  DOTNET_ROOT: /home/runner/.dotnet
 on:
   push:
     branches:
