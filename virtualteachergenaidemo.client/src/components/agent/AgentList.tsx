@@ -12,6 +12,7 @@ import { tokens } from '@fluentui/tokens';
 import { Button } from '@fluentui/react-button';
 import { AgentDialog } from './AgentDialog';
 import { useLocalization } from '../../contexts/LocalizationContext';
+import { AgentService } from '../../services/AgentService';
 
 const useStyles = makeStyles({
     customPreview: {
@@ -21,7 +22,7 @@ const useStyles = makeStyles({
         minWidth: '400px',
         maxWidth: '300px',
         minHeight: '200px',
-        maxHeight: '200px',    
+        maxHeight: '200px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
@@ -77,7 +78,7 @@ const useStyles = makeStyles({
     buttonIcon: {
         fontSize: '48px',
         marginBottom: '5px',
-    },  
+    },
     headerText: {
         fontSize: '20px',
         lineHeight: 'var(--lineHeightBase400)',
@@ -112,12 +113,10 @@ const AgentList: FC = () => {
     const [dialogType, setDialogType] = useState<string>('');
     const { getTranslation } = useLocalization();
 
-    useEffect(() => {
-        // Fetch agents from an API or data source
-        fetch('/api/agent/all')
-            .then(response => response.json())
-            .then(data => {
-                setAgents(data);
+    useEffect(() => {        
+        AgentService.getAllAgents()
+            .then(response => {
+                setAgents(response.data);
                 setLoading(false);
             })
             .catch(error => {
@@ -194,8 +193,8 @@ const AgentList: FC = () => {
     return (
         <div className="tabcontainer">
             <TabList selectedValue={selectedTab} onTabSelect={onTabSelect} appearance='subtle-circular' size='large'>
-                <Tab value="RolePlay" icon={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass('rolePlay', classes))} />}>{ getTranslation("RolePlayTabLabel") }</Tab>
-                <Tab value="Teacher" icon={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass("teacher", classes))} />}>{ getTranslation("TeacherTabLabel") }</Tab>
+                <Tab value="RolePlay" icon={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass('rolePlay', classes))} />}>{getTranslation("RolePlayTabLabel")}</Tab>
+                <Tab value="Teacher" icon={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass("teacher", classes))} />}>{getTranslation("TeacherTabLabel")}</Tab>
                 <Tab value="System" icon={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass("system", classes))} />}>{getTranslation("SystemTabLabel")}</Tab>
             </TabList>
             <div className="agent-cards-grid">
@@ -203,7 +202,7 @@ const AgentList: FC = () => {
                     <>
                         <Button className={classes.buttonWithIcon} onClick={() => handleAddAgent('rolePlay')}>
                             <AddCircleRegular className={classes.buttonIcon} />
-                            { getTranslation("AddAgentButton") }
+                            {getTranslation("AddAgentButton")}
                         </Button>
                         {renderAgents('rolePlay')}
                     </>

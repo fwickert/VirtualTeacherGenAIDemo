@@ -4,6 +4,7 @@ import { Card, CardHeader, CardPreview } from '@fluentui/react-card';
 import { useState, useEffect } from 'react';
 import { Agent } from '../../models/ScenarioItem';
 import { useLocalization } from '../../contexts/LocalizationContext';
+import { AgentService } from '../../services/AgentService';
 
 interface AgentSelectionDialogProps {
     onSelectAgent: (agent: Agent) => void;
@@ -17,10 +18,8 @@ export const AgentSelectionDialog = ({ onSelectAgent, onClose, isOpen, type }: A
     const { getTranslation } = useLocalization();
 
     useEffect(() => {
-        // Fetch agents with the specified type from API
-        fetch(`/api/agent/ByType?type=${type}`)
-            .then(response => response.json())
-            .then(data => setAgents(data))
+        AgentService.getAgentsByType(type)
+            .then(response => setAgents(response.data))
             .catch(error => console.error('Error:', error));
     }, [type]);
 
@@ -32,9 +31,9 @@ export const AgentSelectionDialog = ({ onSelectAgent, onClose, isOpen, type }: A
                     <DialogContent>
                         {agents.map(agent => (
                             <Card key={agent.id} onClick={() => onSelectAgent(agent)} style={{ cursor: 'pointer', marginBottom: '10px' }}>
-                                <CardHeader header={<h3>{agent.name}</h3>}>                                    
+                                <CardHeader header={<h3>{agent.name}</h3>}>
                                 </CardHeader>
-                                <CardPreview>                                    
+                                <CardPreview>
                                     <p>{agent.prompt}</p>
                                 </CardPreview>
                             </Card>

@@ -11,6 +11,7 @@ import AgentSelectionDialog from '../agent/AgentSelectionDialog';
 import { Add24Regular } from '@fluentui/react-icons';
 import { tokens } from '@fluentui/tokens';
 import { useLocalization } from '../../contexts/LocalizationContext';
+import { ScenarioService } from '../../services/scenarioService';
 
 const useStyles = makeStyles({
     customDialogSurface: {
@@ -133,23 +134,11 @@ export const ScenarioDialog = ({ onAddScenario, onDeleteScenario, onClose, isOpe
 
         const newScenario = { name, description, agents, id: scenario ? scenario.id : "" };
 
-        const apiUrl = scenario ? `/api/scenario/${scenario.id}` : '/api/scenario';
-        const method = scenario ? 'PUT' : 'POST';
+        const apiCall = scenario ? ScenarioService.updateScenario(newScenario) : ScenarioService.addScenario(newScenario);
 
-        fetch(apiUrl, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newScenario),
-        })
+        apiCall
             .then(response => {
-                if (response.status === 204) {
-                    return null; // No content to parse
-                }
-                return response.json();
-            })
-            .then(data => {
+                const data = response.data;
                 console.log('Success:', data);
                 if (!scenario) {
                     newScenario.id = data.id; // Assuming the API returns the new scenario's ID
@@ -157,7 +146,6 @@ export const ScenarioDialog = ({ onAddScenario, onDeleteScenario, onClose, isOpe
                 onAddScenario(newScenario);
             })
             .catch(error => console.error('Error:', error));
-
 
         setIsAgentDialogOpen(false);
         onClose();
@@ -172,19 +160,14 @@ export const ScenarioDialog = ({ onAddScenario, onDeleteScenario, onClose, isOpe
     const handleDeleteScenario = () => {
         if (!scenario) return;
 
-        fetch(`/api/scenario/${scenario.id}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
+        ScenarioService.deleteScenario(scenario.id)
             .then(response => {
-                if (response.ok) {
-                    console.log('Agent deleted successfully');
+                if (response.status === 204) {
+                    console.log('Scenario deleted successfully');
                     onDeleteScenario(scenario.id);
                     onClose();
                 } else {
-                    console.error('Failed to delete agent');
+                    console.error('Failed to delete scenario');
                 }
             })
             .catch(error => console.error('Error:', error));
@@ -198,7 +181,7 @@ export const ScenarioDialog = ({ onAddScenario, onDeleteScenario, onClose, isOpe
             <Dialog open={isOpen} onOpenChange={handleOpenChange}>
                 <DialogSurface className={styles.customDialogSurface}>
                     <DialogBody>
-                        <DialogTitle>{scenario ? getTranslation("EditScenario") : getTranslation("NewScenario") }</DialogTitle>
+                        <DialogTitle>{scenario ? getTranslation("EditScenario") : getTranslation("NewScenario")}</DialogTitle>
                         <DialogContent className={styles.dialogContent}>
                             <div className="formcard">
                                 <Field label={getTranslation("NameLabel")} required validationMessage={nameError}>
@@ -243,7 +226,7 @@ export const ScenarioDialog = ({ onAddScenario, onDeleteScenario, onClose, isOpe
                                 <Button className={styles.deleteButton} onClick={() => setIsDeleteConfirmOpen(true)}>{getTranslation("DeleteButton")}</Button>
                             )}
                             <Button appearance="primary" onClick={handleAddScenario}>{scenario ? getTranslation("SaveButton") : getTranslation("AddButton")}</Button>
-                            <Button appearance="secondary" onClick={onClose}>{getTranslation("CancelButton") }</Button>
+                            <Button appearance="secondary" onClick={onClose}>{getTranslation("CancelButton")}</Button>
                         </DialogActions>
                     </DialogBody>
                 </DialogSurface>
@@ -252,9 +235,9 @@ export const ScenarioDialog = ({ onAddScenario, onDeleteScenario, onClose, isOpe
             <Dialog open={isDeleteConfirmOpen} onOpenChange={(_event, data) => setIsDeleteConfirmOpen(data.open)}>
                 <DialogSurface>
                     <DialogBody>
-                        <DialogTitle>{ getTranslation("DeleteAskTitle")}</DialogTitle>
+                        <DialogTitle>{getTranslation("DeleteAskTitle")}</DialogTitle>
                         <DialogContent>
-                            <p>{getTranslation("DeleteScenarioAskMessage") }</p>
+                            <p>{getTranslation("DeleteScenarioAskMessage")}</p>
                         </DialogContent>
                         <DialogActions>
                             <Button className={styles.deleteButton} onClick={handleDeleteScenario}>{getTranslation("DeleteButton")}</Button>

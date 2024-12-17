@@ -10,6 +10,7 @@ import { makeStyles } from '@fluentui/react-components';
 import { tokens } from '@fluentui/tokens';
 import { FileUpload } from '../Utilities/FileUpload';
 import { useLocalization } from '../../contexts/LocalizationContext';
+import { AgentService } from '../../services/AgentService';
 
 interface AgentDialogProps {
     onAddAgent: (agent: AgentItem) => void;
@@ -104,23 +105,9 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
             fileNames
         };
 
-        const apiUrl = agent ? `/api/agent/${agent.id}` : '/api/agent';
-        const method = agent ? 'PUT' : 'POST';
-
-        fetch(apiUrl, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newAgent),
-        })
+        AgentService.upsertAgent(newAgent)
             .then(response => {
-                if (response.status === 204) {
-                    return null;
-                }
-                return response.json();
-            })
-            .then(data => {
+                const data = response.data;
                 console.log('Success:', data);
                 if (!agent) {
                     newAgent.id = data.id;
@@ -136,14 +123,9 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
     const handleDeleteAgent = () => {
         if (!agent) return;
 
-        fetch(`/api/agent/${agent.id}?type=${agent.type}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
+        AgentService.deleteAgent(agent.id, agent.type)
             .then(response => {
-                if (response.ok) {
+                if (response.status === 204) {
                     console.log('Agent deleted successfully');
                     onDeleteAgent(agent.id);
                     onClose();
