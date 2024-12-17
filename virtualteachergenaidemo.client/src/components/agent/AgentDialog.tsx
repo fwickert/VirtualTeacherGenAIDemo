@@ -60,7 +60,12 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
     }, [agent]);
 
     const handleFileUpload = (fileName: string) => {
-        setFileNames(prevFileNames => [...prevFileNames, fileName]);
+        setFileNames(prevFileNames => {
+            if (!prevFileNames.includes(fileName)) {
+                return [...prevFileNames, fileName];
+            }
+            return prevFileNames;
+        });
     };
 
     const handleUpsertAgent = () => {
