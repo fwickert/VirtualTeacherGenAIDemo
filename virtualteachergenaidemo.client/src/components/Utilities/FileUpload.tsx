@@ -96,6 +96,12 @@ export const FileUpload = ({ agentId, type, initialFileNames, onFileUpload }: Fi
             return;
         }
 
+        // If agentId is null, create a new agentId using a GUID
+        let currentAgentId = agentId;
+        if (!currentAgentId) {
+            currentAgentId = uuidv4();
+        }
+
         for (let i = 0; i < newFiles.length; i++) {
             const file = newFiles[i];
             const fileId = uuidv4();
@@ -107,7 +113,8 @@ export const FileUpload = ({ agentId, type, initialFileNames, onFileUpload }: Fi
                 const chunk = file.slice(start, end);
 
                 try {
-                    await uploadChunk(chunk, chunkIndex, totalChunks, fileId, file.name, connection?.connectionId || '', agentId, type);
+                   
+                    await uploadChunk(chunk, chunkIndex, totalChunks, fileId, file.name, connection?.connectionId || '', currentAgentId, type);
                     onFileUpload(file.name); // Call the callback function with the new file name
                 } catch (error) {
                     setFileErrors(prevErrors => [...prevErrors, `File upload failed for ${file.name}. Please try again.`]);
