@@ -1,3 +1,5 @@
+{{$userPrompt}}
+
 [RULES]
 DONT WASTE WORDS
 USE SHORT, CLEAR, COMPLETE SENTENCES.
@@ -12,5 +14,5 @@ Use the same language as the conversation.
 {{$conversation}}
 
 [TASK]
-Create a short summary of the conversation above.
+Create only a short summary of the conversation above.
 [END]

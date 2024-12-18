@@ -15,6 +15,16 @@
       "name": "conversation",
       "description": "the conversattion to evaluate",
       "default": ""
+    },
+    {
+      "name": "userPrompt",
+      "description": "the user give it's own prompt'",
+      "default": ""
+    },
+    {
+      "name": "knowledge",
+      "description": "The knowledge use by this agent",
+      "default": ""
     }
   ]
 }

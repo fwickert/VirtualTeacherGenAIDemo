@@ -4,18 +4,18 @@ import { mergeStyles } from '@fluentui/react';
 import { Button } from '@fluentui/react-button';
 import { useNavigate } from 'react-router-dom';
 import { ArrowCircleLeft48Filled } from '@fluentui/react-icons';
-import { ISessionItem } from '../../models/SessionItem';
-
+import { SessionItem } from '../../models/SessionItem';
+import { useLocalization } from '../../contexts/LocalizationContext';
 
 const SessionPage: React.FC = () => {
     const navigate = useNavigate();
-
+    const { getTranslation } = useLocalization();
 
     const handleBackClick = () => {
         navigate('/');
     };
 
-    const handleSessionStart = async (session: ISessionItem) => {            
+    const handleSessionStart = async (session: SessionItem) => {
         navigate('/training', { state: { session } });
     };
 
@@ -32,10 +32,9 @@ const SessionPage: React.FC = () => {
                     <div className="back">
                         <Button size="large" appearance="transparent" onClick={handleBackClick} icon={<ArrowCircleLeft48Filled />} />
                     </div>
-                    <h1>Your current Sessions</h1>
+                    <h1>{getTranslation("ViewSessionTitle")}</h1>
                     <p className="intro">
-                        A scenario allows the user to choose a scenario to start a simulation. It includes the agents used in the simulation.
-                        Your personal dashboard will display all information about a simulation. You can review the discussion, the summary, advice, and feedback.
+                        {getTranslation("ViewSessionDescription")}
                     </p>
                 </section>
             </div>
