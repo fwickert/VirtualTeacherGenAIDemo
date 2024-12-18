@@ -11,6 +11,5 @@
   <ItemGroup>
     <Folder Include="src\components\speechRecognizer\" />
     <Folder Include="src\models\Request\" />
-    <Folder Include="src\services\" />
   </ItemGroup>
 </Project>

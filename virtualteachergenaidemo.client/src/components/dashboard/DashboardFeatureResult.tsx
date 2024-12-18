@@ -5,6 +5,8 @@ import MarkdownRenderer from '../Utilities/markdownRenderer';
 import { HubConnection } from '@microsoft/signalr';
 import { Button } from '@fluentui/react-button';
 import { DialogPrompt } from '../Utilities/DialogPrompt';
+import DashboardService from '../../services/DashboardService';
+
 interface DashboardFeatureResultProps {
     sessionId:string
     data: any;
@@ -12,10 +14,11 @@ interface DashboardFeatureResultProps {
     loading: boolean;
     connection: HubConnection | null;
     conversation: string;
+    userName: string;
 }
 
 
-const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({ sessionId, data, infoType, loading, conversation, connection }) => {
+const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({ sessionId, data, infoType, loading, conversation, connection, userName }) => {
     const [content, setContent] = useState(data?.content || '');
     const [isLoading, setIsLoading] = useState(loading);
 
@@ -41,23 +44,17 @@ const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({ session
         setIsLoading(true);
         try {
             const body = {
-                id: item == undefined ? "" :  item.id,
+                id: item == undefined ? "" : item.id,
                 sessionId: sessionId,
                 conversation: conversation,
                 connectionId: connection?.connectionId,
                 title: feature,
                 prompt: feature
-            }
+            };
             console.log(`Calling API for ${feature} with body:`, body);
-            const response = await fetch(`/api/dashboard/${feature}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(body),
-            });
-            if (!response.ok) {
-                console.error(`Failed to call API for ${feature}:`, response.statusText);
+            const response = await DashboardService.postFeature(feature, sessionId, userName, body);
+            if (!response) {
+                console.error(`Failed to call API for ${feature}`);
                 setContent('Failed to generate content');
                 setIsLoading(false);
                 return;
@@ -67,7 +64,7 @@ const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({ session
             setContent('Failed to generate content');
             setIsLoading(false);
         } finally {
-
+            // Any final cleanup if necessary
         }
     };
 

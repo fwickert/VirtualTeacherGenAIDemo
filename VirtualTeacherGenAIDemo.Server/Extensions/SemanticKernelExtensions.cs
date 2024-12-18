@@ -108,7 +108,7 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
                 .WithAzureOpenAITextEmbeddingGeneration(azureOpenAIEmbeddingConfig)
                 .WithAzureOpenAITextGeneration(azureOpenAITextConfig)
                 .WithAzureAISearchMemoryDb(azureAISearchConfig)
-                .WithSearchClientConfig(new SearchClientConfig { MaxMatchesCount = 5, Temperature = 0, TopP = 0 })
+                .WithSearchClientConfig(new SearchClientConfig { Temperature = 0, TopP = 0 })
                 .WithCustomImageOcr(new DocIntOCREngine()); ;
 
 

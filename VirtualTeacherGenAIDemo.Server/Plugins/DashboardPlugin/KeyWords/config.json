@@ -3,7 +3,7 @@
   "description": "Extract keywords from a conversation",
   "execution_settings": {
     "default": {
-      "max_tokens": 300,
+      "max_tokens": 1024,
       "temperature": 0,
       "top_p": 0.5,
       "presence_penalty": 0.0,
@@ -14,6 +14,11 @@
     {
       "name": "conversation",
       "description": "the conversattion to extract keywords",
+      "default": ""
+    },
+    {
+      "name": "userPrompt",
+      "description": "the user give it's own prompt'",
       "default": ""
     }
   ]

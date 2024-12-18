@@ -4,17 +4,14 @@ export class AgentItem {
     description: string;
     prompt: string;
     type: string;
-    fileNames: string;
+    fileNames: string[];
 
-
-    constructor(id: string, name: string, description:string, prompt:string, type:string, fileNames:string) {
+    constructor(id: string, name: string, description: string, prompt: string, type: string, fileNames: string[]) {
         this.id = id;
-        this.description = description;
         this.name = name;
+        this.description = description;
         this.prompt = prompt;
         this.type = type;
         this.fileNames = fileNames;
-
     }
 }
-

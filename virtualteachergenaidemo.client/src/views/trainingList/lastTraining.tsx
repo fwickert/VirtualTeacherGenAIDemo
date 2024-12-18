@@ -8,20 +8,28 @@ import { ArrowCircleLeft48Filled } from '@fluentui/react-icons';
 import { Button } from '@fluentui/react-button';
 import { ILastTrainingItem } from '../../models/LastTrainingItem';
 import { useUsername } from '../../auth/UserContext'; 
+import { useLocalization } from '../../contexts/LocalizationContext';
+import { mergeStyles } from '@fluentui/react';
 
 const LastTraining: React.FC = () => {
     const [lastTraining, setLastTraining] = useState<ILastTrainingItem[] | null>();
     const navigate = useNavigate();    
     const userName = useUsername();
+    const { getTranslation } = useLocalization();
 
     const navigateDashboard = (sessionId: string) => {
         navigate('/dashboard', { state: { sessionId } });
     };
 
-    const navigatHome = () => {
+    const handleBackClick = () => {
         navigate('/');
     };
 
+    const containerClass = mergeStyles({
+        marginLeft: '100px',
+        marginRight: '50px',
+        width: '90%',
+    });
 
     useEffect(() => {
         getlastTraining();
@@ -55,9 +63,18 @@ const LastTraining: React.FC = () => {
             </div>;
 
     return (
-        <div>
-            <Button size="large" appearance="transparent" onClick={navigatHome} icon={<ArrowCircleLeft48Filled />} />
-            <h1 className="title">Last Training </h1>
+        <div className={containerClass}>
+            <div className="header">
+                <section className="intro">
+                    <div className="back">
+                        <Button size="large" appearance="transparent" onClick={handleBackClick} icon={<ArrowCircleLeft48Filled />} />
+                    </div>
+                    <h1>{getTranslation("ViewLastTrainingTitle")}</h1>
+                    <p className="intro">
+                        {getTranslation("ViewLastTrainingDescription")}
+                    </p>
+                </section>
+            </div>
             {contents}
         </div>
     );

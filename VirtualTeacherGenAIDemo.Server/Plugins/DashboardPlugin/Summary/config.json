@@ -17,8 +17,8 @@
       "default": ""
     },    
     {
-      "name": "language",
-      "description": "the language for to summary",
+      "name": "userPrompt",
+      "description": "the user give it's own prompt'",
       "default": ""
     }
     

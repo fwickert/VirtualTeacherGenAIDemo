@@ -1,7 +1,7 @@
 import './agentList.css';
 import { useState, useEffect, FC } from 'react';
 import { Card, CardHeader, CardPreview, CardFooter } from '@fluentui/react-card';
-import { Text, Title2, Body2 } from '@fluentui/react-text';
+import { Title2, Body2 } from '@fluentui/react-text';
 import { Spinner } from '@fluentui/react';
 import { Tab, TabList } from '@fluentui/react-tabs';
 import { AgentItem } from '../../models/AgentItem';
@@ -10,17 +10,31 @@ import { PersonAvailableFilled, AddCircleRegular, EditRegular } from '@fluentui/
 import { mergeClasses } from '@fluentui/react-components';
 import { tokens } from '@fluentui/tokens';
 import { Button } from '@fluentui/react-button';
-import { AgentDialog } from './AgentDialog'; // Import AgentDialog
+import { AgentDialog } from './AgentDialog';
+import { useLocalization } from '../../contexts/LocalizationContext';
+import { AgentService } from '../../services/AgentService';
 
 const useStyles = makeStyles({
     customPreview: {
-        padding: '10px',
+        padding: '5px',
     },
     customCard: {
         minWidth: '400px',
         maxWidth: '300px',
         minHeight: '200px',
         maxHeight: '200px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+    },
+    cardFooter: {
+        display: 'flex',
+        justifyContent: 'flex-end',
+        alignItems: 'flex-end',
+        marginTop: 'auto',
+    },
+    editButton: {
+        marginLeft: 'auto',
     },
     iconGrid: {
         display: 'grid',
@@ -65,8 +79,16 @@ const useStyles = makeStyles({
         fontSize: '48px',
         marginBottom: '5px',
     },
-    editButton: {
-        marginLeft: 'auto',
+    headerText: {
+        fontSize: '20px',
+        lineHeight: 'var(--lineHeightBase400)',
+    },
+    truncatedText: {
+        display: '-webkit-box',
+        WebkitLineClamp: 2,
+        WebkitBoxOrient: 'vertical',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
     },
 });
 
@@ -89,13 +111,12 @@ const AgentList: FC = () => {
     const [editingAgent, setEditingAgent] = useState<AgentItem | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [dialogType, setDialogType] = useState<string>('');
+    const { getTranslation } = useLocalization();
 
-    useEffect(() => {
-        // Fetch agents from an API or data source
-        fetch('/api/agent/all')
-            .then(response => response.json())
-            .then(data => {
-                setAgents(data);
+    useEffect(() => {        
+        AgentService.getAllAgents()
+            .then(response => {
+                setAgents(response.data);
                 setLoading(false);
             })
             .catch(error => {
@@ -143,15 +164,13 @@ const AgentList: FC = () => {
             .map(agent => (
                 <Card key={agent.id} className={`${classes.customCard} card`} >
                     <CardHeader
-                        header={<Title2>{agent.name}</Title2>}
+                        header={<Title2 className={classes.headerText}>{agent.name}</Title2>}
                         action={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass(agent.type, classes))} />}
                     />
                     <CardPreview className={classes.customPreview}>
-                        <div className={classes.iconGrid}>
-                            <div><Body2>{agent.description}</Body2></div>                            
-                        </div>
+                        <div><Body2 className={classes.truncatedText}>{agent.description}</Body2></div>
                     </CardPreview>
-                    <CardFooter>
+                    <CardFooter className={classes.cardFooter}>
                         <Button
                             icon={<EditRegular />}
                             className={classes.editButton}
@@ -160,7 +179,7 @@ const AgentList: FC = () => {
                                 setDialogType(agent.type);
                                 setIsDialogOpen(true);
                             }}>
-                            Edit
+                            {getTranslation("Edit")}
                         </Button>
                     </CardFooter>
                 </Card>
@@ -168,22 +187,22 @@ const AgentList: FC = () => {
     };
 
     if (loading) {
-        return <Spinner label="Loading agents..." />;
+        return <Spinner label={getTranslation("Loading")} />;
     }
 
     return (
         <div className="tabcontainer">
             <TabList selectedValue={selectedTab} onTabSelect={onTabSelect} appearance='subtle-circular' size='large'>
-                <Tab value="RolePlay" icon={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass('rolePlay', classes))} />}>RolePlay</Tab>
-                <Tab value="Teacher" icon={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass("teacher", classes))} />}>Teacher</Tab>
-                <Tab value="System" icon={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass("system", classes))} />}>System</Tab>
+                <Tab value="RolePlay" icon={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass('rolePlay', classes))} />}>{getTranslation("RolePlayTabLabel")}</Tab>
+                <Tab value="Teacher" icon={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass("teacher", classes))} />}>{getTranslation("TeacherTabLabel")}</Tab>
+                <Tab value="System" icon={<PersonAvailableFilled className={mergeClasses(classes.icon, getAgentColorClass("system", classes))} />}>{getTranslation("SystemTabLabel")}</Tab>
             </TabList>
             <div className="agent-cards-grid">
                 {selectedTab === 'RolePlay' && (
                     <>
                         <Button className={classes.buttonWithIcon} onClick={() => handleAddAgent('rolePlay')}>
                             <AddCircleRegular className={classes.buttonIcon} />
-                            Add Roleplay Agent
+                            {getTranslation("AddAgentButton")}
                         </Button>
                         {renderAgents('rolePlay')}
                     </>
@@ -192,7 +211,7 @@ const AgentList: FC = () => {
                     <>
                         <Button className={classes.buttonWithIcon} onClick={() => handleAddAgent('teacher')}>
                             <AddCircleRegular className={classes.buttonIcon} />
-                            Add Teacher Agent
+                            {getTranslation("AddAgentButton")}
                         </Button>
                         {renderAgents('teacher')}
                     </>
@@ -201,21 +220,21 @@ const AgentList: FC = () => {
                     <>
                         <Button className={classes.buttonWithIcon} onClick={() => handleAddAgent('system')}>
                             <AddCircleRegular className={classes.buttonIcon} />
-                            Add System Agent
+                            {getTranslation("AddAgentButton")}
                         </Button>
                         {renderAgents('system')}
                     </>
                 )}
             </div>
             {isDialogOpen && (
-
                 <AgentDialog
                     onAddAgent={handleAgentAddedOrEdited}
                     onDeleteAgent={handleDeleteAgent}
                     type={dialogType}
                     onClose={() => setIsDialogOpen(false)}
                     agent={editingAgent || undefined}
-                />
+                    />
+                
             )}
         </div>
     );

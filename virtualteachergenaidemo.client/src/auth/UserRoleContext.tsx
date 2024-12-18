@@ -1,5 +1,5 @@
 // src/auth/UserRoleContext.tsx
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { UserRoleEnum } from '../models/UserRoleEnum';
 
 interface UserRoleContextType {

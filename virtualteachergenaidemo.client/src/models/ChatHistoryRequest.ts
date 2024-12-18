@@ -1,11 +1,11 @@
-import { ISessionItem } from '../models/SessionItem';
+import { SessionItem } from '../models/SessionItem';
 
 export class ChatHistoryRequest {
     messages: ChatMessage[];
     userId: string;
-    session: ISessionItem;
+    session: SessionItem;
 
-    constructor(userId: string, session:ISessionItem, messages: ChatMessage[]) {
+    constructor(userId: string, session:SessionItem, messages: ChatMessage[]) {
         this.userId = userId;
         this.session = session;
         this.messages = messages;

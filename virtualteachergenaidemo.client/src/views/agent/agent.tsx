@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowCircleLeft48Filled } from '@fluentui/react-icons';
 import { useUserRole } from '../../auth/UserRoleContext';
 import { UserRoleEnum } from '../../models/UserRoleEnum';
+import { useLocalization } from '../../contexts/LocalizationContext';
 
 
 const Agent = () => {
@@ -15,6 +16,7 @@ const Agent = () => {
     const [dialogType, setDialogType] = useState<string | null>(null);
     const navigate = useNavigate();
     const { role } = useUserRole();
+    const { getTranslation } = useLocalization();
 
     useEffect(() => {
         if (role !== UserRoleEnum.Admin) {
@@ -43,9 +45,9 @@ const Agent = () => {
                     <div className="back">
                         <Button size="large" appearance="transparent" onClick={handleBackClick} icon={<ArrowCircleLeft48Filled />} />
                     </div>
-                    <h1>Agent View</h1>
-                    <p className="intro">
-                        An agent is part of the AI system and functions like an expert system. Users can see three types of agents: Roleplay that AI plays, Teacher, and System prompt.
+                    <h1>{getTranslation("ViewAgentTitle")}</h1>
+                    <p className="intro">                        
+                        {getTranslation("ViewAgentDescription")}
                     </p>
                 </section>
             </div>
