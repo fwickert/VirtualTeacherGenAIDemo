@@ -11,6 +11,9 @@ import { tokens } from '@fluentui/tokens';
 import { FileUpload } from '../Utilities/FileUpload';
 import { useLocalization } from '../../contexts/LocalizationContext';
 import { AgentService } from '../../services/AgentService';
+import { v4 as uuidv4 } from 'uuid'; 
+import { useRef } from 'react';
+
 
 interface AgentDialogProps {
     onAddAgent: (agent: AgentItem) => void;
@@ -52,6 +55,9 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
     const [fileNames, setFileNames] = useState<string[]>(agent?.fileNames || []);
     const { getTranslation } = useLocalization();
+
+    const agentIdRef = useRef(agent?.id || uuidv4());
+    const agentId = agentIdRef.current;
 
     useEffect(() => {
         if (agent) {
@@ -101,17 +107,16 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
             description,
             prompt,
             type,
-            id: agent?.id || "",
+            id: agentId,
             fileNames
         };
 
         AgentService.upsertAgent(newAgent)
             .then(response => {
-                const data = response.data;
-                console.log('Success:', data);
-                if (!agent) {
-                    newAgent.id = data.id;
-                }
+                const data = response.data;                
+                //if (!agent) {
+                //    newAgent.id = data.id;
+                //}
                 onAddAgent(newAgent);
             })
             .catch(error => console.error('Error:', error));
@@ -184,7 +189,7 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
                             <div className="formcard">
                                 <label>{getTranslation("KnowledgeLabel")}</label>
 
-                                <FileUpload agentId={agent?.id} initialFileNames={fileNames} type={agent?.type} onFileUpload={handleFileUpload} />
+                                <FileUpload agentId={agentId} initialFileNames={fileNames} type={type} onFileUpload={handleFileUpload} />
 
                             </div>
                         </DialogContent>

@@ -9,6 +9,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using VirtualTeacherGenAIDemo.Server.Hubs;
+using VirtualTeacherGenAIDemo.Server.Models.Storage;
 using VirtualTeacherGenAIDemo.Server.Options;
 
 namespace VirtualTeacherGenAIDemo.Server.Services
@@ -37,6 +38,32 @@ namespace VirtualTeacherGenAIDemo.Server.Services
 
             int i = 1;
             await UpdateMessageOnClient("DocumentParsedUpdate", "Process started...", connectionId, token);
+
+
+            //Update agent's file list before process, then if process failed, the user can remove file name from the list            
+            AgentItem agent;
+            try
+            {
+                agent = await _agentService.GetByIdAsync(agentId, type);
+                // Check the file name is not already in the list
+                if (!agent.FileNames.Contains(fileName))
+                {
+                    agent.FileNames.Add(fileName);
+                    await _agentService.UpdateAgentAsync(agent);
+                }
+            }
+            catch (KeyNotFoundException ex)
+            {
+                // If agent is not found, create a new one
+                agent = new AgentItem()
+                {
+                    Id = agentId,
+                    Type = type,
+                    FileNames = new List<string>() { fileName }
+                };
+
+                await _agentService.AddAgentAsync(agent);
+            }
 
 
             while (true)
@@ -78,19 +105,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             }
             await UpdateMessageOnClient("DocumentParsedUpdate", "Process completed !", connectionId, token);
 
-            //Update agent with filename
-            //Get agent to update
-            
-            var agent = await _agentService.GetByIdAsync(agentId, type);
-            if (agent != null)
-            {
-                //Check the file name is not already in the list
-                if (!agent.FileNames.Contains(fileName))
-                {
-                    agent.FileNames.Add(fileName);
-                    await _agentService.UpdateAgentAsync(agent);
-                }
-            }
+           
 
 
             return true;

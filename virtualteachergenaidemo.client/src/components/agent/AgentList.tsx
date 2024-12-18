@@ -227,14 +227,14 @@ const AgentList: FC = () => {
                 )}
             </div>
             {isDialogOpen && (
-
                 <AgentDialog
                     onAddAgent={handleAgentAddedOrEdited}
                     onDeleteAgent={handleDeleteAgent}
                     type={dialogType}
                     onClose={() => setIsDialogOpen(false)}
                     agent={editingAgent || undefined}
-                />
+                    />
+                
             )}
         </div>
     );
