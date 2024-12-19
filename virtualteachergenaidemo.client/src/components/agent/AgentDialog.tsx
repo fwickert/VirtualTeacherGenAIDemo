@@ -111,12 +111,11 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
             fileNames
         };
 
-        AgentService.upsertAgent(newAgent)
+        const isUpdate = !!agent;
+
+        AgentService.upsertAgent(newAgent, isUpdate)
             .then(response => {
-                const data = response.data;                
-                //if (!agent) {
-                //    newAgent.id = data.id;
-                //}
+                const data = response.data;
                 onAddAgent(newAgent);
             })
             .catch(error => console.error('Error:', error));
@@ -124,6 +123,7 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
         setIsOpen(false);
         onClose();
     };
+
 
     const handleDeleteAgent = () => {
         if (!agent) return;

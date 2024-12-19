@@ -59,7 +59,10 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
                 return BadRequest("Agent item is null.");
             }
 
-            agent.Id = Guid.NewGuid().ToString();
+            if (string.IsNullOrEmpty(agent.Id))
+            {
+                agent.Id = Guid.NewGuid().ToString();
+            }
             
             await _agentService.AddAgentAsync(agent);
             return CreatedAtAction(nameof(Get), new { id = agent.Id, type = agent.Type }, agent);

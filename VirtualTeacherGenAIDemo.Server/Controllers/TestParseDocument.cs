@@ -5,6 +5,7 @@ using Azure.AI.DocumentIntelligence;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.KernelMemory;
 using StackExchange.Redis;
+using VirtualTeacherGenAIDemo.Server.Services;
 
 namespace VirtualTeacherGenAIDemo.Server.Controllers
 {
@@ -13,10 +14,12 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
     public class TestParseDocument : ControllerBase
     {
         private IKernelMemory _kernelMemory;
+        private readonly SearchService _searchService;
 
-        public TestParseDocument([FromServices] IKernelMemory kernelMemory)
+        public TestParseDocument([FromServices] IKernelMemory kernelMemory, SearchService searchService)
         {
             _kernelMemory = kernelMemory;
+            _searchService = searchService;
         }
 
         [HttpGet]
@@ -89,5 +92,17 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
 
             return Ok();
         }
+
+        //call Searchservice and Test method
+        [HttpGet("search")]
+        public async Task<IActionResult> Search()
+        {
+
+            var result = await _searchService.TestSearchWithArray("a91e75cc-6841-4a0d-a379-eff7a7a61281");
+            return Ok(result);
+        }
+
+        
+
     }
 }

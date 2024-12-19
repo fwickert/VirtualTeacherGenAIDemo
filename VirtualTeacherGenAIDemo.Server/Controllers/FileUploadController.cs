@@ -49,5 +49,14 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
 
             return Ok();
         }
+
+        [HttpGet]
+        public async Task<IActionResult> DeleteFile(string filename)
+        {
+            await _fileUploadService.DeleteFileInformationByDocName(filename);
+
+            return Ok();
+        }
+
     }
 }

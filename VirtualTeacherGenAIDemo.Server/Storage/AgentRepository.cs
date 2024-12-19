@@ -36,7 +36,7 @@ namespace VirtualTeacherGenAIDemo.Server.Storage
         //add new agent
         public Task AddAgentAsync(AgentItem agent)
         {
-            return base.StorageContext.CreateAsync(agent);
+            return base.StorageContext.UpsertAsync(agent);
         }
 
         //Update agent
@@ -49,6 +49,11 @@ namespace VirtualTeacherGenAIDemo.Server.Storage
         public Task DeleteAgentAsync(AgentItem agent)
         {
             return base.StorageContext.DeleteAsync(agent);
+        }
+
+        public Task<IEnumerable<AgentItem>> GetAgentsByFileNameAsync(string fileName)
+        {
+            return base.StorageContext.QueryEntitiesAsync(e => e.FileNames.Contains(fileName));
         }
     }    
 }
