@@ -1,13 +1,9 @@
 using Azure;
 using Azure.AI.DocumentIntelligence;
-using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.Extensions.Options;
 using Microsoft.KernelMemory;
-using MongoDB.Driver.Core.Connections;
-using System;
-using System.IO;
-using System.Threading.Tasks;
 using VirtualTeacherGenAIDemo.Server.Hubs;
 using VirtualTeacherGenAIDemo.Server.Models.Storage;
 using VirtualTeacherGenAIDemo.Server.Options;
@@ -16,102 +12,28 @@ namespace VirtualTeacherGenAIDemo.Server.Services
 {
     public class FileUploadService
     {
+
         private readonly IKernelMemory _kernelMemory;
         private readonly DocumentIntelligentOptions _options;
         private readonly IHubContext<MessageRelayHub> _messageRelayHubContext;
         private readonly AgentService _agentService;
 
-        public FileUploadService(IKernelMemory kernelMemory, IOptions<DocumentIntelligentOptions> options, IHubContext<MessageRelayHub> messageRelayHubContext, AgentService agentService)
+
+
+        public FileUploadService(IKernelMemory kernelMemory,
+            IOptions<DocumentIntelligentOptions> options,
+            IHubContext<MessageRelayHub> messageRelayHubContext,
+            AgentService agentService)
         {
+            
             _kernelMemory = kernelMemory;
             _options = options.Value;
             _messageRelayHubContext = messageRelayHubContext;
             _agentService = agentService;
+            
         }
 
-        public async Task<bool> ParseDocument(Stream fileStream, string fileName, string agentId, string type, string connectionId, CancellationToken token)
-        {
-            var client = new DocumentIntelligenceClient(new Uri(_options.Endpoint), new AzureKeyCredential(_options.Key));
-
-            var binaryData = BinaryData.FromStream(fileStream);
-            var content = new AnalyzeDocumentContent() { Base64Source = binaryData };
-
-            int i = 1;
-            await UpdateMessageOnClient("DocumentParsedUpdate", "Process started...", connectionId, token);
-
-
-            //Update agent's file list before process, then if process failed, the user can remove file name from the list            
-            AgentItem agent;
-            try
-            {
-                agent = await _agentService.GetByIdAsync(agentId, type);
-                // Check the file name is not already in the list
-                if (!agent.FileNames.Contains(fileName))
-                {
-                    agent.FileNames.Add(fileName);
-                    await _agentService.UpdateAgentAsync(agent);
-                }
-            }
-            catch (KeyNotFoundException ex)
-            {
-                // If agent is not found, create a new one
-                agent = new AgentItem()
-                {
-                    Id = agentId,
-                    Type = type,
-                    FileNames = new List<string>() { fileName }
-                };
-
-                await _agentService.AddAgentAsync(agent);
-            }
-
-
-            while (true)
-            {
-                try
-                {
-                    Operation<AnalyzeResult> operation = await client.AnalyzeDocumentAsync(WaitUntil.Completed, "prebuilt-layout", content, outputContentFormat: ContentFormat.Markdown, pages: i.ToString());
-                    AnalyzeResult result = operation.Value;
-
-                    TagCollection tags = new TagCollection();
-
-                    tags.Add("agentId", agentId);
-                    tags.Add("docName", fileName);
-
-
-                    string docuId = $"{agentId}_file_{fileName.Replace(" ", "-")}_id_{i.ToString()}";
-
-                    if (!string.IsNullOrWhiteSpace(result.Content))
-                    {
-                        //await _kernelMemory.DeleteDocumentAsync(docuId, index: _options.IndexName); // Need to test if need to delete
-                        await _kernelMemory.ImportTextAsync(result.Content, docuId, index: _options.IndexName, tags: tags);
-
-                        string toSend = $"Page {i} parsed successfully.";
-                        await UpdateMessageOnClient("DocumentParsedUpdate", toSend, connectionId, token);
-                    }
-
-                    if (!fileName.EndsWith("pdf") && result.Pages.Count == i)
-                    {
-                        break;
-                    }
-
-                    i++;
-                }
-                catch (Exception ex)
-                {
-                    await UpdateMessageOnClient("DocumentParsedUpdate", $"Error : {ex.Message}", connectionId, token);
-                    break;
-                }
-            }
-            await UpdateMessageOnClient("DocumentParsedUpdate", "Process completed !", connectionId, token);
-
-           
-
-
-            return true;
-        }
-
-        public async Task<bool> DeleteFileInformation(string fileName, string agentId, string type,  string connectionId,  CancellationToken token)
+        public async Task<bool> DeleteFileInformation(string fileName, string agentId, string type, string connectionId, CancellationToken token)
         {
             var agent = await _agentService.GetByIdAsync(agentId, type);
             if (agent == null)
@@ -130,14 +52,38 @@ namespace VirtualTeacherGenAIDemo.Server.Services
 
             while (result.Results.Count > 0)
             {
-                foreach (var item in result.Results)
+                bool end = false;
+                foreach (Citation item in result.Results)
                 {
-                    await _kernelMemory.DeleteDocumentAsync(item.DocumentId, index: _options.IndexName);
+                    foreach (var part in item.Partitions)
+                    {
+                        var otherAgentIds = part.Tags["agentId"].Where(tag => tag != agentId).ToList();
+                        if (otherAgentIds.Any()) //not delete if another agent use this file
+                        {   
+                            List<string?> tagsToKeep = part.Tags["agentId"].Where(x => x != agentId).ToList();
+                            TagCollection tags = new TagCollection();
+                            tags.Add("agentId", tagsToKeep);
+                            tags.Add("docName", fileName);
+
+                            await _kernelMemory.DeleteDocumentAsync(item.DocumentId, index: _options.IndexName); //need to delete before recreate otherwise new document will be created
+                            await _kernelMemory.ImportTextAsync(part.Text, item.DocumentId, tags, index: _options.IndexName);
+                        }
+                        else
+                        {
+                            await _kernelMemory.DeleteDocumentAsync(item.DocumentId, index: _options.IndexName);
+                            end = true;
+                            break;
+                        }                       
+                    }
+                     if(end)
+                        {
+                            break;
+                        }
+
                 }
                 // Assuming you need to re-fetch the results after deletion
                 result = await _kernelMemory.SearchAsync("", index: _options.IndexName, filter);
             }
-
 
 
             // Remove file name from agent's file list
@@ -149,6 +95,27 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             await UpdateMessageOnClient("DeleteFileUpdate", "Delete file completed !", connectionId, token);
             return true;
         }
+
+        //Delete indesearch by docname
+        public async Task<bool> DeleteFileInformationByDocName(string docName)
+        {
+            MemoryFilter filter = new MemoryFilter();
+            filter.Add("docName", docName);
+
+            SearchResult result = await _kernelMemory.SearchAsync("", index: _options.IndexName, filter: filter);
+            while (result.Results.Count > 0)
+            {
+                foreach (Citation item in result.Results)
+                {
+                    await _kernelMemory.DeleteDocumentAsync(item.DocumentId, index: _options.IndexName);
+                }
+                result = await _kernelMemory.SearchAsync("", index: _options.IndexName, filter);
+            }
+
+            return (true);
+
+        }
+
 
         private async Task UpdateMessageOnClient(string hubConnection, object message, string connectionId, CancellationToken token)
         {

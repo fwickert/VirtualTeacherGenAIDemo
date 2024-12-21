@@ -34,18 +34,59 @@ namespace VirtualTeacherGenAIDemo.Server.Services
 
             foreach (Citation result in answer.Results)
             {
-                foreach(var part in result.Partitions.OrderBy(o=>o.Relevance))
+                foreach (var part in result.Partitions.OrderBy(o => o.Relevance))
                 {
                     results.AppendLine(part.Text);
                     results.AppendLine($"Relevance: {part.Relevance}");
                 }
-                
+
             }
 
-            return results.ToString(); 
+            return results.ToString();
         }
 
-        
+        //Search by docId
+        public async Task<List<string>> SearchByDocId(string docId)
+        {
+            MemoryFilter filter = new MemoryFilter();
+            filter.Add("__document_id", docId);
+            List<string> results = new();
+            
+            SearchResult answer = await _memoryServerless.SearchAsync(query: "", index: _documentIntelligentOptions.IndexName, filter: filter);
+            foreach (Citation result in answer.Results)
+            {
+                foreach (var part in result.Partitions.OrderBy(o => o.Relevance))
+                {
+                    results.Add(part.Text);                    
+                }
+            }
+            return results;
+        }
 
+        public async Task<string> TestSearchWithArray(string agentId)
+        {
+            MemoryFilter filter = new MemoryFilter();
+            
+            List<string> agentIds = new();
+            agentIds.Add(agentId);
+
+            filter.Add("agentId", agentIds!);
+
+            StringBuilder results = new();
+            results.AppendLine();
+            SearchResult answer = await _memoryServerless.SearchAsync(query: "test", index: _documentIntelligentOptions.IndexName, filter: filter);
+            foreach (Citation result in answer.Results)
+            {
+                foreach (var part in result.Partitions.OrderBy(o => o.Relevance))
+                {
+                    results.AppendLine(part.Text);
+                    results.AppendLine($"Relevance: {part.Relevance}");
+                }
+            }
+            return results.ToString();
+
+
+
+        }
     }
 }

@@ -14,10 +14,12 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
     {
         private readonly FileUploadService _fileUploadService;
         private static readonly ConcurrentDictionary<string, MemoryStream> _fileStreams = new();
+        private readonly DocumentService _documentService;
 
-        public FileUploadController([FromServices] FileUploadService fileUploadService)
+        public FileUploadController([FromServices] FileUploadService fileUploadService, DocumentService documentService)
         {
             _fileUploadService = fileUploadService;
+            _documentService = documentService;
         }
 
         [HttpPost()]
@@ -34,7 +36,7 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
             if (chunkIndex == totalChunks - 1)
             {
                 fileStream.Position = 0;
-                _ = Task.Run(() => _fileUploadService.ParseDocument(fileStream, fileName , agentId, type ,connectionId, token));
+                _ = Task.Run(() => _documentService.ParseDocument(fileStream, fileName , agentId, type ,connectionId, token));
                 _fileStreams.TryRemove(fileId, out _);
             }
 
@@ -49,5 +51,14 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
 
             return Ok();
         }
+
+        [HttpGet]
+        public async Task<IActionResult> DeleteFile(string filename)
+        {
+            await _fileUploadService.DeleteFileInformationByDocName(filename);
+
+            return Ok();
+        }
+
     }
 }

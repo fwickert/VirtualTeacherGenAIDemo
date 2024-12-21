@@ -156,6 +156,7 @@ namespace VirtualTeacherGenAIDemo.Server.Extensions
             services.AddScoped<FileUploadService>();
             services.AddScoped<SearchService>();
             services.AddScoped<LocalizationService>();
+            services.AddScoped<DocumentService>();
             return services;
         }
     }
