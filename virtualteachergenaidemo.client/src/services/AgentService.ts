@@ -20,6 +20,9 @@ export const AgentService = {
         const method = isUpdate ? 'put' : 'post';
         return apiClient[method](apiUrl, agent);
     },
+    cloneAgent(agent: AgentItem) {
+        return axios.post('/api/agent/clone', agent);
+    },
     deleteAgent: (agentId: string, type: string) => {
         return apiClient.delete(`/agent/${agentId}?type=${type}`);
     },

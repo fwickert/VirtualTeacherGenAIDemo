@@ -61,6 +61,22 @@ namespace VirtualTeacherGenAIDemo.Server.Services
 
         }
 
+        public async Task<AgentItem> CloneAgentAsync(AgentItem originalAgent)
+        {
+            var newAgent = new AgentItem
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = originalAgent.Name,
+                Description = originalAgent.Description,
+                Prompt = originalAgent.Prompt,
+                Type = originalAgent.Type,
+                FileNames = new List<string>(originalAgent.FileNames)
+            };
+
+            await AddAgentAsync(newAgent);
+            return newAgent;
+        }
+
         public async Task DeleteAgentAsync(AgentItem agent)
         {   
 
@@ -72,16 +88,6 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 filter.Add("docName", fileName);
 
                 SearchResult result = await _kernelMemory.SearchAsync("", index: _options.IndexName, filter);
-
-                //while (result.Results.Count > 0)
-                //{
-                //    foreach (var item in result.Results)
-                //    {
-                //        await _kernelMemory.DeleteDocumentAsync(item.DocumentId, index: _options.IndexName);
-                //    }
-                //    // Re-fetch the results after deletion
-                //    result = await _kernelMemory.SearchAsync("", index: _options.IndexName, filter);
-                //}
 
                 while (result.Results.Count > 0)
                 {

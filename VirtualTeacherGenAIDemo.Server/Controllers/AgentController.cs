@@ -12,10 +12,12 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
     public class AgentController : ControllerBase
     {
         private readonly AgentService _agentService;
+        private readonly DocumentService _documentService;
 
-        public AgentController(AgentService agentService)
+        public AgentController(AgentService agentService, DocumentService documentService)
         {
             _agentService = agentService;
+            _documentService = documentService;
         }
 
         [HttpGet("ByType", Name = "{type}")]
@@ -109,6 +111,20 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
             return NoContent();
         }
 
+        [HttpPost("Clone")]
+        public async Task<IActionResult> Clone([FromBody] AgentItem originalAgent)
+        {
+            if (originalAgent == null)
+            {
+                return BadRequest("Original agent is null.");
+            }
+
+            var newAgent = await _agentService.CloneAgentAsync(originalAgent);
+            await _documentService.UpdateDocumentsWithNewAgentIdAsync(originalAgent.Id, newAgent.Id);
+
+            return CreatedAtAction(nameof(Get), new { id = newAgent.Id, type = newAgent.Type }, newAgent);
+        }
+
         private async Task HandleFileUpload(IFormFile file)
         {
             if (file != null && file.Length > 0)
@@ -120,5 +136,7 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
                 }
             }
         }
+
+      
     }
 }

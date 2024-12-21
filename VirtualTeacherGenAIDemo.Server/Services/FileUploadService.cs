@@ -12,129 +12,25 @@ namespace VirtualTeacherGenAIDemo.Server.Services
 {
     public class FileUploadService
     {
+
         private readonly IKernelMemory _kernelMemory;
         private readonly DocumentIntelligentOptions _options;
         private readonly IHubContext<MessageRelayHub> _messageRelayHubContext;
         private readonly AgentService _agentService;
-        private readonly SearchService _searchService;
+
+
 
         public FileUploadService(IKernelMemory kernelMemory,
             IOptions<DocumentIntelligentOptions> options,
             IHubContext<MessageRelayHub> messageRelayHubContext,
-            AgentService agentService,
-            SearchService searchService)
+            AgentService agentService)
         {
+            
             _kernelMemory = kernelMemory;
             _options = options.Value;
             _messageRelayHubContext = messageRelayHubContext;
             _agentService = agentService;
-            _searchService = searchService;
-        }
-
-        public async Task<bool> ParseDocument(Stream fileStream, string fileName, string agentId, string type, string connectionId, CancellationToken token)
-        {
-            var client = new DocumentIntelligenceClient(new Uri(_options.Endpoint), new AzureKeyCredential(_options.Key));
-
-            var binaryData = BinaryData.FromStream(fileStream);
-            var content = new AnalyzeDocumentContent() { Base64Source = binaryData };
-
-            int i = 1;
-            await UpdateMessageOnClient("DocumentParsedUpdate", "Process started...", connectionId, token);
-
-
-            //Update agent's file list before process, then if process failed, the user can remove file name from the list            
-            AgentItem agent;
-            try
-            {
-                agent = await _agentService.GetByIdAsync(agentId, type);
-                // Check the file name is not already in the list
-                if (!agent.FileNames.Contains(fileName))
-                {
-                    agent.FileNames.Add(fileName);
-                    await _agentService.UpdateAgentAsync(agent);
-                }
-            }
-            catch (KeyNotFoundException ex)
-            {
-                // If agent is not found, create a new one
-                agent = new AgentItem()
-                {
-                    Id = agentId,
-                    Type = type,
-                    FileNames = new List<string>() { fileName }
-                };
-
-                await _agentService.AddAgentAsync(agent);
-            }
-
-            //Get all agentid who use this file now + the new one
-            IEnumerable<AgentItem> items = await _agentService.GetAgentsByFileNameAsync(fileName);
-            List<string> agentIds = items.Select(x => x.Id).ToList();
-
-
-            while (true)
-            {
-                try
-                {
-                    string docuId = $"{fileName.Replace(" ", "-")}_id_{i.ToString()}";
-
-                    //Before parsing, check if document existe une SearchDB
-                    var search = await _searchService.SearchByDocId(docuId);
-
-
-                    TagCollection tags = new TagCollection();
-
-                    tags.Add("agentId", agentIds!);
-                    tags.Add("docName", fileName);
-
-
-                    AnalyzeResult? result = null;
-
-                    if (search.Count == 0)
-                    {
-                        Operation<AnalyzeResult> operation = await client.AnalyzeDocumentAsync(WaitUntil.Completed, "prebuilt-layout", content, outputContentFormat: ContentFormat.Markdown, pages: i.ToString());
-                        result = operation.Value;
-                        if (!string.IsNullOrWhiteSpace(result.Content))
-                        {
-                            await _kernelMemory.ImportTextAsync(result.Content, docuId, index: _options.IndexName, tags: tags);
-
-                            if (!fileName.EndsWith("pdf") && result.Pages.Count == i)
-                            {
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        while (search.Count != 0)
-                        {
-                            foreach (var item in search)
-                            {
-                                await _kernelMemory.DeleteDocumentAsync(docuId, index: _options.IndexName);
-                                await _kernelMemory.ImportTextAsync(item, docuId, index: _options.IndexName, tags: tags);
-                            }
-
-                            i++;
-                            docuId = $"{fileName.Replace(" ", "-")}_id_{i.ToString()}";
-                            search = await _searchService.SearchByDocId(docuId);
-                        }
-
-                    }
-
-                    string toSend = $"Page {i} parsed successfully.";
-                    await UpdateMessageOnClient("DocumentParsedUpdate", toSend, connectionId, token);
-
-                    i++;
-                }
-                catch (Exception ex)
-                {
-                    await UpdateMessageOnClient("DocumentParsedUpdate", $"Error : {ex.Message}", connectionId, token);
-                    break;
-                }
-            }
-            await UpdateMessageOnClient("DocumentParsedUpdate", "Process completed !", connectionId, token);
-
-            return true;
+            
         }
 
         public async Task<bool> DeleteFileInformation(string fileName, string agentId, string type, string connectionId, CancellationToken token)

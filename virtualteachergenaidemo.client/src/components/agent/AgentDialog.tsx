@@ -11,9 +11,9 @@ import { tokens } from '@fluentui/tokens';
 import { FileUpload } from '../Utilities/FileUpload';
 import { useLocalization } from '../../contexts/LocalizationContext';
 import { AgentService } from '../../services/AgentService';
-import { v4 as uuidv4 } from 'uuid'; 
+import { v4 as uuidv4 } from 'uuid';
 import { useRef } from 'react';
-
+import { Spinner } from '@fluentui/react'; // Add this import
 
 interface AgentDialogProps {
     onAddAgent: (agent: AgentItem) => void;
@@ -35,11 +35,23 @@ const useStyles = makeStyles({
     fileListColumn: {
         display: 'flex',
         flexDirection: 'column',
-        gap: '10x', 
+        gap: '10x',
     },
     tag: {
         width: '100%',
-        display: 'block', 
+        display: 'block',
+    },
+    spinnerOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1000,
     },
 });
 
@@ -54,6 +66,7 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
     const [isOpen, setIsOpen] = useState<boolean>(true);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
     const [fileNames, setFileNames] = useState<string[]>(agent?.fileNames || []);
+    const [isProcessing, setIsProcessing] = useState<boolean>(false); // Add this state
     const { getTranslation } = useLocalization();
 
     const agentIdRef = useRef(agent?.id || uuidv4());
@@ -124,10 +137,26 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
         onClose();
     };
 
+    const handleCloneAgent = () => {
+        if (!agent) return;
+        setIsProcessing(true); // Set processing state to true
+        agent.name = `${agent.name} (clone)`;
+        AgentService.cloneAgent(agent)
+            .then(response => {
+                const data = response.data;
+                onAddAgent(data);
+            })
+            .catch(error => console.error('Error:', error))
+            .finally(() => {
+                setIsProcessing(false); // Set processing state to false
+                setIsOpen(false);
+                onClose();
+            });
+    };
 
     const handleDeleteAgent = () => {
         if (!agent) return;
-
+        setIsProcessing(true); // Set processing state to true
         AgentService.deleteAgent(agent.id, agent.type)
             .then(response => {
                 if (response.status === 204) {
@@ -138,10 +167,12 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
                     console.error('Failed to delete agent');
                 }
             })
-            .catch(error => console.error('Error:', error));
-
-        setIsDeleteConfirmOpen(false);
-        setIsOpen(false);
+            .catch(error => console.error('Error:', error))
+            .finally(() => {
+                setIsProcessing(false); // Set processing state to false
+                setIsDeleteConfirmOpen(false);
+                setIsOpen(false);
+            });
     };
 
     const handleOpenChange = (_event: any, data: { open: boolean }) => {
@@ -153,9 +184,11 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
 
     return (
         <>
+           
             <Dialog open={isOpen} onOpenChange={handleOpenChange}>
                 <DialogSurface>
                     <DialogBody>
+                        {isProcessing && <div className={styles.spinnerOverlay}><Spinner label={getTranslation("Processing")} /></div>} {/* Add this line */}
                         <DialogTitle>{agent ? getTranslation("EditAgentButton") : getTranslation("AddAgentButton")}</DialogTitle>
                         <DialogContent>
                             <div className="formcard">
@@ -195,10 +228,21 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
                         </DialogContent>
                         <DialogActions>
                             {agent && (
-                                <Button className={styles.deleteButton} onClick={() => setIsDeleteConfirmOpen(true)}>{ getTranslation("DeleteButton") }</Button>
+                                <Button className={styles.deleteButton} onClick={() => setIsDeleteConfirmOpen(true)} disabled={isProcessing}>
+                                    {getTranslation("DeleteButton")}
+                                </Button>
                             )}
-                            <Button appearance="primary" onClick={handleUpsertAgent}>{agent ? getTranslation("SaveButton") : getTranslation("AddButton")}</Button>
-                            <Button appearance="secondary" onClick={() => { setIsOpen(false); onClose(); }}>{ getTranslation("CancelButton") }</Button>
+                            {agent && (
+                                <Button appearance="secondary" onClick={handleCloneAgent} disabled={isProcessing}>
+                                    {getTranslation("CloneButton")}
+                                </Button>
+                            )}
+                            <Button appearance="primary" onClick={handleUpsertAgent} disabled={isProcessing}>
+                                {agent ? getTranslation("SaveButton") : getTranslation("AddButton")}
+                            </Button>
+                            <Button appearance="secondary" onClick={() => { setIsOpen(false); onClose(); }} disabled={isProcessing}>
+                                {getTranslation("CancelButton")}
+                            </Button>
                         </DialogActions>
                     </DialogBody>
                 </DialogSurface>
@@ -207,13 +251,18 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
             <Dialog open={isDeleteConfirmOpen} onOpenChange={(_event, data) => setIsDeleteConfirmOpen(data.open)}>
                 <DialogSurface>
                     <DialogBody>
-                        <DialogTitle>{ getTranslation("DeleteAskTitle") }</DialogTitle>
+                        {isProcessing && <div className={styles.spinnerOverlay}><Spinner label={getTranslation("Processing")} /></div>} {/* Add this line */}
+                        <DialogTitle>{getTranslation("DeleteAskTitle")}</DialogTitle>
                         <DialogContent>
-                            <p>{ getTranslation("DeleteAgentAskMessage") }</p>
+                            <p>{getTranslation("DeleteAgentAskMessage")}</p>
                         </DialogContent>
                         <DialogActions>
-                            <Button className={styles.deleteButton} onClick={handleDeleteAgent}>{ getTranslation("DeleteButton") }</Button>
-                            <Button appearance="secondary" onClick={() => setIsDeleteConfirmOpen(false)}>{ getTranslation("CancelButton") }</Button>
+                            <Button className={styles.deleteButton} onClick={handleDeleteAgent} disabled={isProcessing}>
+                                {getTranslation("DeleteButton")}
+                            </Button>
+                            <Button appearance="secondary" onClick={() => setIsDeleteConfirmOpen(false)} disabled={isProcessing}>
+                                {getTranslation("CancelButton")}
+                            </Button>
                         </DialogActions>
                     </DialogBody>
                 </DialogSurface>
