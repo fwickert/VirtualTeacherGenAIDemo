@@ -1,5 +1,6 @@
 import './chatHistory.css';
 import { Spinner } from '@fluentui/react-spinner';
+import { useLocalization } from '../../contexts/LocalizationContext';
 
 enum AuthorRoles {
     User = 0,
@@ -18,6 +19,7 @@ interface ChatHistoryProps {
     conversation: IChat[];
 }
 const ChatHistory: React.FC<ChatHistoryProps> = ({ conversation }) => {
+    const { getTranslation } = useLocalization(); 
 
     return (
         <div id="history" className="frame window">
@@ -32,7 +34,8 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ conversation }) => {
                             {conversation.map((message: IChat) => (
                                 message.content.length !== 0 ?
                                     <div key={message.id} className={`dashboard-chat-message ${message.authorRole === 0 ? 'dashboard-user-message' : 'dashboard-assistant-message'}`}>
-                                        {message.content}
+                                        <strong>{(message.authorRole === AuthorRoles.User ? getTranslation("SellerRole") : getTranslation("ClientRole")) + " : "} </strong>{message.content}
+
                                     </div>
                                     :
                                     null

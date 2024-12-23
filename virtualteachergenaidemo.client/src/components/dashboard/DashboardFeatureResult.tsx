@@ -4,8 +4,9 @@ import { Skeleton2Rows } from '../../components/Utilities/skeleton2rows';
 import MarkdownRenderer from '../Utilities/markdownRenderer';
 import { HubConnection } from '@microsoft/signalr';
 import { Button } from '@fluentui/react-button';
-import { DialogPrompt } from '../Utilities/DialogPrompt';
+//import { DialogPrompt } from '../Utilities/DialogPrompt';
 import DashboardService from '../../services/DashboardService';
+import { useLocalization } from '../../contexts/LocalizationContext';
 
 interface DashboardFeatureResultProps {
     sessionId:string
@@ -21,7 +22,7 @@ interface DashboardFeatureResultProps {
 const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({ sessionId, data, infoType, loading, conversation, connection, userName }) => {
     const [content, setContent] = useState(data?.content || '');
     const [isLoading, setIsLoading] = useState(loading);
-
+    const { getTranslation } = useLocalization();
 
     useEffect(() => {
 
@@ -70,13 +71,12 @@ const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({ session
 
     return (
         <div role="tabpanel" aria-labelledby={infoType} className="tabpanel">
-            <Button onClick={() => callApiForFeature(infoType,data)}>Generate {infoType}</Button>
-            <DialogPrompt title={infoType} />
+            <Button onClick={() => callApiForFeature(infoType, data)}>{getTranslation("GenerateButton")} {infoType}</Button>
+            {/*<DialogPrompt title={infoType} />*/}
             <section className="frame">
                 <span id={infoType}>
                     {isLoading ? <Skeleton2Rows /> :
-                        content ? <MarkdownRenderer markdown={content} /> : <span>No Generate Yet</span>
-                            
+                        content ? <MarkdownRenderer markdown={content} /> : <span>{getTranslation("NoGenerateYet")}</span>
                     }
                 </span>
             </section>

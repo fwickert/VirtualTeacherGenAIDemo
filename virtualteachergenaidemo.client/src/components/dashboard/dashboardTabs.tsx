@@ -5,6 +5,7 @@ import { Skeleton3Rows } from '../../components/Utilities/skeleton3rows';
 import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
 import { DashboardFeatureResult } from './DashboardFeatureResult';
 import DashboardService from '../../services/DashboardService';
+import { useLocalization } from '../../contexts/LocalizationContext'; // Import useLocalization
 
 interface DashboardTabsProps {
     sessionId: string;
@@ -17,6 +18,7 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ sessionId, conversation, 
     const [dashboardData, setDashboardData] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [connection, setConnection] = useState<HubConnection | null>(null);
+    const { getTranslation } = useLocalization(); // Use useLocalization
 
     useEffect(() => {
         const hubUrl = process.env.HUB_URL;
@@ -74,8 +76,8 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ sessionId, conversation, 
     return (
         <div>
             <TabList className="tab" selectedValue={selectedValue} onTabSelect={onTabSelect}>
-                <Tab value="Summary">Summary</Tab>
-                <Tab value="Advice">Advice</Tab>
+                <Tab value="Summary">{getTranslation("SummaryTab")}</Tab> {/* Use getTranslation */}
+                <Tab value="Advice">{getTranslation("AdviceTab")}</Tab> {/* Use getTranslation */}
                 {/*<Tab value="Example">Example</Tab>*/}
                 {/*<Tab value="Evaluation">Evaluation</Tab>*/}
             </TabList>
@@ -85,13 +87,13 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ sessionId, conversation, 
                 <div>
                     {selectedValue === "Summary" && (
                         <>
-                            <div>{getTabContent("Summary", "Summary")}</div>
-                            <div>{getTabContent("Products", "Products")}</div>
-                            <div>{getTabContent("Keywords", "Keywords")}</div>
+                            <div>{getTabContent("Summary", getTranslation("SummaryTab"))}</div> 
+                            <div>{getTabContent("Products", getTranslation("ProductsTab"))}</div>
+                            <div>{getTabContent("Keywords", getTranslation("KeywordsTab"))}</div>
                         </>
                     )}
                     {selectedValue === "Advice" && (
-                        <div>{getTabContent("Advice", "Advice")}</div>
+                        <div>{getTabContent("Advice", getTranslation("AdviceTab"))}</div> 
                     )}
                     {/*{selectedValue === "Example" && (*/}
                     {/*    <div>{getTabContent("Example", "Example")}</div>*/}
