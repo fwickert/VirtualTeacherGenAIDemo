@@ -15,10 +15,10 @@
       "name": "conversation",
       "description": "the conversattion to extract products",
       "default": ""
-    },
+    },    
     {
-      "name": "userPrompt",
-      "description": "the user give it's own prompt'",
+      "name": "task",
+      "description": "Task to do",
       "default": ""
     }
   ]

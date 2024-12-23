@@ -1,18 +1,7 @@
-{{$userPrompt}}
-
-[RULES]
-DONT WASTE WORDS
-USE SHORT, CLEAR, COMPLETE SENTENCES.
-DO NOT USE BULLET POINTS OR DASHES.
-USE SAME VOICE.
-MAXIMIZE DETAIL, MEANING.
-FOCUS ON THE CONTENT.
-Add emotji to make your answer more attractive.
-Use the same language as the conversation.
-
 [CONVERSATION]
 {{$conversation}}
 
 [TASK]
-Create only a short summary of the conversation above.
+{{$task}}
 [END]
+

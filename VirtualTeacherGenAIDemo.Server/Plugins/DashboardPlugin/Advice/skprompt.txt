@@ -1,5 +1,9 @@
 {{$userPrompt}}
 
+
+[ROLEPLAY]
+{{$roleplay}}
+
 [OUTPUT FORMAT]
 Return the response in Markdown format for human readable format.(please without '''markdown''' or any other format)).
 Don't stard with --- or === or something like that.
@@ -14,6 +18,5 @@ Use the same language as the conversation.
 {{$knowledge}}
 
 [TASK]
-For the conversation above, give some advice to the sales associate to improve their conversation with customers.
-Use your knowledge to provide the best advice possible.
+{{$task}}
 [END]

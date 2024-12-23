@@ -148,10 +148,13 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
             scenarioDescription: scenarioDescription || '',
             agents: currentScenario?.map(agent => ({
                 prompt: agent.prompt,
+                name: agent.name,
                 type: agent.type,
-                id: agent.id
+                id: agent.id,
+                features: agent.type === 'teacher' ? agent.features : undefined
             })) || []
         };
+
 
         const chatHistory = new ChatHistoryRequest(userName, sessionItem, [
             new ChatMessage("", "System", promptSystem),

@@ -1,20 +1,10 @@
-{{$userPrompt}}
-
 [OUTPUT FORMAT]
 Return the response in Markdown format for human readable format.(please without '''markdown''' or any other format))
 Use the same language as the conversation.
-
-[DETAILS]
-productName is the name of the product mentioned or infered in the conversation.
-productType is the type of the product mentioned or infered in the conversation.
-quoted is a boolean value indicating whether the product name was quoted explicitly in the conversation by one of the person.
-why is a string explaining why the product name was inferred.
-Only use the conversation.
-
 
 [CONVERSATION]
 {{$conversation}}
 
 [TASK]
-Extract ProductName from the conversation. It can be quoted explicity or you can infer it from the conversation. 
+{{$task}}
 [END]

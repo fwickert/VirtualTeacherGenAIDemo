@@ -11,7 +11,7 @@ import AgentSelectionDialog from '../agent/AgentSelectionDialog';
 import { Add24Regular } from '@fluentui/react-icons';
 import { tokens } from '@fluentui/tokens';
 import { useLocalization } from '../../contexts/LocalizationContext';
-import { ScenarioService } from '../../services/scenarioService';
+import { ScenarioService } from '../../services/ScenarioService';
 
 const useStyles = makeStyles({
     customDialogSurface: {

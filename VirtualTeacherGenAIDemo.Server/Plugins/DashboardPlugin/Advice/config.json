@@ -25,6 +25,16 @@
       "name": "knowledge",
       "description": "The knowledge use by this agent",
       "default": ""
+    },
+    {
+      "name": "task",
+      "description": "Task to do",
+      "default": ""
+    },
+    {
+      "name": "roleplay",
+      "description": "The roleplay of the other agent that play a role for the training",
+      "default": ""
     }
   ]
 }

@@ -13,11 +13,13 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
     {
         private readonly AgentService _agentService;
         private readonly DocumentService _documentService;
+        private readonly ScenarioService _scenarioService;
 
-        public AgentController(AgentService agentService, DocumentService documentService)
+        public AgentController(AgentService agentService, DocumentService documentService, ScenarioService scenarioService)
         {
             _agentService = agentService;
             _documentService = documentService;
+            _scenarioService = scenarioService;
         }
 
         [HttpGet("ByType", Name = "{type}")]
@@ -88,6 +90,34 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
 
             
             await _agentService.UpdateAgentAsync(agent);
+
+            //Update scenario too, for prompt changed
+            var scenarios = await _scenarioService.GetScenariosByAgentIdAsync(agent.Id);
+            foreach (var scenario in scenarios)
+            {
+                foreach (var scenarioAgent in scenario.Agents!)
+                {
+                    if (scenarioAgent.Id == agent.Id)
+                    {
+                        scenarioAgent.Prompt = agent.Prompt;
+                        scenarioAgent.Name = agent.Name;                        
+                        // If the agent is a teacher, update the features' prompt too
+                        if (agent.Type == "teacher")
+                        {
+                            foreach (var feature in scenarioAgent.features)
+                            {
+                                var matchingFeature = agent.Features.FirstOrDefault(f => f.Feature == feature.Feature);
+                                if (matchingFeature != null)
+                                {
+                                    feature.Prompt = matchingFeature.Prompt;
+                                }
+                            }
+                        }
+                    }
+                }
+                await _scenarioService.UpdateAsync(scenario);
+            }
+
             return NoContent();
         }
 
