@@ -37,5 +37,11 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         {
             await _scenarioRepository.DeleteScenarioAsync(scenario);
         }
+
+        public async Task<IEnumerable<ScenarioItem>> GetScenariosByAgentIdAsync(string agentId)
+        {
+            var scenarios = await _scenarioRepository.GetScenariosAsync();
+            return scenarios.Where(s => s.Agents != null && s.Agents.Any(a => a.Id == agentId));
+        }
     }
 }
