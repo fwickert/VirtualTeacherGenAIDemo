@@ -76,8 +76,8 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ sessionId, conversation, 
             <TabList className="tab" selectedValue={selectedValue} onTabSelect={onTabSelect}>
                 <Tab value="Summary">Summary</Tab>
                 <Tab value="Advice">Advice</Tab>
-                <Tab value="Example">Example</Tab>
-                <Tab value="Evaluation">Evaluation</Tab>
+                {/*<Tab value="Example">Example</Tab>*/}
+                {/*<Tab value="Evaluation">Evaluation</Tab>*/}
             </TabList>
             {loading ? (
                 <Skeleton3Rows />
@@ -93,12 +93,12 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ sessionId, conversation, 
                     {selectedValue === "Advice" && (
                         <div>{getTabContent("Advice", "Advice")}</div>
                     )}
-                    {selectedValue === "Example" && (
-                        <div>{getTabContent("Example", "Example")}</div>
-                    )}
-                    {selectedValue === "Evaluation" && (
-                        <div>{getTabContent("Evaluation", "Evaluation")}</div>
-                    )}
+                    {/*{selectedValue === "Example" && (*/}
+                    {/*    <div>{getTabContent("Example", "Example")}</div>*/}
+                    {/*)}*/}
+                    {/*{selectedValue === "Evaluation" && (*/}
+                    {/*    <div>{getTabContent("Evaluation", "Evaluation")}</div>*/}
+                    {/*)}*/}
                 </div>
             )}
         </div>

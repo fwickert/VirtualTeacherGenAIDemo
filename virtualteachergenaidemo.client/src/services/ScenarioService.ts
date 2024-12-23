@@ -9,6 +9,9 @@ const apiClient = axios.create({
 });
 
 export const ScenarioService = {
+    getAllScenarios: () => {
+        return apiClient.get<ScenarioItem[]>('/scenario');
+    },
     addScenario: (scenario: ScenarioItem) => {
         return apiClient.post('/scenario', scenario);
     },
@@ -19,3 +22,4 @@ export const ScenarioService = {
         return apiClient.delete(`/scenario/${scenarioId}`);
     },
 };
+

@@ -25,8 +25,20 @@ namespace VirtualTeacherGenAIDemo.Server.Models.Storage
         [JsonPropertyName("fileNames")]
         public List<string> FileNames { get; set; } = new List<string>();
 
+        [JsonPropertyName("features")]
+        public List<PromptDashboardFeature> Features { get; set; } = new List<PromptDashboardFeature>();
+
         [JsonIgnore]
         public string Partition => this.Type;
+
+    }
+
+    public class  PromptDashboardFeature
+    {
+        
+        public string Prompt { get; set; } = string.Empty;
+
+        public string Feature { get; set; } = string.Empty;
 
 
     }

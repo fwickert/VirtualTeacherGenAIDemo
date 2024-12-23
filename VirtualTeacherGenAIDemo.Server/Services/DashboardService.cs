@@ -31,13 +31,14 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         {
             _dashboardResponse.FunctionName = "Summary";
 
-            SessionAgent agentTeacher = await GetAgent(sessionId, userName);
+            SessionAgent agentTeacher = await GetAgent(sessionId, userName, "teacher");
+            string summaryPrompt = agentTeacher.features.Single(q => q.Feature == "summary").Prompt;
 
             _ = Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Summary",
                                new Dictionary<string, string>()
                                {
-                    { "conversation", dashboardRequest.Conversation },
-                    { "userPrompt", agentTeacher.Prompt }
+                    { "conversation", dashboardRequest.Conversation },                    
+                    { "task", summaryPrompt }
             }, dashboardRequest.ConnectionId, token), token);
 
             return TypedResults.Ok("Summarize requested");
@@ -48,13 +49,14 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         {
             _dashboardResponse.FunctionName = "Products";
 
-            SessionAgent agentTeacher = await GetAgent(sessionId, userName);
+            SessionAgent agentTeacher = await GetAgent(sessionId, userName, "teacher");
+            string productPrompt = agentTeacher.features.Single(q => q.Feature == "products").Prompt;
 
             _ = Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Products",
                 new Dictionary<string, string>()
                 {
-                    { "conversation", dashboardRequest.Conversation },
-                    { "userPrompt", agentTeacher.Prompt }
+                    { "conversation", dashboardRequest.Conversation },                    
+                    { "task", productPrompt }
                 }
                 , dashboardRequest.ConnectionId, token), token);
 
@@ -66,14 +68,14 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         {
             _dashboardResponse.FunctionName = "Keywords";
 
-            SessionAgent agentTeacher = await GetAgent(sessionId, userName);
-
+            SessionAgent agentTeacher = await GetAgent(sessionId, userName, "teacher");
+            string keywordPrompt = agentTeacher.features.Single(q => q.Feature == "keywords").Prompt;
 
             _ = Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Keywords",
                 new Dictionary<string, string>()
                 {
-                    { "conversation", dashboardRequest.Conversation },
-                    { "userPrompt", agentTeacher.Prompt }
+                    { "conversation", dashboardRequest.Conversation },                    
+                    { "task", keywordPrompt }
                 }, dashboardRequest.ConnectionId, token), token);
 
             return TypedResults.Ok("Keywords requested");
@@ -84,7 +86,10 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         {
             _dashboardResponse.FunctionName = "Advice";
 
-            SessionAgent agentTeacher = await GetAgent(sessionId, userName);
+            SessionAgent agentTeacher = await GetAgent(sessionId, userName, "teacher");
+            SessionAgent agentRolePlay = await GetAgent(sessionId, userName, "rolePlay");
+
+            string advicePrompt = agentTeacher.features.Single(q => q.Feature == "advice").Prompt;
 
             //take the content of knowledge by searching with agentId
             string search = await _searchService.SearchByAgent("", agentTeacher.Id, "teacher");
@@ -94,7 +99,9 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 {
                     { "conversation", dashboardRequest.Conversation },
                     { "userPrompt", agentTeacher.Prompt },
-                    {"knowledge", search }
+                    {"knowledge", search },
+                    { "task", advicePrompt },
+                    { "roleplay", agentRolePlay.Type }
                 }, dashboardRequest.ConnectionId, token), token);
 
             return TypedResults.Ok("Advice requested");
@@ -107,7 +114,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         {
             _dashboardResponse.FunctionName = "Example";
 
-            SessionAgent agentTeacher = await GetAgent(sessionId, userName);
+            SessionAgent agentTeacher = await GetAgent(sessionId, userName, "teacher");
 
             _ = Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Example",
                 new Dictionary<string, string>()
@@ -124,7 +131,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         {
             _dashboardResponse.FunctionName = "Evaluation";
 
-            SessionAgent agentTeacher = await GetAgent(sessionId, userName);
+            SessionAgent agentTeacher = await GetAgent(sessionId, userName, "teacher");
 
             //take the content of knowledge by searching with agentId
             string search = await _searchService.SearchByAgent("", agentTeacher.Id, "teacher");
@@ -159,12 +166,12 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             return promptStream!;
         }
 
-        private async Task<SessionAgent> GetAgent(string sessionId, string userName)
+        private async Task<SessionAgent> GetAgent(string sessionId, string userName, string type)
         {
             //take the agent teacher intruction from user for userPrompt properties
             SessionItem session = await _sessionRepository.GetSessionById(sessionId, userName);
-            SessionAgent? agentTeacher = session.Agents.Single(q => q.Type == "teacher");
-            return agentTeacher;
+            SessionAgent? agent = session.Agents.Single(q => q.Type == type);
+            return agent;
         }
     }
 }

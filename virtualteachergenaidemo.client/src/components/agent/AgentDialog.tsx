@@ -6,14 +6,14 @@ import { Textarea } from '@fluentui/react-textarea';
 import { Field } from '@fluentui/react-field';
 import { useState, useEffect } from 'react';
 import { AgentItem } from '../../models/AgentItem';
-import { makeStyles } from '@fluentui/react-components';
+import { makeStyles, Tab, TabList } from '@fluentui/react-components';
 import { tokens } from '@fluentui/tokens';
 import { FileUpload } from '../Utilities/FileUpload';
 import { useLocalization } from '../../contexts/LocalizationContext';
 import { AgentService } from '../../services/AgentService';
 import { v4 as uuidv4 } from 'uuid';
 import { useRef } from 'react';
-import { Spinner } from '@fluentui/react'; // Add this import
+import { Spinner } from '@fluentui/react';
 
 interface AgentDialogProps {
     onAddAgent: (agent: AgentItem) => void;
@@ -66,6 +66,13 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
     const [isOpen, setIsOpen] = useState<boolean>(true);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
     const [fileNames, setFileNames] = useState<string[]>(agent?.fileNames || []);
+    const [features, setFeatures] = useState<{ feature: string, prompt: string }[]>(agent?.features || [
+        { feature: 'summary', prompt: '' },
+        { feature: 'products', prompt: '' },
+        { feature: 'keywords', prompt: '' },
+        { feature: 'advice', prompt: '' }
+    ]); // Add this state
+    const [selectedTab, setSelectedTab] = useState('summary'); // Add this state
     const [isProcessing, setIsProcessing] = useState<boolean>(false); // Add this state
     const { getTranslation } = useLocalization();
 
@@ -78,6 +85,12 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
             setDescription(agent.description);
             setPrompt(agent.prompt);
             setFileNames(agent.fileNames || []);
+            setFeatures(agent.features || [
+                { feature: 'summary', prompt: '' },
+                { feature: 'products', prompt: '' },
+                { feature: 'keywords', prompt: '' },
+                { feature: 'advice', prompt: '' }
+            ]); // Add this line
         }
     }, [agent]);
 
@@ -88,6 +101,12 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
             }
             return prevFileNames;
         });
+    };
+
+    const handleFeatureChange = (feature: string, prompt: string) => {
+        setFeatures(prevFeatures => prevFeatures.map(f =>
+            f.feature === feature ? { ...f, prompt } : f
+        ));
     };
 
     const handleUpsertAgent = () => {
@@ -121,7 +140,8 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
             prompt,
             type,
             id: agentId,
-            fileNames
+            fileNames,
+            features: type === 'teacher' ? features : [] 
         };
 
         const isUpdate = !!agent;
@@ -182,9 +202,12 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
         }
     };
 
+    const handleTabSelect = (_event: any, data: any) => {
+        setSelectedTab(data.value);
+    };
+
     return (
         <>
-           
             <Dialog open={isOpen} onOpenChange={handleOpenChange}>
                 <DialogSurface>
                     <DialogBody>
@@ -223,8 +246,58 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
                                 <label>{getTranslation("KnowledgeLabel")}</label>
 
                                 <FileUpload agentId={agentId} initialFileNames={fileNames} type={type} onFileUpload={handleFileUpload} />
-
                             </div>
+
+                            {type === 'teacher' && (
+                                <div className="formcard">
+                                    <TabList selectedValue={selectedTab} onTabSelect={handleTabSelect}>
+                                        <Tab value="summary">{getTranslation("SummaryTab")}</Tab>
+                                        <Tab value="products">{getTranslation("ProductsTab")}</Tab>
+                                        <Tab value="keywords">{getTranslation("KeywordsTab")}</Tab>
+                                        <Tab value="advice">{getTranslation("AdviceTab")}</Tab>
+                                    </TabList>
+                                    {selectedTab === 'summary' && (
+                                        <Field label={getTranslation("SummaryLabel")}>
+                                            <Textarea
+                                                placeholder={getTranslation("SummaryPlaceholder")}
+                                                value={features.find(f => f.feature === 'summary')?.prompt || ''}
+                                                rows={10}
+                                                onChange={(e) => handleFeatureChange('summary', e.target.value)}
+                                            />
+                                        </Field>
+                                    )}
+                                    {selectedTab === 'products' && (
+                                        <Field label={getTranslation("ProductsLabel")}>
+                                            <Textarea
+                                                placeholder={getTranslation("ProductsPlaceholder")}
+                                                value={features.find(f => f.feature === 'products')?.prompt || ''}
+                                                rows={10}
+                                                onChange={(e) => handleFeatureChange('products', e.target.value)}
+                                            />
+                                        </Field>
+                                    )}
+                                    {selectedTab === 'keywords' && (
+                                        <Field label={getTranslation("KeywordsLabel")}>
+                                            <Textarea
+                                                placeholder={getTranslation("KeywordsPlaceholder")}
+                                                value={features.find(f => f.feature === 'keywords')?.prompt || ''}
+                                                rows={10}
+                                                onChange={(e) => handleFeatureChange('keywords', e.target.value)}
+                                            />
+                                        </Field>
+                                    )}
+                                    {selectedTab === 'advice' && (
+                                        <Field label={getTranslation("AdviceLabel")}>
+                                            <Textarea
+                                                placeholder={getTranslation("AdvicePlaceholder")}
+                                                value={features.find(f => f.feature === 'advice')?.prompt || ''}
+                                                rows={10}
+                                                onChange={(e) => handleFeatureChange('advice', e.target.value)}
+                                            />
+                                        </Field>
+                                    )}
+                                </div>
+                            )}
                         </DialogContent>
                         <DialogActions>
                             {agent && (

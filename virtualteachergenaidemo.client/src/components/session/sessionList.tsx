@@ -9,8 +9,9 @@ import { AddCircleRegular, PeopleCommunityFilled, PlayRegular } from '@fluentui/
 import { tokens } from '@fluentui/tokens';
 import { useNavigate } from 'react-router-dom';
 import { SessionItem } from '../../models/SessionItem';
-import { useUsername } from '../../auth/UserContext'; 
+import { useUsername } from '../../auth/UserContext';
 import { useLocalization } from '../../contexts/LocalizationContext';
+import { SessionService } from '../../services/SessionService';
 
 interface SessionListProps {
     onSessionStart: (session: SessionItem) => void;
@@ -76,41 +77,38 @@ const SessionList: React.FC<SessionListProps> = ({ onSessionStart }) => {
     const navigate = useNavigate();
     const classes = useStyles();
     const userName = useUsername();
-    const [sessions, setSessions] = useState<SessionItem[]>([]);    
+    const [sessions, setSessions] = useState<SessionItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const { getTranslation } = useLocalization();
 
     useEffect(() => {
-        // Fetch incomplete sessions from the backend using fetch
-        fetch(`/api/Session/NotCompleted/${userName}`)
-            .then(response => response.json())
-            .then(data => {
-                const parsedData = data.map((session: any) => ({
+        SessionService.getIncompleteSessions(userName)
+            .then(response => {
+                const parsedData = response.data.map((session: any) => ({
                     ...session,
                     timestamp: new Date(session.timestamp)
                 }));
                 setSessions(parsedData);
                 setIsLoading(false);
             })
-            .catch(error => {                
+            .catch(error => {
+                console.error('Error fetching sessions:', error);
                 setIsLoading(false);
             });
-    }, []);
+    }, [userName]);
 
-    const handleResume = async (session: SessionItem) => {       
-        if (onSessionStart) {            
+    const handleResume = async (session: SessionItem) => {
+        if (onSessionStart) {
             onSessionStart(session);
         }
-        
     };
 
     const handleAddSession = () => {
-        // Navigate to the scenario page
         navigate('/scenarios');
     };
 
     const formatDate = (date: Date) => {
-        return date.toLocaleDateString('en-GB'); // 'en-GB' locale formats date as dd/MM/yyyy
+        return date.toLocaleDateString('en-GB');
     };
 
     return (
@@ -120,7 +118,7 @@ const SessionList: React.FC<SessionListProps> = ({ onSessionStart }) => {
                 <div className="session-cards-grid">
                     <Button className={classes.buttonWithIcon} onClick={handleAddSession}>
                         <AddCircleRegular className={classes.buttonIcon} />
-                        { getTranslation("NewSession") }
+                        {getTranslation("NewSession")}
                     </Button>
                     {sessions.map(session => (
                         <Card key={session.id} className={`${classes.customCard} card`}>
@@ -138,7 +136,7 @@ const SessionList: React.FC<SessionListProps> = ({ onSessionStart }) => {
                                     className={classes.resumeButton}
                                     icon={<PlayRegular />}
                                     onClick={() => handleResume(session)}>
-                                    {getTranslation("Resume") }
+                                    {getTranslation("Resume")}
                                 </Button>
                             </CardFooter>
                         </Card>

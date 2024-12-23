@@ -8,7 +8,6 @@ export class SessionItem {
     scenarioDescription: string;
     agents: SessionAgent[];
 
-    
     constructor(id: string, title: string, isComplete: boolean, timestamp: Date, userId: string, scenarioName: string, scenarioDescription: string, agents: SessionAgent[]) {
         this.id = id;
         this.title = title;
@@ -22,14 +21,17 @@ export class SessionItem {
 }
 
 export class SessionAgent {
-    id:string
+    id: string;
+    name: string;
     prompt: string;
     type: string;
+    features: { feature: string, prompt: string }[] | null | undefined;
 
-    
-    constructor(id:string, prompt: string, type: string) {
+    constructor(id: string, name:string ,prompt: string, type: string, features: { feature: string, prompt: string }[] | null | undefined) {
+        this.id = id;
+        this.name = name;
         this.prompt = prompt;
         this.type = type;
-        this.id = id;
+        this.features = features;
     }
 }
