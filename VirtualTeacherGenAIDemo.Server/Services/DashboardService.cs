@@ -101,7 +101,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                     { "userPrompt", agentTeacher.Prompt },
                     {"knowledge", search },
                     { "task", advicePrompt },
-                    { "roleplay", agentRolePlay.Type }
+                    { "roleplay", agentRolePlay.Name }
                 }, dashboardRequest.ConnectionId, token), token);
 
             return TypedResults.Ok("Advice requested");
