@@ -257,7 +257,7 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
                                         <Tab value="advice">{getTranslation("AdviceTab")}</Tab>
                                     </TabList>
                                     {selectedTab === 'summary' && (
-                                        <Field label={getTranslation("SummaryLabel")}>
+                                        <Field>
                                             <Textarea
                                                 placeholder={getTranslation("SummaryPlaceholder")}
                                                 value={features.find(f => f.feature === 'summary')?.prompt || ''}
@@ -267,7 +267,7 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
                                         </Field>
                                     )}
                                     {selectedTab === 'products' && (
-                                        <Field label={getTranslation("ProductsLabel")}>
+                                        <Field>
                                             <Textarea
                                                 placeholder={getTranslation("ProductsPlaceholder")}
                                                 value={features.find(f => f.feature === 'products')?.prompt || ''}
@@ -277,7 +277,7 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
                                         </Field>
                                     )}
                                     {selectedTab === 'keywords' && (
-                                        <Field label={getTranslation("KeywordsLabel")}>
+                                        <Field>
                                             <Textarea
                                                 placeholder={getTranslation("KeywordsPlaceholder")}
                                                 value={features.find(f => f.feature === 'keywords')?.prompt || ''}
@@ -287,7 +287,7 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
                                         </Field>
                                     )}
                                     {selectedTab === 'advice' && (
-                                        <Field label={getTranslation("AdviceLabel")}>
+                                        <Field>
                                             <Textarea
                                                 placeholder={getTranslation("AdvicePlaceholder")}
                                                 value={features.find(f => f.feature === 'advice')?.prompt || ''}
