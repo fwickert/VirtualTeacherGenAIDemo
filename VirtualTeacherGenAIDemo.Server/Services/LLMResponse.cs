@@ -117,7 +117,11 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         /// <param name="message">The message</param>
         private async Task UpdateMessageOnClient(string hubconnection, MessageResponse message, string connectionId, CancellationToken token)
         {
-            await this._messageRelayHubContext.Clients.Client(connectionId).SendAsync(hubconnection, message, token);
+            if (!string.IsNullOrEmpty(connectionId))
+            {
+                await this._messageRelayHubContext.Clients.Client(connectionId).SendAsync(hubconnection, message, token);
+            }
+            
         }
 
     }

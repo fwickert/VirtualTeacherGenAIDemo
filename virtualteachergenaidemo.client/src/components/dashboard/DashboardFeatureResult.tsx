@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Skeleton2Rows } from '../../components/Utilities/skeleton2rows';
 import MarkdownRenderer from '../Utilities/markdownRenderer';
 import { HubConnection } from '@microsoft/signalr';
-import { Button } from '@fluentui/react-button';
+//import { Button } from '@fluentui/react-button';
 //import { DialogPrompt } from '../Utilities/DialogPrompt';
 import DashboardService from '../../services/DashboardService';
 import { useLocalization } from '../../contexts/LocalizationContext';
@@ -51,8 +51,7 @@ const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({ session
                 connectionId: connection?.connectionId,
                 title: feature,
                 prompt: feature
-            };
-            console.log(`Calling API for ${feature} with body:`, body);
+            };            
             const response = await DashboardService.postFeature(feature, sessionId, userName, body);
             if (!response) {
                 console.error(`Failed to call API for ${feature}`);
@@ -71,7 +70,7 @@ const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({ session
 
     return (
         <div role="tabpanel" aria-labelledby={infoType} className="tabpanel">
-            <Button onClick={() => callApiForFeature(infoType, data)}>{getTranslation("GenerateButton")} {infoType}</Button>
+            {/*<Button onClick={() => callApiForFeature(infoType, data)}>{getTranslation("GenerateButton")} {infoType}</Button>*/}
             {/*<DialogPrompt title={infoType} />*/}
             <section className="frame">
                 <span id={infoType}>
