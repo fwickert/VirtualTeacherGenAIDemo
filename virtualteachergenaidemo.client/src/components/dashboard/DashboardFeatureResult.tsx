@@ -8,64 +8,41 @@ import { HubConnection } from '@microsoft/signalr';
 import DashboardService from '../../services/DashboardService';
 import { useLocalization } from '../../contexts/LocalizationContext';
 
-interface DashboardFeatureResultProps {
-    sessionId:string
+interface DashboardFeatureResultProps {    
     data: any;
     infoType: string;
     loading: boolean;
-    connection: HubConnection | null;
-    conversation: string;
-    userName: string;
+    connection: HubConnection | null;    
 }
 
-
-const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({ sessionId, data, infoType, loading, conversation, connection, userName }) => {
+const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({ data, infoType, loading, connection}) => {
     const [content, setContent] = useState(data?.content || '');
     const [isLoading, setIsLoading] = useState(loading);
     const { getTranslation } = useLocalization();
 
     useEffect(() => {
-
         if (connection) {
-            
-            connection.on(infoType, (updatedData: any) => {
-                setIsLoading(false);
-                
-                setContent(updatedData.content);
-            });
+            setupConnectionHandlers(connection);
 
             return () => {
-                connection.off(infoType);
+                removeConnectionHandlers(connection);
             };
+        } else {
+            console.log('Connection not found');
         }
-        else { console.log('Connection not found') }
     }, [connection]);
 
-    const callApiForFeature = async (feature: string, item: any) => {
-        setIsLoading(true);
-        try {
-            const body = {
-                id: item == undefined ? "" : item.id,
-                sessionId: sessionId,
-                conversation: conversation,
-                connectionId: connection?.connectionId,
-                title: feature,
-                prompt: feature
-            };            
-            const response = await DashboardService.postFeature(feature, sessionId, userName, body);
-            if (!response) {
-                console.error(`Failed to call API for ${feature}`);
-                setContent('Failed to generate content');
-                setIsLoading(false);
-                return;
-            }
-        } catch (error) {
-            console.error(`Error calling API for ${feature}:`, error);
-            setContent('Failed to generate content');
+    const removeConnectionHandlers = (connection: HubConnection) => {
+        connection.off(infoType);
+    };
+
+    const setupConnectionHandlers = (connection: HubConnection) => {
+        removeConnectionHandlers(connection);
+
+        connection.on(infoType, (updatedData: any) => {
             setIsLoading(false);
-        } finally {
-            // Any final cleanup if necessary
-        }
+            setContent(updatedData.content);
+        });
     };
 
     return (
@@ -83,4 +60,5 @@ const DashboardFeatureResult: React.FC<DashboardFeatureResultProps> = ({ session
     );
 };
 
-export { DashboardFeatureResult }
+export { DashboardFeatureResult };
+

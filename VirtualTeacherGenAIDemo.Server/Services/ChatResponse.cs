@@ -80,6 +80,8 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             };
 
             
+
+            
             await foreach (StreamingChatMessageContent chatUpdate in _chat.GetStreamingChatMessageContentsAsync(chatHistory, 
                 executionSettings: openAIPromptExecutionSettings, 
                 kernel: _kernel,  

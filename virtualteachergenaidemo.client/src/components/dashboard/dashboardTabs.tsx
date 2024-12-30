@@ -2,10 +2,11 @@ import './dashboardTabs.css';
 import React, { useEffect, useState } from 'react';
 import { Tab, TabList } from '@fluentui/react-tabs';
 import { Skeleton3Rows } from '../../components/Utilities/skeleton3rows';
-import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
+import { HubConnection } from '@microsoft/signalr';
 import { DashboardFeatureResult } from './DashboardFeatureResult';
 import DashboardService from '../../services/DashboardService';
 import { useLocalization } from '../../contexts/LocalizationContext'; // Import useLocalization
+import { getHubConnection } from '../../services/signalR';
 
 interface DashboardTabsProps {
     sessionId: string;
@@ -21,17 +22,18 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ sessionId, conversation, 
     const { getTranslation } = useLocalization(); // Use useLocalization
 
     useEffect(() => {
-        const hubUrl = process.env.HUB_URL;
-        const newConnection = new HubConnectionBuilder()
-            .withUrl(hubUrl!)
-            .withAutomaticReconnect()
-            .build();
+        const setupConnection = async () => {
+            try {
+                const newConnection = await getHubConnection();
+                setConnection(newConnection);                
+            } catch (error) {
+                console.error('Connection failed: ', error);
+            }
+        };
 
-        newConnection.start().then();
-        setConnection(newConnection);
-        console.log('Connection started:', connection?.connectionId);
-
+        setupConnection();
     }, []);
+   
 
     useEffect(() => {
         console.log('Fetching dashboard data for chatId:', sessionId);
@@ -60,14 +62,11 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ sessionId, conversation, 
 
         return (
             <div role="tabpanel" aria-labelledby={infoType} className="tabpanel">
-                <DashboardFeatureResult
-                    sessionId={sessionId}
+                <DashboardFeatureResult                    
                     data={item}
                     loading={loading}
                     infoType={infoType}
-                    connection={connection}
-                    conversation={conversation}
-                    userName={userName}
+                    connection={connection}                                        
                 ></DashboardFeatureResult>
             </div>
         )
@@ -87,13 +86,13 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ sessionId, conversation, 
                 <div>
                     {selectedValue === "Summary" && (
                         <>
-                            <div>{getTabContent("Summary", getTranslation("SummaryTab"))}</div> 
+                            <div>{getTabContent("Summary", getTranslation("SummaryTab"))}</div>
                             <div>{getTabContent("Products", getTranslation("ProductsTab"))}</div>
                             <div>{getTabContent("Keywords", getTranslation("KeywordsTab"))}</div>
                         </>
                     )}
                     {selectedValue === "Advice" && (
-                        <div>{getTabContent("Advice", getTranslation("AdviceTab"))}</div> 
+                        <div>{getTabContent("Advice", getTranslation("AdviceTab"))}</div>
                     )}
                     {/*{selectedValue === "Example" && (*/}
                     {/*    <div>{getTabContent("Example", "Example")}</div>*/}
