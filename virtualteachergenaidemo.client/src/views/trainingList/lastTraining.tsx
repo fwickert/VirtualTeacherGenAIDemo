@@ -50,7 +50,7 @@ const useStyles = makeStyles({
         width: '90%',
     },
     deactivatedIcon: {
-        color: '#A0A0A0', // Deactivated color
+        color: '#000000', // Deactivated color
     },
     activatedIcon: {
         color: '#000000', // Activated color
