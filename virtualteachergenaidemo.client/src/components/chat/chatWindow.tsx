@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import SpeechRecognizer from '../speechRecognizer/speechRecognizer';
 import AudioVisualizer from '../speechRecognizer/AudioVisualizer';
 import { ChatHistoryRequest, ChatMessage } from '../../models/ChatHistoryRequest';
-import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
+import { HubConnection } from '@microsoft/signalr';
 import { textToSpeechAsync, cancelSpeech } from '../../services/speechService';
 import { ScenarioItem } from '../../models/ScenarioItem';
 import { SessionItem } from '../../models/SessionItem';
@@ -12,6 +12,7 @@ import { useUsername } from '../../auth/UserContext';
 import { DeleteSessionRequest } from '../../models/Request/DeleteSessionRequest';
 import { DeleteMessageRequest } from '../../models/Request/DeleteMessageRequest';
 import { getMessages, sendMessage, deleteMessage, saveSession, deleteSession as deleteSessionService } from '../../services/ChatService';
+import { getHubConnection } from '../../services/signalR';
 
 enum AuthorRole {
     User,
@@ -39,72 +40,72 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
     const [isSavingSession, setIsSavingSession] = useState<boolean>(false);
 
     useEffect(() => {
-        const hubUrl = process.env.HUB_URL;
-        const newConnection = new HubConnectionBuilder()
-            .withUrl(hubUrl!)
-            .withAutomaticReconnect()
-            .build();
+        const setupConnection = async () => {
+            try {
+                const newConnection = await getHubConnection();
+                setConnection(newConnection);
+                setupConnectionHandlers(newConnection);
+            } catch (error) {
+                console.error('Connection failed: ', error);
+            }
+        };
 
-        setConnection(newConnection);
+        setupConnection();
     }, []);
 
-    useEffect(() => {
-        if (connection) {
-            connection.start()
-                .then(() => {
-                    connection.on('SessionInsert', (message: any) => {
-                        setSessionId(message.sessionId);
-                    });
+    const removeConnectionHandlers = (connection: HubConnection) => {
+        connection.off('SessionInsert');
+        connection.off('StartMessageUpdate');
+        connection.off('InProgressMessageUpdate');
+        connection.off('EndMessageUpdate');
+        connection.off('MessageIdUpdate');
+    };
 
-                    connection.on('StartMessageUpdate', (message: any) => {
-                        currentMessageRef.current = message.content;
+    const setupConnectionHandlers = (connection: HubConnection) => {
+        removeConnectionHandlers(connection);
 
-                        setMessages(prevMessages => [...prevMessages, {
-                            id: message.messageId,
-                            sessionId: message.sessionId,
-                            content: message.content,
-                            authorRole: AuthorRole.Assistant
-                        }]);
+        connection.on('SessionInsert', (message: any) => {
+            setSessionId(message.sessionId);
+        });
 
-                        //affiche le dernier message de messages
-                        console.log("messages: ", messages[messages.length - 1]);
+        connection.on('StartMessageUpdate', (message: any) => {
+            currentMessageRef.current = message.content;
+            setMessages(prevMessages => [...prevMessages, {
+                id: message.messageId,
+                sessionId: message.sessionId,
+                content: message.content,
+                authorRole: AuthorRole.Assistant
+            }]);
+        });
 
-                    });
+        connection.on('InProgressMessageUpdate', (message: any) => {
+            setMessages(prevMessages => {
+                const updatedMessages = [...prevMessages];
+                updatedMessages[updatedMessages.length - 1] = { id: message.id, sessionId: message.sessionId, content: message.content, authorRole: AuthorRole.Assistant };
+                return updatedMessages;
+            });
+        });
 
-                    connection.on('InProgressMessageUpdate', (message: any) => {
-                        setMessages(prevMessages => {
-                            const updatedMessages = [...prevMessages];
-                            updatedMessages[updatedMessages.length - 1] = { id: message.id, sessionId: message.sessionId, content: message.content, authorRole: AuthorRole.Assistant }
-                            return updatedMessages;
-                        });
+        connection.on('EndMessageUpdate', (message: any) => {
+            setMessages(prevMessages => {
+                const updatedMessages = [...prevMessages];
+                updatedMessages[updatedMessages.length - 1].sessionId = message.sessionId;
+                return updatedMessages;
+            });
+            textToSpeechAsync(message.content);
+        });
 
-                    });
-
-                    connection.on('EndMessageUpdate', (message: any) => {
-                        setMessages(prevMessages => {
-                            const updatedMessages = [...prevMessages];
-                            updatedMessages[updatedMessages.length - 1].sessionId = message.sessionId;
-                            return updatedMessages;
-                        });
-                        textToSpeechAsync(message.content);
-
-                    });
-
-                    connection.on('MessageIdUpdate', (message: any) => {
-                        setMessages(prevMessages => {
-                            const updatedMessages = [...prevMessages];
-                            const lastUserMessage = updatedMessages.find(msg => msg.authorRole === AuthorRole.User);
-                            if (lastUserMessage !== null && lastUserMessage !== undefined) {
-                                lastUserMessage.id = message.id;
-                            }
-                            return updatedMessages;
-                        });
-                    });
-
-                })
-                .catch(e => console.log('Connection failed: ', e));
-        }
-    }, [connection]);
+        connection.on('MessageIdUpdate', (message: any) => {
+            setMessages(prevMessages => {
+                const updatedMessages = [...prevMessages];
+                const lastUserMessage = updatedMessages.find(msg => msg.authorRole === AuthorRole.User);
+                if (lastUserMessage) {
+                    lastUserMessage.id = message.id;
+                }
+                return updatedMessages;
+            });
+        });
+    };
 
     useEffect(() => {
         if (session) {
@@ -134,7 +135,10 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
         const currentScenario = scenario?.agents || session?.agents;
         const agent = currentScenario?.find(agent => agent.type === 'system');
         const rolePlayAgent = currentScenario?.find(agent => agent.type === 'rolePlay');
-        const promptSystem = agent!.prompt + "/r/n" + rolePlayAgent!.prompt;
+
+        const promptSystem = agent!.prompt + "\n\n[ROLEPLAY]\n\n" + rolePlayAgent!.prompt;
+
+        console.log("prompsystem: ", promptSystem);
 
         const scenarioName = scenario?.name || session?.scenarioName;
         const scenarioDescription = scenario?.description || session?.scenarioDescription;
@@ -185,7 +189,7 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
 
     const handleSaveSession = async (sessionId: string | undefined) => {
         try {
-            await saveSession(sessionId, userName);
+            await saveSession(sessionId, userName, connection?.connectionId);
             console.log('Session saved successfully');
         } catch (error) {
             console.error('Error saving session:', error);

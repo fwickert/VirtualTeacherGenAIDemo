@@ -1,19 +1,32 @@
 .list {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px; /* Adjust the gap as needed */
-    max-width: 70%; /* Adjust the width as needed */
-    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: left;
+    margin-top: 10px;
 }
 
-.horizontalCardImage{
-    padding: 10px;    
-    width:100%;
+    .list > .card {
+        flex: 1 1 auto;
+        max-width: 300px;
+        min-width: 300px;
+        height: 200px;
+        display: flex;
+        flex-direction: column;        
+    }
+
+.horizontalCardImage {
+    width: 100%;
+    padding:10px;
 }
 
-.htitle{
-    padding-top: 15px;
+.htitle {
+    font-size: 20px;
+    line-height: var(--lineHeightBase400);
+}
 
+.agent-info {
+    margin-top: 10px;
 }
 
 @media (max-width: 1200px) {

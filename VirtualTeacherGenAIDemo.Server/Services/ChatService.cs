@@ -35,7 +35,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 switch (message.Role)
                 {
                     case "User":
-                        SKHistory.AddUserMessage(message.Content + "\r\nUse the seach tool to find information.");
+                        SKHistory.AddUserMessage(message.Content);
                         break;
                     case "System":
                         SKHistory.AddSystemMessage($"agentId:{agentId}\n" + message.Content);

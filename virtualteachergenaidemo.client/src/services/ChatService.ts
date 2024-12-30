@@ -24,10 +24,13 @@ export const deleteMessage = async (deleteRequest: DeleteMessageRequest) => {
     return response.data;
 };
 
-export const saveSession = async (sessionId: string | undefined, userId: string) => {
-    const response = await axios.post(`${API_BASE_URL}/Session/CompleteSession`, { sessionId, userId });
+export const saveSession = async (sessionId: string | undefined, userId: string, connectionId: string | null | undefined) => {
+    const response = await axios.post(`${API_BASE_URL}/Session/CompleteSession`, { sessionId, userId }, {
+        params: { connectionId }
+    });
     return response.data;
 };
+
 
 export const deleteSession = async (deleteRequest: DeleteSessionRequest) => {
     const response = await axios.delete(`${API_BASE_URL}/session/delete`, {

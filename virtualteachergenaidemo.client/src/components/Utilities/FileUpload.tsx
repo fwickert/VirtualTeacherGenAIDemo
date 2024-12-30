@@ -2,12 +2,13 @@ import './FileUpload.css';
 import { useState, useEffect, useRef } from 'react';
 import { Button, Dialog, DialogSurface, DialogTitle, DialogBody, DialogActions, DialogContent } from '@fluentui/react-components';
 import { Field } from '@fluentui/react-field';
-import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
+import { HubConnection } from '@microsoft/signalr';
 import { TagGroup, Tag, TagGroupProps } from '@fluentui/react-tags';
 import { makeStyles } from '@fluentui/react-components';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocalization } from '../../contexts/LocalizationContext';
 import { uploadChunk, deleteFileFromServer } from '../../services/FileService';
+import { getHubConnection } from '../../services/signalR';
 
 interface FileUploadProps {
     agentId: string | undefined;
@@ -58,30 +59,41 @@ export const FileUpload = ({ agentId, type, initialFileNames, onFileUpload }: Fi
     const { getTranslation } = useLocalization();
 
     useEffect(() => {
-        const hubUrl = process.env.HUB_URL;
-        const newConnection = new HubConnectionBuilder()
-            .withUrl(hubUrl!)
-            .withAutomaticReconnect()
-            .build();
+        const setupConnection = async () => {
+            try {
+                const newConnection = await getHubConnection();
+                setConnection(newConnection);
+                setupConnectionHandlers(newConnection);
+            } catch (error) {
+                console.error('Connection failed: ', error);
+            }
+        };
 
-        setConnection(newConnection);
+        setupConnection();
     }, []);
 
     useEffect(() => {
         if (connection) {
-            connection.start()
-                .then(() => {
-                    connection.on('DocumentParsedUpdate', (message: string) => {
-                        setStatus(message);
-                    });
-
-                    connection.on('DeleteFileUpdate', (message: string) => {
-                        setStatus(message);
-                    });
-                })
-                .catch(e => console.log('Connection failed: ', e));
+            setupConnectionHandlers(connection);
         }
     }, [connection]);
+
+    const removeConnectionHandlers = (connection: HubConnection) => {
+        connection.off('DocumentParsedUpdate');
+        connection.off('DeleteFileUpdate');
+    };
+
+    const setupConnectionHandlers = (connection: HubConnection) => {
+        removeConnectionHandlers(connection);
+
+        connection.on('DocumentParsedUpdate', (message: string) => {
+            setStatus(message);
+        });
+
+        connection.on('DeleteFileUpdate', (message: string) => {
+            setStatus(message);
+        });
+    };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFiles = Array.from(event.target.files || []);
@@ -113,7 +125,6 @@ export const FileUpload = ({ agentId, type, initialFileNames, onFileUpload }: Fi
                 const chunk = file.slice(start, end);
 
                 try {
-                   
                     await uploadChunk(chunk, chunkIndex, totalChunks, fileId, file.name, connection?.connectionId || '', currentAgentId, type);
                     onFileUpload(file.name); // Call the callback function with the new file name
                 } catch (error) {
@@ -208,3 +219,4 @@ export const FileUpload = ({ agentId, type, initialFileNames, onFileUpload }: Fi
         </div>
     );
 };
+
