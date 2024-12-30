@@ -88,7 +88,7 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
             await _dashboardService.GetSummarize(forSummary, request.SessionId, request.UserId, token);
             await _dashboardService.GetProducts(forProducts, request.SessionId, request.UserId, token);
             await _dashboardService.GetKeywords(forKeywords, request.SessionId, request.UserId, token);
-            await _dashboardService.GetAdvice(forAdvice, request.SessionId, request.UserId, token);
+            await _dashboardService.GetAdvice(forAdvice, request.SessionId, request.UserId, token);            
 
         }
 

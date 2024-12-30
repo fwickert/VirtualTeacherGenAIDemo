@@ -60,8 +60,7 @@ const useStyles = makeStyles({
 const LastTraining: React.FC = () => {
     const classes = useStyles();
     const [lastTraining, setLastTraining] = useState<SessionItem[] | undefined>();
-    const [connection, setConnection] = useState<HubConnection | null>(null);
-    const [iconActivated, setIconActivated] = useState<boolean>(false);
+    const [connection, setConnection] = useState<HubConnection | null>(null);    
     const navigate = useNavigate();
     const userName = useUsername();
     const { getTranslation } = useLocalization();

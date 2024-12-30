@@ -189,7 +189,7 @@ function ChatWindow({ scenario, session }: ChatWindowProps) {
 
     const handleSaveSession = async (sessionId: string | undefined) => {
         try {
-            await saveSession(sessionId, userName);
+            await saveSession(sessionId, userName, connection?.connectionId);
             console.log('Session saved successfully');
         } catch (error) {
             console.error('Error saving session:', error);
