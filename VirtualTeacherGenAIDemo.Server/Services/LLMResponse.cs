@@ -40,7 +40,8 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 arguments[item.Key] = item.Value;
             }
 
-            await StreamResponseToClient(sessionId, id, whatAbout, arguments, connectionId, token);
+            //await StreamResponseToClient(sessionId, id, whatAbout, arguments, connectionId, token);
+            await NoStreamingResponseToClient(sessionId, id, whatAbout, arguments, token);
         }
 
         public async Task GetCoachAsync(string whatAbout, Dictionary<string, string> variablesContext, string connectionId, CancellationToken token)
@@ -109,6 +110,37 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             
             //await this.UpdateMessageOnClient( messageResponse, connectionId, token);
             
+        }
+
+        private async Task NoStreamingResponseToClient(string sessionId, string id, string whatAbout, KernelArguments arguments, CancellationToken token)
+        {
+            var response = await _kernel.InvokeAsync(_kernel.Plugins[this.PluginName][this.FunctionName], arguments, token);
+                        
+            string content = response.GetValue<string>();
+
+            string NewId = Guid.NewGuid().ToString();
+            //Save content in DB
+            await this._dashboardRepository.UpsertAsync(new DashboardItem
+            {
+                SessionId = sessionId,
+                Content = content,
+                Id = id != null && id != "" ? id : NewId,
+                InfoType = whatAbout
+            });
+        }
+
+        private async Task SendIconActivationMessage(string whatAbout, string connectionId, CancellationToken token)
+        {
+            string hubConnection = whatAbout.ToLower() switch
+            {
+                "summary" => "ActivateNoteIcon",
+                "keywords" => "ActivateTagIcon",
+                "products" => "ActivateBoxIcon",
+                "advice" => "ActivateBotIcon",
+                _ => ""
+            };
+
+            await this.UpdateMessageOnClient(hubConnection, new MessageResponse(), connectionId, token);
         }
 
         /// <summary>

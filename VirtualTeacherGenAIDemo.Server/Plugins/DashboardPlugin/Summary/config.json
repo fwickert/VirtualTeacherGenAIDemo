@@ -13,7 +13,7 @@
   "input_variables": [
     {
       "name": "conversation",
-      "description": "the conversattion to summariez",
+      "description": "the conversation to summarize",
       "default": ""
     },   
     {

@@ -49,7 +49,7 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
 
             //Crate dahsbopardrequest object conversation id the 
             DashboardRequest forSummary = new DashboardRequest();
-            forSummary.SessionId = request.SessionId;
+            forSummary.SessionId = request.SessionId;            
             forSummary.Id = Guid.NewGuid().ToString();
             forSummary.Title = "Summary";
 

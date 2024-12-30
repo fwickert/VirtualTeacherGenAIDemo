@@ -65,6 +65,10 @@ const LastTraining: React.FC = () => {
     const navigate = useNavigate();
     const userName = useUsername();
     const { getTranslation } = useLocalization();
+    const [noteActivated, setNoteActivated] = useState<boolean>(false);
+    const [tagActivated, setTagActivated] = useState<boolean>(false);
+    const [boxActivated, setBoxActivated] = useState<boolean>(false);
+    const [botActivated, setBotActivated] = useState<boolean>(false);
 
     const navigateDashboard = (sessionId: string) => {
         navigate('/dashboard', { state: { sessionId } });
@@ -93,14 +97,29 @@ const LastTraining: React.FC = () => {
     }, []);
 
     const removeConnectionHandlers = (connection: HubConnection) => {
-        connection.off('ActivateIcon');
+        connection.off('ActivateNoteIcon');
+        connection.off('ActivateTagIcon');
+        connection.off('ActivateBoxIcon');
+        connection.off('ActivateBotIcon');
     };
 
     const setupConnectionHandlers = (connection: HubConnection) => {
         removeConnectionHandlers(connection);
 
-        connection.on('ActivateIcon', () => {
-            setIconActivated(true);
+        connection.on('ActivateNoteIcon', () => {
+            setNoteActivated(true);
+        });
+
+        connection.on('ActivateTagIcon', () => {
+            setTagActivated(true);
+        });
+
+        connection.on('ActivateBoxIcon', () => {
+            setBoxActivated(true);
+        });
+
+        connection.on('ActivateBotIcon', () => {
+            setBotActivated(true);
         });
 
         connection.onclose(() => {
@@ -149,10 +168,10 @@ const LastTraining: React.FC = () => {
                                     )}
                                 </CardPreview>
                                 <CardFooter className={classes.cardFooter}>
-                                    <NotepadRegular className={iconActivated ? classes.activatedIcon : classes.deactivatedIcon} />
-                                    <TagRegular className={iconActivated ? classes.activatedIcon : classes.deactivatedIcon} />
-                                    <BoxRegular className={iconActivated ? classes.activatedIcon : classes.deactivatedIcon} />
-                                    <BotFilled className={iconActivated ? classes.activatedIcon : classes.deactivatedIcon} />
+                                    <NotepadRegular className={noteActivated ? classes.activatedIcon : classes.deactivatedIcon} />
+                                    <TagRegular className={tagActivated ? classes.activatedIcon : classes.deactivatedIcon} />
+                                    <BoxRegular className={boxActivated ? classes.activatedIcon : classes.deactivatedIcon} />
+                                    <BotFilled className={botActivated ? classes.activatedIcon : classes.deactivatedIcon} />
                                     <Button
                                         icon={<EditRegular />}
                                         className={classes.editButton}
