@@ -1,21 +1,21 @@
 import './training.css'
 import { Text } from "@fluentui/react-text"
 import { useNavigate, useLocation } from 'react-router-dom';
-import ChatWindow from '../../components/chat/chatWindow'
+//import ChatWindow from '../../components/chat/chatWindow'
+import Chat from '../../components/chat/chat'
 import { Button } from '@fluentui/react-button';
 import { ArrowCircleLeft48Filled } from '@fluentui/react-icons';
 import { useState, useEffect } from 'react';
 import ScenarioList from '../../components/scenario/scenarioList';
 import { ScenarioItem } from '../../models/ScenarioItem';
 import { SessionItem } from '../../models/SessionItem';
-import { useLocalization } from '../../contexts/LocalizationContext';
+
 
 function Training() {
     const navigate = useNavigate();
     const location = useLocation();
     const [selectedScenario, setSelectedScenario] = useState<ScenarioItem | null>(location.state?.scenario);
-    const [session, setSession] = useState<SessionItem | null>();
-    const { getTranslation } = useLocalization();
+    const [session, setSession] = useState<SessionItem | null>();    
 
     const handleBackClick = () => {
         setSelectedScenario(null);
@@ -55,7 +55,8 @@ function Training() {
             </Text>
 
 
-            {(selectedScenario || session) && <ChatWindow scenario={selectedScenario} session={session!} />}
+            {/*            {(selectedScenario || session) && <ChatWindow scenario={selectedScenario} session={session!} />}*/}
+            {(selectedScenario || session) && <Chat scenario={selectedScenario} session={session!} />}
 
         </div>
     );

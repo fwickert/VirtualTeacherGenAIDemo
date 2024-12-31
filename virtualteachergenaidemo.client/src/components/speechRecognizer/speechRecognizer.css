@@ -1,3 +1,18 @@
-.mic-icon.mic-on {
+/*.mic-icon.mic-on {
     color: red;    
+}
+*/
+
+.mic-icon.mic-on {
+    color: red;
+}
+
+.micButtonContainer {
+    position: relative;
+    margin-left: 5px;
+}
+
+.micButton {
+    position: relative;
+    z-index: 1;
 }
