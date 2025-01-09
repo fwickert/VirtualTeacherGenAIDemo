@@ -19,6 +19,7 @@ import { ChatHistoryRequest, ChatMessage } from '../../models/ChatHistoryRequest
 import { DeleteMessageRequest } from '../../models/Request/DeleteMessageRequest';
 import { DeleteSessionRequest } from '../../models/Request/DeleteSessionRequest';
 import { textToSpeechAsync, cancelSpeech } from '../../services/SpeechService';
+import { v4 as uuidv4 } from 'uuid';
 
 const useStyles = makeStyles({
     chatContainer: {
@@ -78,8 +79,8 @@ const useStyles = makeStyles({
 });
 
 enum AuthorRole {
-    User,
-    Assistant
+    User = 0,
+    Assistant = 1
 }
 
 interface Message {
@@ -129,21 +130,31 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
     const setupConnectionHandlers = (connection: HubConnection) => {
         removeConnectionHandlers(connection);
 
-        connection.on('SessionInsert', (message: any) => {
+        connection.on('SessionInsert', (message: any) => {            
             setSessionId(message.sessionId);
+            console.log('SessionId:', message.sessionId);
+            setMessages(prevMessages => {
+                return prevMessages.map(msg => {
+                    if (msg.sessionId === "") {
+                        return { ...msg, sessionId: message.sessionId };
+                    }
+                    return msg;
+                });
+            });
+
         });
 
-        connection.on('StartMessageUpdate', (message: any) => {
+        connection.on('StartMessageUpdate', (message: Message) => {
             currentMessageRef.current = message.content;
             setMessages(prevMessages => [...prevMessages, {
-                id: message.messageId,
+                id: message.id,
                 sessionId: message.sessionId,
                 content: message.content,
                 authorRole: AuthorRole.Assistant
             }]);
         });
 
-        connection.on('InProgressMessageUpdate', (message: any) => {
+        connection.on('InProgressMessageUpdate', (message: Message) => {
             setMessages(prevMessages => {
                 const updatedMessages = [...prevMessages];
                 updatedMessages[updatedMessages.length - 1] = { id: message.id, sessionId: message.sessionId, content: message.content, authorRole: AuthorRole.Assistant };
@@ -154,22 +165,34 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
         connection.on('EndMessageUpdate', (message: any) => {
             setMessages(prevMessages => {
                 const updatedMessages = [...prevMessages];
-                updatedMessages[updatedMessages.length - 1].sessionId = message.sessionId;
+                // Find the last assistant message
+                const lastMessage = updatedMessages.slice().reverse().find(msg => msg.authorRole === AuthorRole.Assistant);
+                if (lastMessage) {
+                    lastMessage.sessionId = message.sessionId;
+                    lastMessage.id = message.messageId;
+                }
+                console.log('lastAssistantMessage:', lastMessage);
                 return updatedMessages;
             });
+
             textToSpeechAsync(message.content);
         });
 
-        connection.on('MessageIdUpdate', (message: any) => {
-            setMessages(prevMessages => {
-                const updatedMessages = [...prevMessages];
-                const lastUserMessage = updatedMessages.find(msg => msg.authorRole === AuthorRole.User);
-                if (lastUserMessage) {
-                    lastUserMessage.id = message.id;
-                }
-                return updatedMessages;
-            });
-        });
+
+        //connection.on('MessageIdUpdate', (message: any) => {            
+        //    //setMessages(prevMessages => {
+        //    //    const updatedMessages = [...prevMessages];
+        //    //    //I should find the last user message
+        //    //    const lastUserMessage = updatedMessages.find(msg => msg.authorRole === AuthorRole.User);
+                
+        //    //    if (lastUserMessage) {
+                    
+        //    //        lastUserMessage.messageId = message.messageId;
+        //    //    }
+               
+        //    //    return updatedMessages;
+        //    //});
+        //});
     };
 
     useEffect(() => {
@@ -181,29 +204,27 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
                         .map((msg: Message) => ({
                             id: msg.id,
                             content: msg.content,
-                            sessionId: msg.sessionId,
+                            sessionId: session.id,
                             authorRole: msg.authorRole
                         })
                         );
-                    setMessages(fetchedMessages);
-                    console.log("fetchedMessages: ", fetchedMessages);
+                    setMessages(fetchedMessages);                        
+                    
                 })
                 .catch(error => console.error('Error fetching session messages:', error));
-
-            console.log("sessionId: ", session.id);
+            
         }
     }, [session]);
 
     const handleNewMessage = async (message: string) => {
-        setMessages(prevMessages => [...prevMessages, { id: "", sessionId: sessionId, content: message, authorRole: AuthorRole.User }]);
+        const messageUserId = uuidv4();
+        setMessages(prevMessages => [...prevMessages, { id: messageUserId, sessionId: sessionId, content: message, authorRole: AuthorRole.User }]);
 
         const currentScenario = scenario?.agents || session?.agents;
         const agent = currentScenario?.find(agent => agent.type === 'system');
         const rolePlayAgent = currentScenario?.find(agent => agent.type === 'rolePlay');
 
         const promptSystem = agent!.prompt + "\n\n[ROLEPLAY]\n\n" + rolePlayAgent!.prompt;
-
-        console.log("prompsystem: ", promptSystem);
 
         const scenarioName = scenario?.name || session?.scenarioName;
         const scenarioDescription = scenario?.description || session?.scenarioDescription;
@@ -225,11 +246,12 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
         };
 
         const chatHistory = new ChatHistoryRequest(userName, sessionItem, [
-            new ChatMessage("", "System", promptSystem),
-            ...messages.map(msg => new ChatMessage("", msg.authorRole.toString(), msg.content)),
-            new ChatMessage("", "User", message)
+            new ChatMessage(uuidv4(), "System", promptSystem),
+            ...messages.map(msg => new ChatMessage(msg.id, msg.authorRole.toString(), msg.content)),
+            new ChatMessage(messageUserId, "User", message)
         ]);
-        console.log(chatHistory);
+
+       
 
         await sendMessage(chatHistory, rolePlayAgent?.id, connection?.connectionId);
     };
@@ -237,8 +259,9 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
     const handleDeleteMessage = async (id: string) => {
         //stop the audio
         cancelSpeech();
-
+        console.log("id: ", id);
         const messageToDelete = messages.find(msg => msg.id === id);
+        console.log("msg: ", messages);
         if (messageToDelete !== null && messageToDelete !== undefined) {
             const deleteRequest = new DeleteMessageRequest(messageToDelete.id, messageToDelete.sessionId!);
 
@@ -251,9 +274,10 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
         }
     };
 
-    const handleSaveSession = async (sessionId: string | undefined) => {
+    const handleSaveSession = async () => {
         try {
-            await saveSession(sessionId, userName, connection?.connectionId);
+            console.log('Saving session...', sessionId);
+            await saveSession(session?.id || sessionId, userName, connection?.connectionId);
             console.log('Session saved successfully');
         } catch (error) {
             console.error('Error saving session:', error);
@@ -262,10 +286,8 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
         }
     };
 
-    const deleteSession = async () => {
-        if (!session) return;
-
-        const deleteRequest = new DeleteSessionRequest(session.id, session.userId);
+    const deleteSession = async () => {       
+        const deleteRequest = new DeleteSessionRequest(session?.id || sessionId, session?.userId || userName);
 
         try {
             await deleteSessionService(deleteRequest);

@@ -4,7 +4,7 @@ import SpeechRecognizer from '../speechRecognizer/speechRecognizer';
 import AudioVisualizer from '../speechRecognizer/AudioVisualizer';
 import { ChatHistoryRequest, ChatMessage } from '../../models/ChatHistoryRequest';
 import { HubConnection } from '@microsoft/signalr';
-import { textToSpeechAsync, cancelSpeech } from '../../services/speechService';
+import { textToSpeechAsync, cancelSpeech } from '../../services/SpeechService';
 import { ScenarioItem } from '../../models/ScenarioItem';
 import { SessionItem } from '../../models/SessionItem';
 import { Button } from '@fluentui/react-button';
