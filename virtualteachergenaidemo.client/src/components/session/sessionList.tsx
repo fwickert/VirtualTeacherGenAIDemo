@@ -19,11 +19,14 @@ interface SessionListProps {
 
 const useStyles = makeStyles({
     customPreview: {
-        padding: '10px',
+        paddingLeft: '10px',
     },
     customCard: {
         minWidth: '400px',
         maxWidth: '300px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
     },
     iconGrid: {
         display: 'grid',
@@ -70,6 +73,14 @@ const useStyles = makeStyles({
     },
     resumeButton: {
         marginLeft: 'auto',
+        zIndex: 1, // Ensure the button is above other elements
+    },
+    cardFooter: {
+        display: 'flex',
+        justifyContent: 'flex-end',
+        alignItems: 'flex-end',
+        marginTop: 'auto',
+        position: 'relative', // Ensure z-index works
     },
 });
 
@@ -130,7 +141,7 @@ const SessionList: React.FC<SessionListProps> = ({ onSessionStart }) => {
                                 <Body2>Session details or description can go here.</Body2>
                                 <Body2>{formatDate(session.timestamp!)}</Body2>
                             </CardPreview>
-                            <CardFooter>
+                            <CardFooter className={classes.cardFooter}>
                                 <Button
                                     appearance='primary'
                                     className={classes.resumeButton}
