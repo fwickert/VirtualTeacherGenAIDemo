@@ -44,7 +44,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             }
             if (chatHistory.Session != null)
             {
-                Task.Run(() => _chatResponse.StartChat(connectionId, SKHistory, chatHistory.UserId, chatHistory.Session, _messageRepository, _sessionRepository, token), token);
+                Task.Run(() => _chatResponse.StartChat(connectionId, SKHistory, chatHistory.UserId, chatHistory.Session, chatHistory.Messages, _messageRepository, _sessionRepository, token), token);
             }
 
 

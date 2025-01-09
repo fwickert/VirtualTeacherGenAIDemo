@@ -17,7 +17,7 @@ import { getHubConnection } from '../../services/signalR';
 
 const useStyles = makeStyles({
     customPreview: {
-        padding: '10px',
+        paddingLeft: '10px',
     },
     customCard: {
         minWidth: '300px',
@@ -36,6 +36,7 @@ const useStyles = makeStyles({
     },
     editButton: {
         marginLeft: 'auto',
+        zIndex: 1,
     },
     htitle: {
         fontSize: '20px',

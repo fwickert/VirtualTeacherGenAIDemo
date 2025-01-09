@@ -82,6 +82,7 @@ const useStyles = makeStyles({
     },
     editButton: {
         marginLeft: 'auto',
+        zIndex: 1,
     },
     headerText: {
         fontSize: '20px',

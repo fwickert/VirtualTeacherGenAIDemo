@@ -74,6 +74,7 @@ const useStyles = makeStyles({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
+        zIndex: 1,
     },
     buttonIcon: {
         fontSize: '48px',

@@ -5,6 +5,7 @@ using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using VirtualTeacherGenAIDemo.Server.Hubs;
+using VirtualTeacherGenAIDemo.Server.Models.Request;
 using VirtualTeacherGenAIDemo.Server.Models.Response;
 using VirtualTeacherGenAIDemo.Server.Models.Storage;
 using VirtualTeacherGenAIDemo.Server.Storage;
@@ -19,7 +20,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         private readonly Kernel _kernel;
         private readonly int DELAY = 25;
 
-        public ChatResponse(ILogger<ChatResponse> logger,            
+        public ChatResponse(ILogger<ChatResponse> logger,
             [FromServices] IHubContext<MessageRelayHub> messageRelayHubContext,
             [FromServices] Kernel kernel)
         {
@@ -27,13 +28,14 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             _kernel = kernel;
             _chat = _kernel.GetRequiredService<IChatCompletionService>();
             _messageRelayHubContext = messageRelayHubContext;
-            
+
         }
 
         public async Task StartChat(string connectionId,
             ChatHistory chatHistory,
             string userId,
             SessionItem session,
+            List<ChatMessage> messages,
             MessageRepository messageRepository,
             SessionRepository sessionRepository,
             CancellationToken token)
@@ -60,35 +62,33 @@ namespace VirtualTeacherGenAIDemo.Server.Services
 
                 MessageResponse messageforUI = new()
                 {
-                    SessionId = session.Id,                    
+                    SessionId = session.Id,
                 };
                 await this.UpdateMessageOnClient("SessionInsert", messageforUI, connectionId, token);
             }
 
-            MessageResponse response = new MessageResponse
-            {   
-                SessionId = session.Id,
-                Role = AuthorRole.Assistant,
-                Content = string.Empty,
-                
-            };
-            await this.UpdateMessageOnClient("StartMessageUpdate", response, connectionId, token);
+            await this.UpdateMessageOnClient("StartMessageUpdate", null, connectionId, token);
 
             OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
             {
                 ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
             };
 
-            
+            MessageResponse response = new MessageResponse
+            {
+                SessionId = session.Id,
+                Role = AuthorRole.Assistant,
+                Content = string.Empty,
 
-            
-            await foreach (StreamingChatMessageContent chatUpdate in _chat.GetStreamingChatMessageContentsAsync(chatHistory, 
-                executionSettings: openAIPromptExecutionSettings, 
-                kernel: _kernel,  
+            };
+
+            await foreach (StreamingChatMessageContent chatUpdate in _chat.GetStreamingChatMessageContentsAsync(chatHistory,
+                executionSettings: openAIPromptExecutionSettings,
+                kernel: _kernel,
                 cancellationToken: token))
             {
                 if (!string.IsNullOrEmpty(chatUpdate.Content))
-                {                    
+                {
                     response.Content += chatUpdate.Content;
                     await this.UpdateMessageOnClient("InProgressMessageUpdate", response, connectionId, token);
                     Console.Write(chatUpdate.Content);
@@ -97,7 +97,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             }
 
             ////Take last message from chatHistory and save in cosmosDB.
-            var lastMessage = chatHistory.Last(q => q.Role == AuthorRole.User);
+            var lastMessage = messages.Last(q => q.Role == "User");
             if (lastMessage != null)
             {
                 MessageItem userMessage = new()
@@ -105,13 +105,13 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                     SessionId = session.Id,
                     Content = lastMessage.Content!,
                     Timestamp = DateTimeOffset.Now,
-                    Id = Guid.NewGuid().ToString(),
+                    Id = lastMessage.Id,
                     AuthorRole = MessageItem.AuthorRoles.User
                 };
                 await messageRepository.UpsertAsync(userMessage);
 
                 MessageResponse messageforUI = new()
-                {  
+                {
                     MessageId = userMessage.Id,
                     SessionId = session.Id,
                 };
@@ -124,22 +124,14 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 Content = response.Content,
             };
             message.Id = Guid.NewGuid().ToString();
-            if (response.Role == AuthorRole.User)
-            {
-                message.AuthorRole = MessageItem.AuthorRoles.User;
-            }
-            else
-            {
-                message.AuthorRole = MessageItem.AuthorRoles.Assistant;
-            }
+            message.AuthorRole = MessageItem.AuthorRoles.Assistant;
             message.Timestamp = DateTimeOffset.Now;
             message.SessionId = session.Id;
             messageRepository.UpsertAsync(message).GetAwaiter().GetResult();
 
-            
+
             response.MessageId = message.Id;
             response.SessionId = message.SessionId;
-            //chatHistory.AddAssistantMessage(response.Content);
             await this.UpdateMessageOnClient("EndMessageUpdate", response, connectionId, token);
 
         }
@@ -150,7 +142,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         /// Update the response on the client.
         /// </summary>
         /// <param name="message">The message</param>
-        private async Task UpdateMessageOnClient(string hubconnection, MessageResponse message, string connectionId, CancellationToken token)
+        private async Task UpdateMessageOnClient(string hubconnection, MessageResponse? message, string connectionId, CancellationToken token)
         {
             await this._messageRelayHubContext.Clients.Client(connectionId).SendAsync(hubconnection, message, token);
         }
