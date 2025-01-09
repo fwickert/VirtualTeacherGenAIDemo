@@ -1,7 +1,6 @@
 import './training.css'
 import { Text } from "@fluentui/react-text"
 import { useNavigate, useLocation } from 'react-router-dom';
-//import ChatWindow from '../../components/chat/chatWindow'
 import Chat from '../../components/chat/chat'
 import { Button } from '@fluentui/react-button';
 import { ArrowCircleLeft48Filled } from '@fluentui/react-icons';
@@ -9,13 +8,14 @@ import { useState, useEffect } from 'react';
 import ScenarioList from '../../components/scenario/scenarioList';
 import { ScenarioItem } from '../../models/ScenarioItem';
 import { SessionItem } from '../../models/SessionItem';
-
+import { useLocalization } from '../../contexts/LocalizationContext';
 
 function Training() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { getTranslation } = useLocalization();
     const [selectedScenario, setSelectedScenario] = useState<ScenarioItem | null>(location.state?.scenario);
-    const [session, setSession] = useState<SessionItem | null>();    
+    const [session, setSession] = useState<SessionItem | null>();
 
     const handleBackClick = () => {
         setSelectedScenario(null);
@@ -25,7 +25,6 @@ function Training() {
 
     const handleScenarioSelect = (scenario: ScenarioItem) => {
         setSelectedScenario(scenario);
-
     };
 
     useEffect(() => {
@@ -33,10 +32,8 @@ function Training() {
             setSelectedScenario(location.state.scenario);
         } else {
             setSession(location.state.session);
-
         }
     }, [location.state]);
-
 
     return (
         <div>
@@ -45,19 +42,16 @@ function Training() {
                     <div className="back">
                         <Button size="large" appearance="transparent" onClick={handleBackClick} icon={<ArrowCircleLeft48Filled />} />
                     </div>
-                    <h1 className="title">Virtual Assistant Teacher</h1>
+                    <h1 className="title">{getTranslation("VirtualAssistantTeacherTitle")}</h1>
                     <p className="intro">
-                        Virtual Assistant Teacher is a tool that trains you to sell with an AI customer.<br /> It simulates a real scenario, listens and evaluates you, and gives you feedback and tips. It helps you to boost your confidence and efficiency in sales.
+                        {getTranslation("VirtualAssistantTeacherDescription")}
                     </p>
 
                     {!selectedScenario && !session && <ScenarioList onScenarioSelect={handleScenarioSelect} />}
                 </section>
             </Text>
 
-
-            {/*            {(selectedScenario || session) && <ChatWindow scenario={selectedScenario} session={session!} />}*/}
             {(selectedScenario || session) && <Chat scenario={selectedScenario} session={session!} />}
-
         </div>
     );
 };

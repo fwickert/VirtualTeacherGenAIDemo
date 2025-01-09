@@ -21,6 +21,8 @@ import { DeleteSessionRequest } from '../../models/Request/DeleteSessionRequest'
 import { textToSpeechAsync, cancelSpeech } from '../../services/SpeechService';
 import { v4 as uuidv4 } from 'uuid';
 import { TypingIndicator } from './TypingIndicator';
+import { useLocalization } from '../../contexts/LocalizationContext';
+import { tokens } from '@fluentui/tokens';
 
 const useStyles = makeStyles({
     chatContainer: {
@@ -36,9 +38,10 @@ const useStyles = makeStyles({
     messagesContainer: {
         flexGrow: 1,
         overflowY: 'auto',
-        ...shorthands.margin('10px'),
+        ...shorthands.margin('10px', '10px', '0px', '10px'), // Adjusted bottom margin
         height: '500px', // Fixed height
         border: '1px solid #ccc', // Border
+        borderRadius: '5px', 
         ...shorthands.padding('10px'),
         '@media (max-width: 767px)': {
             height: '300px', // Adjusted height for phone
@@ -47,7 +50,7 @@ const useStyles = makeStyles({
     inputContainer: {
         display: 'flex',
         alignItems: 'center',
-        ...shorthands.margin('10px'),
+        ...shorthands.margin('5px', '10px', '10px', '10px'), // Adjusted top margin
     },
     inputField: {
         flexGrow: 1,
@@ -55,6 +58,9 @@ const useStyles = makeStyles({
     },
     deleteMessage: {
         cursor: 'pointer',
+        marginLeft: '10px',
+        fontSize: '15px',
+        color: 'red',
     },
     userMessage: {
         backgroundColor: '#f0f0f0',
@@ -77,7 +83,21 @@ const useStyles = makeStyles({
         flexDirection: 'column',
         width: '100%',
     },
+    deleteButton: {
+        backgroundColor: tokens.colorPaletteRedBackground3,
+        color: "white",
+        ':hover': {
+            backgroundColor: tokens.colorPaletteRedForeground1,
+            color: 'white',
+        },
+    },
+    buttonContainer: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        ...shorthands.margin('10px', '10px', '0px', '10px'),
+    },
 });
+
 
 enum AuthorRole {
     User = 0,
@@ -106,6 +126,7 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
     const currentMessageRef = useRef<string | null>(null);
     const [isSavingSession, setIsSavingSession] = useState<boolean>(false);
     const [isTyping, setIsTyping] = useState<boolean>(false);
+    const { getTranslation } = useLocalization();
 
     useEffect(() => {
         const setupConnection = async () => {
@@ -309,8 +330,8 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
     };
 
     return (
-        <div className={styles.chatContainer}>
-            <div className={styles.messagesContainer}>
+        <div className={styles.chatContainer}>        
+            <div className={styles.messagesContainer}>            
                 {messages.map((msg, index) => (
                     <div key={index} className={styles.messageContainer}>
                         <div className={msg.authorRole === AuthorRole.User ? styles.userMessage : styles.assistantMessage}>
@@ -323,7 +344,7 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
             </div>
             <div className={styles.inputContainer}>
                 <Input
-                    placeholder="Type your message"
+                    placeholder={getTranslation("TypeYourMessage")}
                     value={inputText}
                     onChange={(_e, data) => setInputText(data.value)}
                     onKeyDown={handleKeyDown}
@@ -334,8 +355,10 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
                     <SpeechRecognizer onNewMessage={handleNewMessageFromSpeech} />
                 </div>
             </div>
-            <Button appearance='primary' onClick={() => handleSaveSession()} disabled={isSavingSession}>Validate Session</Button>
-            <Button appearance='secondary' onClick={() => deleteSession()}>Delete session</Button>
+            <div className={styles.buttonContainer}>
+                <Button className={styles.deleteButton} onClick={() => deleteSession()}>{getTranslation("DeleteSession")}</Button>
+                <Button appearance='primary' onClick={() => handleSaveSession()} disabled={isSavingSession}>{getTranslation("ValidateSession")}</Button>
+            </div>
         </div>
     );
 };
