@@ -4,6 +4,12 @@ import {
     Input,
     makeStyles,
     shorthands,
+    Dialog,
+    DialogSurface,
+    DialogTitle,
+    DialogBody,
+    DialogActions,
+    DialogContent,
 } from '@fluentui/react-components';
 import {
     SendFilled,
@@ -23,6 +29,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { TypingIndicator } from './TypingIndicator';
 import { useLocalization } from '../../contexts/LocalizationContext';
 import { tokens } from '@fluentui/tokens';
+import { Spinner } from '@fluentui/react';
+import { useNavigate } from 'react-router-dom';
 
 const useStyles = makeStyles({
     chatContainer: {
@@ -41,7 +49,7 @@ const useStyles = makeStyles({
         ...shorthands.margin('10px', '10px', '0px', '10px'), // Adjusted bottom margin
         height: '500px', // Fixed height
         border: '1px solid #ccc', // Border
-        borderRadius: '5px', 
+        borderRadius: '5px',
         ...shorthands.padding('10px'),
         '@media (max-width: 767px)': {
             height: '300px', // Adjusted height for phone
@@ -96,8 +104,19 @@ const useStyles = makeStyles({
         justifyContent: 'space-between',
         ...shorthands.margin('10px', '10px', '0px', '10px'),
     },
+    spinnerOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1000,
+    },
 });
-
 
 enum AuthorRole {
     User = 0,
@@ -119,6 +138,7 @@ interface ChatProps {
 const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
     const styles = useStyles();
     const userName = useUsername();
+    const navigate = useNavigate();
     const [inputText, setInputText] = useState('');
     const [messages, setMessages] = useState<Message[]>([]);
     const [connection, setConnection] = useState<HubConnection | null>(null);
@@ -126,6 +146,9 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
     const currentMessageRef = useRef<string | null>(null);
     const [isSavingSession, setIsSavingSession] = useState<boolean>(false);
     const [isTyping, setIsTyping] = useState<boolean>(false);
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
+    const [isValidateConfirmOpen, setIsValidateConfirmOpen] = useState<boolean>(false);
+    const [isProcessing, setIsProcessing] = useState<boolean>(false);
     const { getTranslation } = useLocalization();
 
     useEffect(() => {
@@ -290,27 +313,37 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
     };
 
     const handleSaveSession = async () => {
+        setIsValidateConfirmOpen(true);
+    };
+
+    const confirmSaveSession = async () => {
+        setIsProcessing(true);
         try {
             console.log('Saving session...', sessionId);
             await saveSession(session?.id || sessionId, userName, connection?.connectionId);
             console.log('Session saved successfully');
+            navigate('/lastTraining');
         } catch (error) {
             console.error('Error saving session:', error);
         } finally {
-            setIsSavingSession(true);
+            setIsProcessing(false);
+            setIsValidateConfirmOpen(false);
         }
     };
 
     const deleteSession = async () => {
+        setIsProcessing(true);
         const deleteRequest = new DeleteSessionRequest(session?.id || sessionId, session?.userId || userName);
 
         try {
             await deleteSessionService(deleteRequest);
-            alert('Session deleted successfully');
             setMessages([]);
+            navigate('/session');
         } catch (error) {
             console.error('Error deleting session:', error);
-            alert('Failed to delete session');
+        } finally {
+            setIsProcessing(false);
+            setIsDeleteConfirmOpen(false);
         }
     };
 
@@ -329,9 +362,17 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
         }
     };
 
+    const handleOpenChange = (_event: any, data: { open: boolean }) => {
+        setIsDeleteConfirmOpen(data.open);
+    };
+
+    const handleValidateOpenChange = (_event: any, data: { open: boolean }) => {
+        setIsValidateConfirmOpen(data.open);
+    };
+
     return (
-        <div className={styles.chatContainer}>        
-            <div className={styles.messagesContainer}>            
+        <div className={styles.chatContainer}>
+            <div className={styles.messagesContainer}>
                 {messages.map((msg, index) => (
                     <div key={index} className={styles.messageContainer}>
                         <div className={msg.authorRole === AuthorRole.User ? styles.userMessage : styles.assistantMessage}>
@@ -356,9 +397,49 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
                 </div>
             </div>
             <div className={styles.buttonContainer}>
-                <Button className={styles.deleteButton} onClick={() => deleteSession()}>{getTranslation("DeleteSession")}</Button>
-                <Button appearance='primary' onClick={() => handleSaveSession()} disabled={isSavingSession}>{getTranslation("ValidateSession")}</Button>
+                <Button className={styles.deleteButton} onClick={() => setIsDeleteConfirmOpen(true)}>{getTranslation("DeleteSession")}</Button>
+                <Button appearance='primary' onClick={handleSaveSession} disabled={isSavingSession}>{getTranslation("ValidateSession")}</Button>
             </div>
+
+            <Dialog open={isDeleteConfirmOpen} onOpenChange={handleOpenChange}>
+                <DialogSurface>
+                    <DialogBody>
+                        {isProcessing && <div className={styles.spinnerOverlay}><Spinner label={getTranslation("Processing")} /></div>}
+                        <DialogTitle>{getTranslation("DeleteAskTitle")}</DialogTitle>
+                        <DialogContent>
+                            <p>{getTranslation("DeleteSessionAskMessage")}</p>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button className={styles.deleteButton} onClick={deleteSession} disabled={isProcessing}>
+                                {getTranslation("DeleteButton")}
+                            </Button>
+                            <Button appearance="secondary" onClick={() => setIsDeleteConfirmOpen(false)} disabled={isProcessing}>
+                                {getTranslation("CancelButton")}
+                            </Button>
+                        </DialogActions>
+                    </DialogBody>
+                </DialogSurface>
+            </Dialog>
+
+            <Dialog open={isValidateConfirmOpen} onOpenChange={handleValidateOpenChange}>
+                <DialogSurface>
+                    <DialogBody>
+                        {isProcessing && <div className={styles.spinnerOverlay}><Spinner label={getTranslation("Processing")} /></div>}
+                        <DialogTitle>{getTranslation("ValidateAskTitle")}</DialogTitle>
+                        <DialogContent>
+                            <p>{getTranslation("ValidateSessionAskMessage")}</p>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button appearance="primary" onClick={confirmSaveSession} disabled={isProcessing}>
+                                {getTranslation("ValidateButton")}
+                            </Button>
+                            <Button appearance="secondary" onClick={() => setIsValidateConfirmOpen(false)} disabled={isProcessing}>
+                                {getTranslation("CancelButton")}
+                            </Button>
+                        </DialogActions>
+                    </DialogBody>
+                </DialogSurface>
+            </Dialog>
         </div>
     );
 };
