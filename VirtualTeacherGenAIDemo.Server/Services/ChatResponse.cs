@@ -67,6 +67,13 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 await this.UpdateMessageOnClient("SessionInsert", messageforUI, connectionId, token);
             }
 
+            await this.UpdateMessageOnClient("StartMessageUpdate", null, connectionId, token);
+
+            OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
+            {
+                ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
+            };
+
             MessageResponse response = new MessageResponse
             {
                 SessionId = session.Id,
@@ -74,14 +81,6 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 Content = string.Empty,
 
             };
-            await this.UpdateMessageOnClient("StartMessageUpdate", response, connectionId, token);
-
-            OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
-            {
-                ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
-            };
-
-
 
             await foreach (StreamingChatMessageContent chatUpdate in _chat.GetStreamingChatMessageContentsAsync(chatHistory,
                 executionSettings: openAIPromptExecutionSettings,
@@ -98,7 +97,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             }
 
             ////Take last message from chatHistory and save in cosmosDB.
-            var lastMessage = messages.Last(q => q.Role == "User"); 
+            var lastMessage = messages.Last(q => q.Role == "User");
             if (lastMessage != null)
             {
                 MessageItem userMessage = new()
@@ -132,7 +131,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
 
 
             response.MessageId = message.Id;
-            response.SessionId = message.SessionId;            
+            response.SessionId = message.SessionId;
             await this.UpdateMessageOnClient("EndMessageUpdate", response, connectionId, token);
 
         }
@@ -143,7 +142,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         /// Update the response on the client.
         /// </summary>
         /// <param name="message">The message</param>
-        private async Task UpdateMessageOnClient(string hubconnection, MessageResponse message, string connectionId, CancellationToken token)
+        private async Task UpdateMessageOnClient(string hubconnection, MessageResponse? message, string connectionId, CancellationToken token)
         {
             await this._messageRelayHubContext.Clients.Client(connectionId).SendAsync(hubconnection, message, token);
         }

@@ -144,23 +144,32 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
 
         });
 
-        connection.on('StartMessageUpdate', (message: Message) => {
-            currentMessageRef.current = message.content;
-            setMessages(prevMessages => [...prevMessages, {
-                id: message.id,
-                sessionId: message.sessionId,
-                content: message.content,
-                authorRole: AuthorRole.Assistant
-            }]);
+        connection.on('StartMessageUpdate', (message: Message) => {          
+            console.log('laoding');
         });
 
+
+
         connection.on('InProgressMessageUpdate', (message: Message) => {
+            currentMessageRef.current = message.content;
+
             setMessages(prevMessages => {
-                const updatedMessages = [...prevMessages];
-                updatedMessages[updatedMessages.length - 1] = { id: message.id, sessionId: message.sessionId, content: message.content, authorRole: AuthorRole.Assistant };
-                return updatedMessages;
+                const existingMessageIndex = prevMessages.findIndex(msg => msg.id === message.id);
+                if (existingMessageIndex !== -1) {
+                    const updatedMessages = [...prevMessages];
+                    updatedMessages[existingMessageIndex] = { ...updatedMessages[existingMessageIndex], content: message.content };
+                    return updatedMessages;
+                } else {
+                    return [...prevMessages, {
+                        id: message.id,
+                        sessionId: message.sessionId,
+                        content: message.content,
+                        authorRole: AuthorRole.Assistant
+                    }];
+                }
             });
         });
+
 
         connection.on('EndMessageUpdate', (message: any) => {
             setMessages(prevMessages => {
@@ -177,22 +186,6 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
 
             textToSpeechAsync(message.content);
         });
-
-
-        //connection.on('MessageIdUpdate', (message: any) => {            
-        //    //setMessages(prevMessages => {
-        //    //    const updatedMessages = [...prevMessages];
-        //    //    //I should find the last user message
-        //    //    const lastUserMessage = updatedMessages.find(msg => msg.authorRole === AuthorRole.User);
-                
-        //    //    if (lastUserMessage) {
-                    
-        //    //        lastUserMessage.messageId = message.messageId;
-        //    //    }
-               
-        //    //    return updatedMessages;
-        //    //});
-        //});
     };
 
     useEffect(() => {
@@ -218,7 +211,7 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
 
     const handleNewMessage = async (message: string) => {
         const messageUserId = uuidv4();
-        setMessages(prevMessages => [...prevMessages, { id: messageUserId, sessionId: sessionId, content: message, authorRole: AuthorRole.User }]);
+        setMessages(prevMessages => [...prevMessages, { id: messageUserId, sessionId: session?.id || sessionId, content: message, authorRole: AuthorRole.User }]);
 
         const currentScenario = scenario?.agents || session?.agents;
         const agent = currentScenario?.find(agent => agent.type === 'system');
@@ -339,7 +332,7 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
                     <SpeechRecognizer onNewMessage={handleNewMessageFromSpeech} />
                 </div>
             </div>
-            <Button appearance='primary' onClick={() => handleSaveSession(session?.id)} disabled={isSavingSession}>Validate Session</Button>
+            <Button appearance='primary' onClick={() => handleSaveSession()} disabled={isSavingSession}>Validate Session</Button>
             <Button appearance='secondary' onClick={() => deleteSession()}>Delete session</Button>
         </div>
     );
