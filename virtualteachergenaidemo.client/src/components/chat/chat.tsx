@@ -20,6 +20,7 @@ import { DeleteMessageRequest } from '../../models/Request/DeleteMessageRequest'
 import { DeleteSessionRequest } from '../../models/Request/DeleteSessionRequest';
 import { textToSpeechAsync, cancelSpeech } from '../../services/SpeechService';
 import { v4 as uuidv4 } from 'uuid';
+import { TypingIndicator } from './TypingIndicator';
 
 const useStyles = makeStyles({
     chatContainer: {
@@ -104,6 +105,7 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
     const [sessionId, setSessionId] = useState<string>("");
     const currentMessageRef = useRef<string | null>(null);
     const [isSavingSession, setIsSavingSession] = useState<boolean>(false);
+    const [isTyping, setIsTyping] = useState<boolean>(false);
 
     useEffect(() => {
         const setupConnection = async () => {
@@ -130,7 +132,7 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
     const setupConnectionHandlers = (connection: HubConnection) => {
         removeConnectionHandlers(connection);
 
-        connection.on('SessionInsert', (message: any) => {            
+        connection.on('SessionInsert', (message: any) => {
             setSessionId(message.sessionId);
             console.log('SessionId:', message.sessionId);
             setMessages(prevMessages => {
@@ -144,13 +146,12 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
 
         });
 
-        connection.on('StartMessageUpdate', (message: Message) => {          
-            console.log('laoding');
+        connection.on('StartMessageUpdate', (message: Message) => {
+            setIsTyping(true);
         });
 
-
-
         connection.on('InProgressMessageUpdate', (message: Message) => {
+            setIsTyping(false);
             currentMessageRef.current = message.content;
 
             setMessages(prevMessages => {
@@ -201,11 +202,11 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
                             authorRole: msg.authorRole
                         })
                         );
-                    setMessages(fetchedMessages);                        
-                    
+                    setMessages(fetchedMessages);
+
                 })
                 .catch(error => console.error('Error fetching session messages:', error));
-            
+
         }
     }, [session]);
 
@@ -244,7 +245,7 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
             new ChatMessage(messageUserId, "User", message)
         ]);
 
-       
+
 
         await sendMessage(chatHistory, rolePlayAgent?.id, connection?.connectionId);
     };
@@ -279,7 +280,7 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
         }
     };
 
-    const deleteSession = async () => {       
+    const deleteSession = async () => {
         const deleteRequest = new DeleteSessionRequest(session?.id || sessionId, session?.userId || userName);
 
         try {
@@ -318,6 +319,7 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
                         </div>
                     </div>
                 ))}
+                {isTyping && <TypingIndicator />}
             </div>
             <div className={styles.inputContainer}>
                 <Input
