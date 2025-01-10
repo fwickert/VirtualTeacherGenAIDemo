@@ -35,15 +35,13 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ sessionId, conversation, 
     }, []);
    
 
-    useEffect(() => {
-        console.log('Fetching dashboard data for chatId:', sessionId);
+    useEffect(() => {        
         loadDashboardData(sessionId);
     }, [sessionId]);
 
     const loadDashboardData = async (chatId: string) => {
         try {
-            const data = await DashboardService.getDashboardData(chatId);
-            console.log('Fetched dashboard data:', data);
+            const data = await DashboardService.getDashboardData(chatId);            
             setDashboardData(data);
         } catch (error) {
             console.error('Error fetching dashboard data:', error);

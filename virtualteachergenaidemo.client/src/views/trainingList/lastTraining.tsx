@@ -39,8 +39,9 @@ const useStyles = makeStyles({
         zIndex: 1,
     },
     htitle: {
-        fontSize: '20px',
+        fontSize: '15px',
         lineHeight: 'var(--lineHeightBase400)',
+        fontWeight: 'bold',
     },
     agentInfo: {
         marginTop: '10px',
@@ -160,7 +161,7 @@ const LastTraining: React.FC = () => {
                                     header={<Text className={classes.htitle}>{formatDate(item.timestamp)}</Text>}
                                 />
                                 <CardPreview className={classes.customPreview}>
-                                    <div className={classes.htitle}> {item.scenarioName}</div>
+                                    <div className={classes.htitle}>Scenario: {item.scenarioName}</div>
                                     {rolePlayAgent && (
                                         <div className={classes.agentInfo}>
                                             <Text>Role: {rolePlayAgent.name}</Text>
