@@ -22,11 +22,18 @@
 
 .htitle {
     font-size: 20px;
-    line-height: var(--lineHeightBase400);
+    /*line-height: var(--lineHeightBase400);*/
 }
 
 .agent-info {
     margin-top: 10px;
+}
+
+
+.additional-info {
+    font-size: 15px; /* Adjust the font size as needed */
+    line-height: 0.5; /* Adjust the line height as needed */
+    text-align: center;
 }
 
 @media (max-width: 1200px) {

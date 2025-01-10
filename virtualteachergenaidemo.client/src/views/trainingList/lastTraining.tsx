@@ -39,8 +39,9 @@ const useStyles = makeStyles({
         zIndex: 1,
     },
     htitle: {
-        fontSize: '20px',
+        fontSize: '15px',
         lineHeight: 'var(--lineHeightBase400)',
+        fontWeight: 'bold',
     },
     agentInfo: {
         marginTop: '10px',
@@ -61,7 +62,7 @@ const useStyles = makeStyles({
 const LastTraining: React.FC = () => {
     const classes = useStyles();
     const [lastTraining, setLastTraining] = useState<SessionItem[] | undefined>();
-    const [connection, setConnection] = useState<HubConnection | null>(null);    
+    const [connection, setConnection] = useState<HubConnection | null>(null);
     const navigate = useNavigate();
     const userName = useUsername();
     const { getTranslation } = useLocalization();
@@ -70,8 +71,8 @@ const LastTraining: React.FC = () => {
     const [boxActivated, setBoxActivated] = useState<boolean>(false);
     const [botActivated, setBotActivated] = useState<boolean>(false);
 
-    const navigateDashboard = (sessionId: string) => {
-        navigate('/dashboard', { state: { sessionId } });
+    const navigateDashboard = (sessionId: string, scenarioTitle: string, roleAgent: string) => {
+        navigate('/dashboard', { state: { sessionId, scenarioTitle, roleAgent } });
     };
 
     const handleBackClick = () => {
@@ -160,7 +161,7 @@ const LastTraining: React.FC = () => {
                                     header={<Text className={classes.htitle}>{formatDate(item.timestamp)}</Text>}
                                 />
                                 <CardPreview className={classes.customPreview}>
-                                    <div className={classes.htitle}> {item.scenarioName}</div>
+                                    <div className={classes.htitle}>Scenario: {item.scenarioName}</div>
                                     {rolePlayAgent && (
                                         <div className={classes.agentInfo}>
                                             <Text>Role: {rolePlayAgent.name}</Text>
@@ -175,7 +176,7 @@ const LastTraining: React.FC = () => {
                                     <Button
                                         icon={<EditRegular />}
                                         className={classes.editButton}
-                                        onClick={() => navigateDashboard(item.id)}
+                                        onClick={() => navigateDashboard(item.id, item.scenarioName, rolePlayAgent ? rolePlayAgent.name : '')}
                                     >
                                         {getTranslation("ViewDetails")}
                                     </Button>

@@ -49,7 +49,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 {
                     Id = session.Id,
                     Timestamp = session.Timestamp,
-                    Title = string.IsNullOrEmpty(session.Title) ? "Title to be created by LLM" : session.Title, // Use default title if empty
+                    Title = session.ScenarioName, //string.IsNullOrEmpty(session.Title) ? "Title to be created by LLM" : session.Title, // Use default title if empty
                     UserId = session.UserId,
                     ScenarioName = session.ScenarioName,
                     ScenarioDescription = session.ScenarioDescription,

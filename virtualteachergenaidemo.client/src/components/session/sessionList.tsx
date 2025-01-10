@@ -131,27 +131,30 @@ const SessionList: React.FC<SessionListProps> = ({ onSessionStart }) => {
                         <AddCircleRegular className={classes.buttonIcon} />
                         {getTranslation("NewSession")}
                     </Button>
-                    {sessions.map(session => (
-                        <Card key={session.id} className={`${classes.customCard} card`}>
-                            <CardHeader
-                                header={<Title2>{session.title}</Title2>}
-                                action={<PeopleCommunityFilled className={classes.icon} />}
-                            />
-                            <CardPreview className={classes.customPreview}>
-                                <Body2>Session details or description can go here.</Body2>
-                                <Body2>{formatDate(session.timestamp!)}</Body2>
-                            </CardPreview>
-                            <CardFooter className={classes.cardFooter}>
-                                <Button
-                                    appearance='primary'
-                                    className={classes.resumeButton}
-                                    icon={<PlayRegular />}
-                                    onClick={() => handleResume(session)}>
-                                    {getTranslation("Resume")}
-                                </Button>
-                            </CardFooter>
-                        </Card>
-                    ))}
+                    {sessions.map(session => {
+                        const rolePlayAgent = session.agents.find(agent => agent.type === 'rolePlay');
+                        return (
+                            <Card key={session.id} className={`${classes.customCard} card`}>
+                                <CardHeader
+                                    header={<Title2>{session.title}</Title2>}
+                                    action={<PeopleCommunityFilled className={classes.icon} />}
+                                />
+                                <CardPreview className={classes.customPreview}>
+                                    <Body2>Role: {rolePlayAgent ? rolePlayAgent.name : 'N/A'}</Body2>
+                                    <Body2>{formatDate(session.timestamp!)}</Body2>
+                                </CardPreview>
+                                <CardFooter className={classes.cardFooter}>
+                                    <Button
+                                        appearance='primary'
+                                        className={classes.resumeButton}
+                                        icon={<PlayRegular />}
+                                        onClick={() => handleResume(session)}>
+                                        {getTranslation("Resume")}
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+                        );
+                    })}
                 </div>
             )}
         </div>

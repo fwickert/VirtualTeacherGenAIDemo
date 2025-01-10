@@ -1,12 +1,11 @@
 
 
-.tab {
-    margin-bottom: 20px;
-}
+
 
 .tabpanel {
     max-height: 73vh;
     overflow-y: auto;
+    
 }
 
 h1 {
@@ -20,3 +19,8 @@ h2 {
     overflow-wrap: break-word;
     line-height: 1.1;
 }
+
+section {
+    margin: 0;
+}
+
