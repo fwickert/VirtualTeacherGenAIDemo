@@ -50,15 +50,15 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ sessionId, conversation, 
         }
     };
 
-    const onTabSelect = (_event: any, data: any) => {        
+    const onTabSelect = (_event: any, data: any) => {
         setSelectedValue(data.value);
     };
 
-    const getTabContent = (infoType: string, _title: string) => {
+    const getTabContent = (infoType: string, _title: string, isFirstTab: boolean = false) => {
         const item = dashboardData.find((data: any) => data.infoType === infoType);
 
         return (
-            <div role="tabpanel" aria-labelledby={infoType} className="tabpanel">
+            <div role="tabpanel" aria-labelledby={infoType} className={`tabpanel ${isFirstTab ? 'bottom-margin' : ''}`}>
                 <DashboardFeatureResult
                     data={item}
                     loading={loading}
@@ -84,13 +84,15 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ sessionId, conversation, 
                 <div>
 
                     {selectedValue === "Advice" && (
-                        <div>{getTabContent("Advice", getTranslation("AdviceTab"))}</div>
+                        <div>{getTabContent("Advice", getTranslation("AdviceTab"), true)}</div>
                     )}
                     {selectedValue === "Summary" && (
                         <>
-                            <div>{getTabContent("Summary", getTranslation("SummaryTab"))}</div>
-                            <div>{getTabContent("Products", getTranslation("ProductsTab"))}</div>
-                            <div>{getTabContent("Keywords", getTranslation("KeywordsTab"))}</div>
+
+                            <div>{getTabContent("Summary", getTranslation("SummaryTab"), true)}</div>
+                            <div>{getTabContent("Products", getTranslation("ProductsTab"), false)}</div>
+                            <div>{getTabContent("Keywords", getTranslation("KeywordsTab"), false)}</div>
+
                         </>
                     )}
                     {/*{selectedValue === "Example" && (*/}

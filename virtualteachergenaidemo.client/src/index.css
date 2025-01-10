@@ -22,10 +22,8 @@ body {
     min-height: 80px;
     border: 1px solid #dee2e6;
     padding: 15px;    
+
 }
-    .frame:first-of-type {
-        margin-top: 20px;
-    }
 
 p.intro {
     font: 10px;
