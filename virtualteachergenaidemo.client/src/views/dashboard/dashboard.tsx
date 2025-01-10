@@ -7,7 +7,7 @@ import { Button } from '@fluentui/react-button';
 import DashboardTabs from '../../components/dashboard/dashboardTabs';
 import { useUsername } from '../../auth/UserContext';
 import DashboardService from '../../services/DashboardService';
-import { useLocalization } from '../../contexts/LocalizationContext'; 
+import { useLocalization } from '../../contexts/LocalizationContext';
 
 enum AuthorRoles {
     User = 0,
@@ -17,11 +17,11 @@ enum AuthorRoles {
 function Dashboard() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { sessionId } = location.state;
+    const { sessionId, scenarioTitle, roleAgent } = location.state;
     const [conversation, setConversation] = useState<IChat[]>([]);
     const [formattedConversation, setFormattedConversation] = useState<string>("");
     const userName = useUsername();
-    const { getTranslation } = useLocalization(); 
+    const { getTranslation } = useLocalization();
 
     const handleBackClick = () => {
         navigate('/lastTraining');
@@ -34,11 +34,11 @@ function Dashboard() {
     const getConversation = async (sessionId: string) => {
         const data = await DashboardService.getConversation(sessionId);
         const formattedConversation = data.map((message: any) => {
-            
+
             const role = message.authorRole === AuthorRoles.User ? getTranslation("SellerRole") : getTranslation("ClientRole"); // Use getTranslation
             console.log(role);
             return `${role}: ${message.content}`;
-        }).join("\n");        
+        }).join("\n");
         setConversation(data);
         setFormattedConversation(formattedConversation);
     };
@@ -50,7 +50,12 @@ function Dashboard() {
                     <div className="back">
                         <Button size="large" appearance="transparent" onClick={handleBackClick} icon={<ArrowCircleLeft48Filled />} />
                     </div>
-                    <h1 className="title">{getTranslation("DashboardTitle")}</h1> {/* Use getTranslation */}
+                    <div className="htitle">
+                        <h1>{getTranslation("DashboardTitle")}</h1>
+                        <div className="additional-info">
+                            <p className='intro'><strong>Scenario:</strong> {scenarioTitle} / <strong>Role:</strong> {roleAgent}</p>
+                        </div>
+                    </div>
                     <p className="intro">
                         {getTranslation("DashboardIntro")} {/* Use getTranslation */}
                     </p>
@@ -63,6 +68,7 @@ function Dashboard() {
             <div className="dashboard">
                 <DashboardTabs sessionId={sessionId} conversation={formattedConversation} userName={userName} />
             </div>
+           
         </div>
     );
 }

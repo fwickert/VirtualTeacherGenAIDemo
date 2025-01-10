@@ -62,7 +62,7 @@ const useStyles = makeStyles({
 const LastTraining: React.FC = () => {
     const classes = useStyles();
     const [lastTraining, setLastTraining] = useState<SessionItem[] | undefined>();
-    const [connection, setConnection] = useState<HubConnection | null>(null);    
+    const [connection, setConnection] = useState<HubConnection | null>(null);
     const navigate = useNavigate();
     const userName = useUsername();
     const { getTranslation } = useLocalization();
@@ -71,8 +71,8 @@ const LastTraining: React.FC = () => {
     const [boxActivated, setBoxActivated] = useState<boolean>(false);
     const [botActivated, setBotActivated] = useState<boolean>(false);
 
-    const navigateDashboard = (sessionId: string) => {
-        navigate('/dashboard', { state: { sessionId } });
+    const navigateDashboard = (sessionId: string, scenarioTitle: string, roleAgent: string) => {
+        navigate('/dashboard', { state: { sessionId, scenarioTitle, roleAgent } });
     };
 
     const handleBackClick = () => {
@@ -176,7 +176,7 @@ const LastTraining: React.FC = () => {
                                     <Button
                                         icon={<EditRegular />}
                                         className={classes.editButton}
-                                        onClick={() => navigateDashboard(item.id)}
+                                        onClick={() => navigateDashboard(item.id, item.scenarioName, rolePlayAgent ? rolePlayAgent.name : '')}
                                     >
                                         {getTranslation("ViewDetails")}
                                     </Button>
