@@ -398,3 +398,4 @@ FodyWeavers.xsd
 *.sln.iml
 /VirtualTeacherGenAIDemo.Server/appsettings.Development.json
 /VirtualTeacherGenAIDemo.Server/Properties/ServiceDependencies/VirtualTeacher - Web Deploy/profile.arm.json
+/VirtualTeacherGenAIDemo.Server/Properties/ServiceDependencies/VirtualTeacher - Web Deploy1/profile.arm.json
