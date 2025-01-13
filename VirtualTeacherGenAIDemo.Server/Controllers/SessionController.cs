@@ -85,10 +85,10 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
             forKeywords.Conversation = conversation.ToString();
             forAdvice.Conversation = conversation.ToString();
 
-            await _dashboardService.GetSummarize(forSummary, request.SessionId, request.UserId, token);
-            await _dashboardService.GetProducts(forProducts, request.SessionId, request.UserId, token);
-            await _dashboardService.GetKeywords(forKeywords, request.SessionId, request.UserId, token);
-            await _dashboardService.GetAdvice(forAdvice, request.SessionId, request.UserId, token);            
+            await _dashboardService.GetSummarize(forSummary, request.SessionId, request.UserId,false, token);
+            await _dashboardService.GetProducts(forProducts, request.SessionId, request.UserId,false, token);
+            await _dashboardService.GetKeywords(forKeywords, request.SessionId, request.UserId,false, token);
+            await _dashboardService.GetAdvice(forAdvice, request.SessionId, request.UserId,false, token);            
 
         }
 

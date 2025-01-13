@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Elastic.Clients.Elasticsearch;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.SemanticKernel;
 using VirtualTeacherGenAIDemo.Server.Hubs;
@@ -31,7 +32,8 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             _pluginsDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
         }
 
-        public async Task GetAsync(string sessionId, string id, string whatAbout, Dictionary<string, string> variablesContext, string connectionId, CancellationToken token)
+        public async Task GetAsync(string sessionId, string id, string whatAbout, Dictionary<string, string> variablesContext, 
+            string connectionId, bool refreshUI, CancellationToken token)
         {
             var arguments = new KernelArguments();
 
@@ -40,8 +42,15 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 arguments[item.Key] = item.Value;
             }
 
-            //await StreamResponseToClient(sessionId, id, whatAbout, arguments, connectionId, token);
-            await NoStreamingResponseToClient(sessionId, id, whatAbout, arguments, connectionId, token);
+
+            if (refreshUI)
+            {
+                await StreamResponseToClient(sessionId, id, whatAbout, arguments, connectionId, token);
+            }
+            else
+            {
+                await NoStreamingResponseToClient(sessionId, id, whatAbout, arguments, connectionId, token);
+            }
         }
 
         public async Task GetCoachAsync(string whatAbout, Dictionary<string, string> variablesContext, string connectionId, CancellationToken token)
@@ -108,7 +117,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 InfoType = whatAbout
             });
             
-            //await this.UpdateMessageOnClient( messageResponse, connectionId, token);
+            await this.UpdateMessageOnClient(whatAbout, messageResponse, connectionId, token);
             
         }
 

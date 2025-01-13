@@ -7,11 +7,12 @@ class DashboardService {
         return response.data;
     }
 
-    async postFeature(feature: string, sessionId: string, userName: string, body: any): Promise<any> {
+    async postFeature(feature: string, sessionId: string, userName: string, body: any, refreshUI: boolean): Promise<any> {
         const response = await axios.post(`/api/dashboard/${feature}`, body, {
             params: {
                 sessionId: sessionId,
-                userName: userName
+                userName: userName,
+                refreshUI: refreshUI
             }
         });
         return response.data;
