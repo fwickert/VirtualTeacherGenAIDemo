@@ -82,6 +82,14 @@ namespace VirtualTeacherGenAIDemo.Server.Services
 
             };
 
+            // Modify the last user message to include "Use search tool"
+            var lastUserMessage = chatHistory.LastOrDefault(m => m.Role == AuthorRole.User);
+            string searchText = " Use search tool to find information";
+            if (lastUserMessage != null)
+            {
+                lastUserMessage.Content += searchText;
+            }
+
             await foreach (StreamingChatMessageContent chatUpdate in _chat.GetStreamingChatMessageContentsAsync(chatHistory,
                 executionSettings: openAIPromptExecutionSettings,
                 kernel: _kernel,
@@ -94,6 +102,12 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                     Console.Write(chatUpdate.Content);
                     await Task.Delay(DELAY);
                 }
+            }
+
+            // Revert the last user message to its original content
+            if (lastUserMessage != null)
+            {
+                lastUserMessage.Content = lastUserMessage.Content?.Replace(searchText, string.Empty);
             }
 
             ////Take last message from chatHistory and save in cosmosDB.
