@@ -1,7 +1,7 @@
 import './lastTraining.css';
 import { useEffect, useState } from 'react';
 import { Spinner } from "@fluentui/react-spinner";
-import { Text, Body2 } from "@fluentui/react-text";
+import { Text } from "@fluentui/react-text";
 import { Card, CardPreview, CardHeader, CardFooter } from '@fluentui/react-card';
 import { useNavigate } from 'react-router-dom';
 import { ArrowCircleLeft48Filled, EditRegular } from '@fluentui/react-icons';
@@ -17,7 +17,8 @@ import { getHubConnection } from '../../services/signalR';
 
 const useStyles = makeStyles({
     customPreview: {
-        paddingLeft: '10px',
+        paddingLeft: '10px', 
+        height: '25px',
     },
     customCard: {
         minWidth: '300px',
@@ -143,7 +144,7 @@ const LastTraining: React.FC = () => {
             return '';
         }
         const date = new Date(timestamp);
-        return date.toLocaleDateString();
+        return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
     const contents = lastTraining === undefined ?
@@ -162,6 +163,7 @@ const LastTraining: React.FC = () => {
                                 />
                                 <CardPreview className={classes.customPreview}>
                                     <div className={classes.htitle}>Scenario: {item.scenarioName}</div>
+                                    <div>{getTranslation("CompletedDate")} : {formatDate(item.completedTimestamp) }</div>
                                     {rolePlayAgent && (
                                         <div className={classes.agentInfo}>
                                             <Text>Role: {rolePlayAgent.name}</Text>

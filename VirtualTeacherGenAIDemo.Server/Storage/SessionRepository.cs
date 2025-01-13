@@ -32,6 +32,7 @@ namespace VirtualTeacherGenAIDemo.Server.Storage
             if (session != null)
             {
                 session.IsCompleted = true;
+                session.CompletedTimestamp = DateTimeOffset.Now;
                 await base.UpsertAsync(session);
             }
         }
