@@ -190,7 +190,7 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
 
         });
 
-        connection.on('StartMessageUpdate', (message: Message) => {
+        connection.on('StartMessageUpdate', (_: Message) => {
             setIsTyping(true);
         });
 
@@ -318,6 +318,7 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
 
     const confirmSaveSession = async () => {
         setIsProcessing(true);
+        setIsSavingSession(true);
         try {
             console.log('Saving session...', sessionId);
             await saveSession(session?.id || sessionId, userName, connection?.connectionId);
