@@ -27,7 +27,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             _searchService = searchService;
         }
 
-        public async Task<IResult> GetSummarize(DashboardRequest dashboardRequest, string sessionId, string userName, CancellationToken token)
+        public async Task<IResult> GetSummarize(DashboardRequest dashboardRequest, string sessionId, string userName, bool refreshUI, CancellationToken token)
         {
             _dashboardResponse.FunctionName = "Summary";
 
@@ -37,15 +37,15 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             _ = Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Summary",
                                new Dictionary<string, string>()
                                {
-                    { "conversation", dashboardRequest.Conversation },                    
+                    { "conversation", dashboardRequest.Conversation },
                     { "task", summaryPrompt }
-            }, dashboardRequest.ConnectionId, token), token);
+            }, dashboardRequest.ConnectionId, refreshUI, token), token);
 
             return TypedResults.Ok("Summarize requested");
         }
 
         //return products
-        public async Task<IResult> GetProducts(DashboardRequest dashboardRequest, string sessionId, string userName, CancellationToken token)
+        public async Task<IResult> GetProducts(DashboardRequest dashboardRequest, string sessionId, string userName, bool refreshUI, CancellationToken token)
         {
             _dashboardResponse.FunctionName = "Products";
 
@@ -55,16 +55,16 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             _ = Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Products",
                 new Dictionary<string, string>()
                 {
-                    { "conversation", dashboardRequest.Conversation },                    
+                    { "conversation", dashboardRequest.Conversation },
                     { "task", productPrompt }
                 }
-                , dashboardRequest.ConnectionId, token), token);
+                , dashboardRequest.ConnectionId, refreshUI, token), token);
 
             return TypedResults.Ok("Products requested");
         }
 
         //Get Keywords
-        public async Task<IResult> GetKeywords(DashboardRequest dashboardRequest, string sessionId, string userName, CancellationToken token)
+        public async Task<IResult> GetKeywords(DashboardRequest dashboardRequest, string sessionId, string userName, bool refreshUI, CancellationToken token)
         {
             _dashboardResponse.FunctionName = "Keywords";
 
@@ -74,15 +74,15 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             _ = Task.Run(() => _dashboardResponse.GetAsync(dashboardRequest.SessionId, dashboardRequest.Id, "Keywords",
                 new Dictionary<string, string>()
                 {
-                    { "conversation", dashboardRequest.Conversation },                    
+                    { "conversation", dashboardRequest.Conversation },
                     { "task", keywordPrompt }
-                }, dashboardRequest.ConnectionId, token), token);
+                }, dashboardRequest.ConnectionId, refreshUI, token), token);
 
             return TypedResults.Ok("Keywords requested");
         }
 
         //get advice
-        public async Task<IResult> GetAdvice(DashboardRequest dashboardRequest, string sessionId, string userName, CancellationToken token)
+        public async Task<IResult> GetAdvice(DashboardRequest dashboardRequest, string sessionId, string userName, bool refreshUI, CancellationToken token)
         {
             _dashboardResponse.FunctionName = "Advice";
 
@@ -102,15 +102,13 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                     {"knowledge", search },
                     { "task", advicePrompt },
                     { "roleplay", agentRolePlay.Name }
-                }, dashboardRequest.ConnectionId, token), token);
+                }, dashboardRequest.ConnectionId, refreshUI, token), token);
 
             return TypedResults.Ok("Advice requested");
         }
 
-     
-
         //for Example
-        public async Task<IResult> GetExample(DashboardRequest dashboardRequest, string sessionId, string userName, CancellationToken token)
+        public async Task<IResult> GetExample(DashboardRequest dashboardRequest, string sessionId, string userName, bool refreshUI, CancellationToken token)
         {
             _dashboardResponse.FunctionName = "Example";
 
@@ -121,13 +119,13 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 {
                     { "conversation", dashboardRequest.Conversation },
                     { "userPrompt", agentTeacher.Prompt }
-                }, dashboardRequest.ConnectionId, token), token);
+                }, dashboardRequest.ConnectionId, refreshUI, token), token);
 
             return TypedResults.Ok("Example requested");
         }
 
         //for evaluation
-        public async Task<IResult> GetEvaluation(DashboardRequest dashboardRequest, string sessionId, string userName, CancellationToken token)
+        public async Task<IResult> GetEvaluation(DashboardRequest dashboardRequest, string sessionId, string userName, bool refreshUI, CancellationToken token)
         {
             _dashboardResponse.FunctionName = "Evaluation";
 
@@ -142,7 +140,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                     { "conversation", dashboardRequest.Conversation },
                     { "userPrompt", agentTeacher.Prompt },
                     { "knowledge", search }
-                }, dashboardRequest.ConnectionId, token), token);
+                }, dashboardRequest.ConnectionId, refreshUI, token), token);
 
             return TypedResults.Ok("Evaluation requested");
         }

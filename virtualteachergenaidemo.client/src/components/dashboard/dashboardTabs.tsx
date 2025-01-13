@@ -64,6 +64,9 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ sessionId, conversation, 
                     loading={loading}
                     infoType={infoType}
                     connection={connection}
+                    sessionId={sessionId}
+                    userName={userName}
+                    conversation={conversation}
                 ></DashboardFeatureResult>
             </div>
         )
