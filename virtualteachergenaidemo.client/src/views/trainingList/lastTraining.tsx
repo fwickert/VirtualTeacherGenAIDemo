@@ -150,7 +150,7 @@ const LastTraining: React.FC = () => {
     const contents = lastTraining === undefined ?
         <Spinner />
         : lastTraining!.length === 0 ?
-            <Text>No training yet</Text>
+            <Text>{getTranslation("NoTrainingYet")}</Text>
             :
             <div className="list">
                 {
