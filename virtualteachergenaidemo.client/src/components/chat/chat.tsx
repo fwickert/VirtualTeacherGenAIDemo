@@ -21,7 +21,7 @@ import { HubConnection } from '@microsoft/signalr';
 import { useUsername } from '../../auth/UserContext';
 import { getMessages, sendMessage, deleteMessage, saveSession, deleteSession as deleteSessionService } from '../../services/ChatService';
 import { getHubConnection } from '../../services/signalR';
-import { ChatHistoryRequest, ChatMessage } from '../../models/ChatHistoryRequest';
+import { ChatHistoryRequest, ChatMessage, AuthorRole } from '../../models/ChatHistoryRequest';
 import { DeleteMessageRequest } from '../../models/Request/DeleteMessageRequest';
 import { DeleteSessionRequest } from '../../models/Request/DeleteSessionRequest';
 import { textToSpeechAsync, cancelSpeech } from '../../services/SpeechService';
@@ -31,6 +31,7 @@ import { useLocalization } from '../../contexts/LocalizationContext';
 import { tokens } from '@fluentui/tokens';
 import { Spinner } from '@fluentui/react';
 import { useNavigate } from 'react-router-dom';
+import { AgentService } from '../../services/AgentService';
 
 const useStyles = makeStyles({
     chatContainer: {
@@ -118,11 +119,6 @@ const useStyles = makeStyles({
     },
 });
 
-enum AuthorRole {
-    User = 0,
-    Assistant = 1
-}
-
 interface Message {
     content: string;
     sessionId?: string;
@@ -149,6 +145,8 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
     const [isValidateConfirmOpen, setIsValidateConfirmOpen] = useState<boolean>(false);
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
+    const [hasFiles, setHasFiles] = useState(false);
+    const [isLoadingMessages, setIsLoadingMessages] = useState<boolean>(false);
     const { getTranslation } = useLocalization();
 
     useEffect(() => {
@@ -163,6 +161,9 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
         };
 
         setupConnection();
+
+        checkRolePlayAgentFiles();
+
     }, []);
 
     const removeConnectionHandlers = (connection: HubConnection) => {
@@ -225,7 +226,6 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
                     lastMessage.sessionId = message.sessionId;
                     lastMessage.id = message.messageId;
                 }
-                console.log('lastAssistantMessage:', lastMessage);
                 return updatedMessages;
             });
 
@@ -233,8 +233,18 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
         });
     };
 
+    const checkRolePlayAgentFiles = async () => {
+        const currentScenario = scenario?.agents || session?.agents;
+        const rolePlayAgent = currentScenario?.find(agent => agent.type === 'rolePlay');
+        if (rolePlayAgent) {
+            const result = await AgentService.hasFiles(rolePlayAgent.id);
+            setHasFiles(result.data);
+        }
+    };
+
     useEffect(() => {
         if (session) {
+            setIsLoadingMessages(true);
             getMessages(session.id)
                 .then(data => {
                     const fetchedMessages = data
@@ -249,7 +259,8 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
                     setMessages(fetchedMessages);
 
                 })
-                .catch(error => console.error('Error fetching session messages:', error));
+                .catch(error => console.error('Error fetching session messages:', error))
+                .finally(() => setIsLoadingMessages(false));
 
         }
     }, [session]);
@@ -262,8 +273,9 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
         const agent = currentScenario?.find(agent => agent.type === 'system');
         const rolePlayAgent = currentScenario?.find(agent => agent.type === 'rolePlay');
 
-        const promptSystem = agent!.prompt + "\n\n[ROLEPLAY]\n\n" + rolePlayAgent!.prompt;
+        //const promptSystem = agent!.prompt + "\n\n[ROLEPLAY]\n\n" + rolePlayAgent!.prompt;
 
+        const promptSystem = agent!.prompt + "\n\n" + rolePlayAgent!.prompt;
         const scenarioName = scenario?.name || session?.scenarioName;
         const scenarioDescription = scenario?.description || session?.scenarioDescription;
 
@@ -284,14 +296,12 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
         };
 
         const chatHistory = new ChatHistoryRequest(userName, sessionItem, [
-            new ChatMessage(uuidv4(), "System", promptSystem),
-            ...messages.map(msg => new ChatMessage(msg.id, msg.authorRole.toString(), msg.content)),
-            new ChatMessage(messageUserId, "User", message)
+            new ChatMessage(uuidv4(), AuthorRole.System, promptSystem),
+            ...messages.map(msg => new ChatMessage(msg.id, msg.authorRole, msg.content)),
+            new ChatMessage(messageUserId, AuthorRole.User, message)
         ]);
 
-
-
-        await sendMessage(chatHistory, rolePlayAgent?.id, connection?.connectionId);
+        await sendMessage(chatHistory, rolePlayAgent?.id, connection?.connectionId, hasFiles);
     };
 
     const handleDeleteMessage = async (id: string) => {
@@ -373,7 +383,8 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
 
     return (
         <div className={styles.chatContainer}>
-            <div className={styles.messagesContainer}>
+            {isLoadingMessages && <div className={styles.spinnerOverlay}><Spinner /></div>}
+            <div className={styles.messagesContainer} style={{ pointerEvents: isLoadingMessages ? 'none' : 'auto' }}>
                 {messages.map((msg, index) => (
                     <div key={index} className={styles.messageContainer}>
                         <div className={msg.authorRole === AuthorRole.User ? styles.userMessage : styles.assistantMessage}>
@@ -391,10 +402,11 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
                     onChange={(_e, data) => setInputText(data.value)}
                     onKeyDown={handleKeyDown}
                     className={`${styles.inputField}`}
+                    disabled={isLoadingMessages}
                 />
-                <Button icon={<SendFilled />} onClick={handleSendClick} />
+                <Button icon={<SendFilled />} onClick={handleSendClick} disabled={isLoadingMessages} />
                 <div className="micButtonContainer">
-                    <SpeechRecognizer onNewMessage={handleNewMessageFromSpeech} />
+                    <SpeechRecognizer onNewMessage={handleNewMessageFromSpeech} disabled={isLoadingMessages} />
                 </div>
             </div>
             <div className={styles.buttonContainer}>

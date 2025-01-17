@@ -30,13 +30,13 @@ export class SessionAgent {
     name: string;
     prompt: string;
     type: string;
-    features: { feature: string, prompt: string }[] | null | undefined;
+    features: { feature: string, prompt: string }[] | null | undefined;  
 
     constructor(id: string, name:string ,prompt: string, type: string, features: { feature: string, prompt: string }[] | null | undefined) {
         this.id = id;
         this.name = name;
         this.prompt = prompt;
         this.type = type;
-        this.features = features;
+        this.features = features;        
     }
 }

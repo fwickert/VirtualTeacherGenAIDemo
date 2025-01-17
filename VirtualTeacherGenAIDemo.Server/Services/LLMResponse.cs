@@ -80,7 +80,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                     messageResponse.Content += contentPiece.Content;
                     await this.UpdateMessageOnClient("InProgressMessageUpdate", messageResponse, connectionId, token);
                     Console.Write(contentPiece.Content);
-                    await Task.Delay(DELAY);
+                    //await Task.Delay(DELAY);
                 }
             }
 

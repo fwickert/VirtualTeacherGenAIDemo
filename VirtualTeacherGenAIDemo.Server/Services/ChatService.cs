@@ -26,7 +26,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         }
 
         //Creater function to call GetAsync in other thread without asunc/await and with cancellation token in parameters
-        public IResult GetChat(ChatHistoryRequest chatHistory, string agentId, string connectionId, CancellationToken token)
+        public IResult GetChat(ChatHistoryRequest chatHistory, string agentId, string connectionId, bool hasFiles, CancellationToken token)
         {
             //Transform ChatHistoryRequest to ChatHistory
             ChatHistory SKHistory = new ChatHistory();
@@ -34,17 +34,23 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             {
                 switch (message.Role)
                 {
-                    case "User":
+                    case Models.Request.AuthorRole.User:
                         SKHistory.AddUserMessage(message.Content);
                         break;
-                    case "System":
+                    case Models.Request.AuthorRole.System:
                         SKHistory.AddSystemMessage($"agentId:{agentId}\n" + message.Content);
+                        break;
+                    case Models.Request.AuthorRole.Assistant:
+                        SKHistory.AddAssistantMessage(message.Content);
                         break;
                 }
             }
             if (chatHistory.Session != null)
             {
-                Task.Run(() => _chatResponse.StartChat(connectionId, SKHistory, chatHistory.UserId, chatHistory.Session, chatHistory.Messages, _messageRepository, _sessionRepository, token), token);
+                Task.Run(() => _chatResponse.StartChat(connectionId, SKHistory, chatHistory.UserId, 
+                    chatHistory.Session, chatHistory.Messages, hasFiles,
+                    _messageRepository, _sessionRepository, 
+                    token), token);
             }
 
 

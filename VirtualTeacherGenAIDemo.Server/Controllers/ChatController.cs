@@ -22,9 +22,9 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
 
         [HttpPost("message",Name = "message")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IResult Post([FromBody] ChatHistoryRequest chatHistory,string agentId, string connectionId, CancellationToken token)
+        public IResult Post([FromBody] ChatHistoryRequest chatHistory,string agentId, string connectionId,bool hasFiles, CancellationToken token)
         {
-            return _chatService.GetChat(chatHistory,agentId,connectionId, token);
+            return _chatService.GetChat(chatHistory,agentId,connectionId, hasFiles, token);
         }
 
 

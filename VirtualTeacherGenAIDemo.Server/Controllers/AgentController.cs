@@ -53,6 +53,19 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
             return agent;
         }
 
+        [HttpGet("HasFiles/{agentId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<bool>> HasFiles(string agentId)
+        {
+            var hasFiles = await _agentService.AgentHasFilesAsync(agentId);
+            if (!hasFiles)
+            {
+                return NotFound("Agent has no files or does not exist.");
+            }
+            return hasFiles;
+        }
+
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
