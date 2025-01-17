@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using VirtualTeacherGenAIDemo.Server.Hubs;
 using VirtualTeacherGenAIDemo.Server.Models.Request;
@@ -36,6 +35,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             string userId,
             SessionItem session,
             List<ChatMessage> messages,
+            bool hasFiles,
             MessageRepository messageRepository,
             SessionRepository sessionRepository,
             CancellationToken token)
@@ -54,7 +54,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                     ScenarioName = session.ScenarioName,
                     ScenarioDescription = session.ScenarioDescription,
                     Agents = session.Agents,
-                    IsCompleted = false,
+                    IsCompleted = false,                   
                 };
 
                 await sessionRepository.UpsertAsync(historyItem);
@@ -77,18 +77,26 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             MessageResponse response = new MessageResponse
             {
                 SessionId = session.Id,
-                Role = AuthorRole.Assistant,
+                Role = Microsoft.SemanticKernel.ChatCompletion.AuthorRole.Assistant,
                 Content = string.Empty,
 
             };
 
-            // Modify the last user message to include "Use search tool"
-            var lastUserMessage = chatHistory.LastOrDefault(m => m.Role == AuthorRole.User);
-            string searchText = " Use search tool to find information";
-            if (lastUserMessage != null)
+
+            ChatMessageContent? lastUserMessage = null;
+            
+            
+            string searchText = "";
+
+            if (hasFiles)
             {
-                lastUserMessage.Content += searchText;
-            }
+                lastUserMessage = chatHistory.LastOrDefault(m => m.Role == Microsoft.SemanticKernel.ChatCompletion.AuthorRole.User);
+                searchText = ". Only for internal Process : If needed, use search tool to find information";
+                if (lastUserMessage != null)
+                {
+                    lastUserMessage.Content += searchText;
+                }
+            }            
 
             await foreach (StreamingChatMessageContent chatUpdate in _chat.GetStreamingChatMessageContentsAsync(chatHistory,
                 executionSettings: openAIPromptExecutionSettings,
@@ -100,7 +108,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                     response.Content += chatUpdate.Content;
                     await this.UpdateMessageOnClient("InProgressMessageUpdate", response, connectionId, token);
                     Console.Write(chatUpdate.Content);
-                    await Task.Delay(DELAY);
+                    //await Task.Delay(DELAY);
                 }
             }
 
@@ -111,7 +119,7 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             }
 
             ////Take last message from chatHistory and save in cosmosDB.
-            var lastMessage = messages.Last(q => q.Role == "User");
+            var lastMessage = messages.Last(q => q.Role == Models.Request.AuthorRole.User);
             if (lastMessage != null)
             {
                 MessageItem userMessage = new()

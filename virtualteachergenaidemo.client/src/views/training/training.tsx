@@ -10,12 +10,13 @@ import { ScenarioItem } from '../../models/ScenarioItem';
 import { SessionItem } from '../../models/SessionItem';
 import { useLocalization } from '../../contexts/LocalizationContext';
 
+
 function Training() {
     const navigate = useNavigate();
     const location = useLocation();
     const { getTranslation } = useLocalization();
     const [selectedScenario, setSelectedScenario] = useState<ScenarioItem | null>(location.state?.scenario);
-    const [session, setSession] = useState<SessionItem | null>();
+    const [session, setSession] = useState<SessionItem | null>();    
 
     const handleBackClick = () => {
         setSelectedScenario(null);
@@ -23,8 +24,8 @@ function Training() {
         navigate(-1); // Navigate back to the previous page
     };
 
-    const handleScenarioSelect = (scenario: ScenarioItem) => {
-        setSelectedScenario(scenario);
+    const handleScenarioSelect = async (scenario: ScenarioItem) => {
+        setSelectedScenario(scenario);       
     };
 
     useEffect(() => {

@@ -14,6 +14,20 @@ namespace VirtualTeacherGenAIDemo.Server.Storage
             
         }
 
+
+
+        public Task<bool> HasFileNamesAsync(string agentId)
+        {
+            return base.StorageContext.ReadAsync(agentId, "rolePlay").ContinueWith(task =>
+            {
+                var agent = task.Result;
+                return agent != null && agent.FileNames != null && agent.FileNames.Any();
+            });
+        }
+
+
+
+
         //function to return all agents
         public Task<IEnumerable<AgentItem>> GetAllAgentsAsync()
         {

@@ -26,4 +26,7 @@ export const AgentService = {
     deleteAgent: (agentId: string, type: string) => {
         return apiClient.delete(`/agent/${agentId}?type=${type}`);
     },
+    hasFiles: (agentId: string) => {
+        return apiClient.get<boolean>(`/agent/HasFiles/${agentId}`);
+    },
 };

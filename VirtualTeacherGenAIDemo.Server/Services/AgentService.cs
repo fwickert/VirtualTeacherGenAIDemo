@@ -44,6 +44,12 @@ namespace VirtualTeacherGenAIDemo.Server.Services
         {
             return await _agentRepository.GetAgentAsync(id, type);
         }
+                
+        public async Task<bool> AgentHasFilesAsync(string agentId)
+        {
+            var agent = await _agentRepository.GetAgentAsync(agentId, "rolePlay");
+            return agent != null && agent.FileNames != null && agent.FileNames.Count > 0;
+        }
 
         public async Task<AgentItem> GetByIdAsync(string id)
         {

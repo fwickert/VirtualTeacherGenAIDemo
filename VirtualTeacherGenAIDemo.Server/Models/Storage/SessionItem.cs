@@ -49,6 +49,8 @@ namespace VirtualTeacherGenAIDemo.Server.Models.Storage
         [Required, NotEmptyOrWhitespace]
         public string Name { get; set; } = string.Empty;
 
+        [JsonIgnore]
+        public bool WithFileForSearch { get; set; } = false;
 
         [Required, NotEmptyOrWhitespace]
         public string Id { get; set; } = string.Empty;
