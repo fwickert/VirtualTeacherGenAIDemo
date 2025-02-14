@@ -6,15 +6,18 @@ import './speechRecognizer.css';
 
 interface SpeechRecognizerProps {
     onNewMessage: (message: string) => void;
+    voiceName: string;
+    language: string;
+
 }
 
-const SpeechRecognizer: React.FC<SpeechRecognizerProps> = ({ onNewMessage }) => {    
+const SpeechRecognizer: React.FC<SpeechRecognizerProps> = ({ onNewMessage, voiceName, language }) => {    
     const [isMicOn, setIsMicOn] = useState(false);
 
     const startRecognition = async () => {
         try {
             setIsMicOn(true);
-            const recognizer = await getSpeechRecognizerAsync();
+            const recognizer = await getSpeechRecognizerAsync(voiceName, language);
 
             recognizer.recognizeOnceAsync(result => {                
                 onNewMessage(result.text);

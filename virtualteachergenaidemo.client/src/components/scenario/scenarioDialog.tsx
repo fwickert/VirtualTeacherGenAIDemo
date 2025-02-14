@@ -4,8 +4,11 @@ import { Button } from '@fluentui/react-button';
 import { Input } from '@fluentui/react-input';
 import { Textarea } from '@fluentui/react-textarea';
 import { Field } from '@fluentui/react-field';
+import { Select } from '@fluentui/react-select';
 import { useState, useEffect } from 'react';
 import { Agent, ScenarioItem } from '../../models/ScenarioItem';
+import { VoiceSettings } from '../../models/VoiceSettings';
+import { VoiceSettingsService } from '../../services/VoiceSettingsService';
 import { makeStyles } from '@fluentui/react-components';
 import AgentSelectionDialog from '../agent/AgentSelectionDialog';
 import { Add24Regular } from '@fluentui/react-icons';
@@ -69,23 +72,29 @@ export const ScenarioDialog = ({ onAddScenario, onDeleteScenario, onClose, isOpe
     const [systemAgentError, setSystemAgentError] = useState('');
     const [rolePlayAgentError, setRolePlayAgentError] = useState('');
     const [teacherAgentError, setTeacherAgentError] = useState('');
+    const [voiceSettingsError, setVoiceSettingsError] = useState('');
     const [systemAgent, setSystemAgent] = useState<Agent | null>(null);
     const [rolePlayAgent, setRolePlayAgent] = useState<Agent | null>(null);
     const [teacherAgent, setTeacherAgent] = useState<Agent | null>(null);
     const [isAgentDialogOpen, setIsAgentDialogOpen] = useState<boolean>(false);
     const [agentType, setAgentType] = useState<'system' | 'rolePlay' | 'teacher'>('system');
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
+    const [voiceSettings, setVoiceSettings] = useState<VoiceSettings | null>(null);
+    const [availableVoices, setAvailableVoices] = useState<VoiceSettings[]>([]);
     const { getTranslation } = useLocalization();
     const userName = useUsername();
 
     useEffect(() => {
+        const voiceSettingsService = new VoiceSettingsService();
+        setAvailableVoices(voiceSettingsService.getVoices());
+
         if (scenario) {
             setName(scenario.name);
             setDescription(scenario.description);
-            // Assuming scenario.agents is an array of agents
             setSystemAgent(scenario.agents.find(agent => agent.type === 'system') || null);
             setRolePlayAgent(scenario.agents.find(agent => agent.type === 'rolePlay') || null);
             setTeacherAgent(scenario.agents.find(agent => agent.type === 'teacher') || null);
+            setVoiceSettings(scenario.voice || null);
         }
     }, [scenario]);
 
@@ -126,6 +135,13 @@ export const ScenarioDialog = ({ onAddScenario, onDeleteScenario, onClose, isOpe
             setTeacherAgentError('');
         }
 
+        if (!voiceSettings) {
+            setVoiceSettingsError(getTranslation("VoiceRequired"));
+            valid = false;
+        } else {
+            setVoiceSettingsError('');
+        }
+
         if (!valid) return;
 
         const agents = [
@@ -134,7 +150,14 @@ export const ScenarioDialog = ({ onAddScenario, onDeleteScenario, onClose, isOpe
             teacherAgent
         ].filter(agent => agent !== null) as Agent[];
 
-        const newScenario = { name, description, agents, id: scenario ? scenario.id : "", users: [{ userId: userName, sharedUser: false }] };
+        const newScenario = {
+            name,
+            description,
+            agents,
+            id: scenario ? scenario.id : "",
+            users: [{ userId: userName, sharedUser: false }],
+            voice: voiceSettings!
+        };
 
         const apiCall = scenario ? ScenarioService.updateScenario(newScenario) : ScenarioService.addScenario(newScenario);
 
@@ -200,6 +223,22 @@ export const ScenarioDialog = ({ onAddScenario, onDeleteScenario, onClose, isOpe
                                         rows={3}
                                         onChange={(e) => setDescription(e.target.value)}
                                     />
+                                </Field>
+                                <Field label={getTranslation("VoiceSettingsLabel")} required validationMessage={voiceSettingsError}>
+                                    <Select
+                                        value={voiceSettings ? voiceSettings.voiceName : ''}
+                                        onChange={(e, data) => {
+                                            const selectedVoice = availableVoices.find(voice => voice.voiceName === data.value);
+                                            setVoiceSettings(selectedVoice || null);
+                                        }}
+                                    >
+                                        <option value="">{getTranslation("SelectVoice")}</option>
+                                        {availableVoices.map(voice => (
+                                            <option key={voice.voiceName} value={voice.voiceName}>
+                                                {voice.displayName}
+                                            </option>
+                                        ))}
+                                    </Select>
                                 </Field>
                                 <div className={styles.buttonGrid}>
                                     <Field label={getTranslation("SystemAgentLabel")} required validationMessage={systemAgentError}>

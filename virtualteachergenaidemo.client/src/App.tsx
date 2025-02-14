@@ -15,12 +15,13 @@ import { InteractionType } from '@azure/msal-browser';
 import UserDisplay from './auth/userDisplay';
 import { UserProvider } from './auth/UserContext';
 import { UserRoleProvider, useUserRole } from './auth/UserRoleContext';
-import { getUserRole, createUser } from './services/UserService';
+import { getUserRole, createUser } from './services/userService';
 import { LocalizationProvider, useLocalization } from './contexts/LocalizationContext';
+import { Select } from '@fluentui/react-components';
 
 function App(props: any) {
     const [msalInstance, setMsalInstance] = useState<PublicClientApplication | null>(null);
-    
+    const [language, setLanguage] = useState('fr-FR');
 
     useEffect(() => {
         const initMsal = async () => {
@@ -39,8 +40,8 @@ function App(props: any) {
         <MsalProvider instance={msalInstance}>
             <UserProvider>
                 <UserRoleProvider>
-                    <LocalizationProvider lang="fr-FR">
-                        <AuthenticatedApp title={props.title} />
+                    <LocalizationProvider lang={language}>
+                        <AuthenticatedApp title={props.title} language={language} setLanguage={setLanguage} />
                     </LocalizationProvider>
                 </UserRoleProvider>
             </UserProvider>
@@ -64,6 +65,11 @@ function AuthenticatedApp(props: any) {
                         userData = await createUser(email);
                     }
                     setRole(userData.role);
+
+                    const userLanguageSetting = userData.settings.find((setting: any) => setting.language);
+                    if (userLanguageSetting) {
+                        props.setLanguage(userLanguageSetting.language);
+                    }
                 } catch (error) {
                     console.error('Error fetching or creating user:', error);
                 }
@@ -73,10 +79,26 @@ function AuthenticatedApp(props: any) {
         fetchUserRole();
     }, [email, setRole]);
 
+    const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        props.setLanguage(event.target.value);
+    };
+
     return (
         <Router>
             <MsalAuthenticationTemplate interactionType={InteractionType.Redirect}>
-                <UserDisplay userName={userName} />
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <label htmlFor="language-select" style={{ marginRight: 10 }}>Select Language</label>
+                    <Select
+                        id="language-select"
+                        value={props.language}
+                        onChange={handleLanguageChange}
+                        style={{ marginRight: 10 }}
+                    >
+                        <option value="fr-FR">French</option>
+                        <option value="en-US">English</option>
+                    </Select>
+                    <UserDisplay userName={userName} />
+                </div>
                 <Routes>
                     <Route path="/" element={<Home title={props.title} />} />
                     <Route path="/training" element={<Training />} />
@@ -85,7 +107,7 @@ function AuthenticatedApp(props: any) {
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/coach" element={<Coach />} />
                     <Route path="/agent" element={<Agent />} />
-                    <Route path="/scenarios" element={<Scenario title={getTranslation("ScenarioTitle") } isForSimulation={false} />} />
+                    <Route path="/scenarios" element={<Scenario title={getTranslation("ScenarioTitle")} isForSimulation={false} />} />
                 </Routes>
             </MsalAuthenticationTemplate>
         </Router>

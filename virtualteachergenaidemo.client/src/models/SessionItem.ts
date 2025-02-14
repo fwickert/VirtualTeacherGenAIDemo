@@ -1,3 +1,5 @@
+import { VoiceSettings } from './VoiceSettings';
+
 export class SessionItem {
     id: string;
     title?: string;    
@@ -7,12 +9,13 @@ export class SessionItem {
     scenarioDescription: string;
     agents: SessionAgent[];
     isComplete?: boolean;
-    completedTimestamp?: Date;
+    completedTimestamp?: Date;    
+    voice: VoiceSettings | undefined;
 
     constructor(id: string, title: string, timestamp: Date, userId: string,
         scenarioName: string, scenarioDescription: string,
         agents: SessionAgent[],
-        isComplete: boolean, completedTimestamp: Date) {
+        isComplete: boolean, completedTimestamp: Date, voiceSettings: VoiceSettings) {
         this.id = id;
         this.title = title;        
         this.timestamp = timestamp;
@@ -22,6 +25,7 @@ export class SessionItem {
         this.agents = agents;
         this.isComplete = isComplete;
         this.completedTimestamp = completedTimestamp; 
+        this.voice = voiceSettings;
     }
 }
 

@@ -54,7 +54,8 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                     ScenarioName = session.ScenarioName,
                     ScenarioDescription = session.ScenarioDescription,
                     Agents = session.Agents,
-                    IsCompleted = false,                   
+                    IsCompleted = false,
+                    Voice = session.Voice,
                 };
 
                 await sessionRepository.UpsertAsync(historyItem);

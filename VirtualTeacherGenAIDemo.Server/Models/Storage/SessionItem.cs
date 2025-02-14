@@ -35,6 +35,8 @@ namespace VirtualTeacherGenAIDemo.Server.Models.Storage
         [Required]
         public IEnumerable<SessionAgent> Agents { get; set; } = Enumerable.Empty<SessionAgent>();
 
+        public VoiceSettings Voice { get; set; } = new VoiceSettings();
+
     }
 
     public class SessionAgent

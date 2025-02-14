@@ -23,6 +23,8 @@ namespace VirtualTeacherGenAIDemo.Server.Models.Storage
         public string Partition => this.Id;
 
         public List<UserFilter> Users { get; set; } = new List<UserFilter>();
+
+        public VoiceSettings Voice { get; set; } = new VoiceSettings();
     }
 
     public class Agent
@@ -43,7 +45,6 @@ namespace VirtualTeacherGenAIDemo.Server.Models.Storage
         public string Type { get; set; } = string.Empty;
 
         public List<PromptDashboardFeature> features { get; set; } = new List<PromptDashboardFeature>();
-
 
     }
 }

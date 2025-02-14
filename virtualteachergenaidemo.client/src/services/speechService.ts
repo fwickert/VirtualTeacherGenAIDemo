@@ -4,7 +4,7 @@ interface TokenResponse {
     subscriptionKey: string;
     region: string;
     defaultLanguage: string,
-    voiceName:string    
+    voiceName:string,    
 }
 
 async function getSpeechTokenAsync() {
@@ -14,24 +14,24 @@ async function getSpeechTokenAsync() {
     return data as TokenResponse;
 };
 
-export async function getSpeechRecognizerAsync() {
+export async function getSpeechRecognizerAsync(voiceName: string, language: string) {
     const token = await getSpeechTokenAsync();
     const speechConfig = speechSdk.SpeechConfig.fromSubscription(token.subscriptionKey, token.region);
     const audioConfig = speechSdk.AudioConfig.fromDefaultMicrophoneInput();
-    speechConfig.speechRecognitionLanguage = token.defaultLanguage;
-    speechConfig.speechSynthesisVoiceName = token.voiceName;
+    //speechConfig.speechRecognitionLanguage = token.defaultLanguage;
+    //speechConfig.speechSynthesisVoiceName = token.voiceName;
+    speechConfig.speechRecognitionLanguage = language;
+    speechConfig.speechSynthesisVoiceName = voiceName;
     return new speechSdk.SpeechRecognizer(speechConfig, audioConfig);
 }
 
 let synthesizer: speechSdk.SpeechSynthesizer | null = null;
 let player: speechSdk.SpeakerAudioDestination | null = null;
 
-export async function textToSpeechAsync(text: string) {
+export async function textToSpeechAsync(text: string, voiceName:string) {
     const token = await getSpeechTokenAsync();
     const speechConfig = speechSdk.SpeechConfig.fromSubscription(token.subscriptionKey, token.region);
-    speechConfig.speechSynthesisVoiceName = token.voiceName;
-    console.log('Voice:', token.voiceName);
-
+    speechConfig.speechSynthesisVoiceName = voiceName;
     
 
     player = new speechSdk.SpeakerAudioDestination();

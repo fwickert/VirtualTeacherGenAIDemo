@@ -149,6 +149,9 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
     const [isLoadingMessages, setIsLoadingMessages] = useState<boolean>(false);
     const { getTranslation } = useLocalization();
 
+    const voiceName = scenario?.voice.voiceName || session?.voice?.voiceName || '';
+    const language = scenario?.voice.language || session?.voice?.language || '';
+
     useEffect(() => {
         const setupConnection = async () => {
             try {
@@ -229,7 +232,7 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
                 return updatedMessages;
             });
 
-            textToSpeechAsync(message.content);
+            textToSpeechAsync(message.content, voiceName);
         });
     };
 
@@ -278,6 +281,7 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
         const promptSystem = agent!.prompt + "\n\n" + rolePlayAgent!.prompt;
         const scenarioName = scenario?.name || session?.scenarioName;
         const scenarioDescription = scenario?.description || session?.scenarioDescription;
+        const voice = scenario?.voice || session?.voice;
 
         //Create ISessionItem object
         const sessionItem: SessionItem = {
@@ -286,6 +290,7 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
             userId: userName,
             scenarioName: scenarioName || '',
             scenarioDescription: scenarioDescription || '',
+            voice: voice,
             agents: currentScenario?.map(agent => ({
                 prompt: agent.prompt,
                 name: agent.name,
@@ -406,7 +411,7 @@ const Chat: React.FC<ChatProps> = ({ scenario, session }) => {
                 />
                 <Button icon={<SendFilled />} onClick={handleSendClick} disabled={isLoadingMessages} />
                 <div className="micButtonContainer">
-                    <SpeechRecognizer onNewMessage={handleNewMessageFromSpeech} disabled={isLoadingMessages} />
+                    <SpeechRecognizer onNewMessage={handleNewMessageFromSpeech} voiceName={voiceName} language={language} />
                 </div>
             </div>
             <div className={styles.buttonContainer}>

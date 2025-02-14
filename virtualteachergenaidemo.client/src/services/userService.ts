@@ -45,7 +45,11 @@ export const createUser = async (email: string) => {
             id: email,
             name: email,
             role: UserRoleEnum.User,
-            settings: {}
+            settings: [
+                {
+                    language: 'en-US'
+                }
+            ]
         });
         return response.data;
     } catch (error) {

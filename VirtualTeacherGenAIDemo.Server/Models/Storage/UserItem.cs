@@ -12,7 +12,7 @@ namespace VirtualTeacherGenAIDemo.Server.Models.Storage
                         
         public RoleEnum Role { get; set; } = RoleEnum.User;
 
-        public IDictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();
+        public List<UserSetting> Settings { get; set; } = new List<UserSetting>();
 
         [JsonIgnore]
         public string Partition => this.Id;

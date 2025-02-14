@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { fetchLanguageData } from '../services/LocalizationService';
+import { fetchLanguageData } from '../services/localizationService';
 import { LocaleItem } from '../models/LocaleItem';
 
 interface LocalizationContextProps {
