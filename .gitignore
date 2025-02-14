@@ -399,3 +399,4 @@ FodyWeavers.xsd
 /VirtualTeacherGenAIDemo.Server/appsettings.Development.json
 /VirtualTeacherGenAIDemo.Server/Properties/ServiceDependencies/VirtualTeacher - Web Deploy/profile.arm.json
 /VirtualTeacherGenAIDemo.Server/Properties/ServiceDependencies/VirtualTeacher - Web Deploy1/profile.arm.json
+/VirtualTeacherGenAIDemo.Server/Properties/ServiceDependencies/Virtualteacher4Demo - Web Deploy/profile.arm.json
