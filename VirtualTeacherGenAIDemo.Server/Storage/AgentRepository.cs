@@ -1,4 +1,5 @@
-﻿using VirtualTeacherGenAIDemo.Server.Models.Storage;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using VirtualTeacherGenAIDemo.Server.Models.Storage;
 
 namespace VirtualTeacherGenAIDemo.Server.Storage
 {
@@ -8,9 +9,9 @@ namespace VirtualTeacherGenAIDemo.Server.Storage
         {
         }
 
-        public Task<IEnumerable<AgentItem>> GetAgentsByTypeAsync(string type)     
+        public Task<IEnumerable<AgentItem>> GetAgentsByTypeAsync(string type, string user)     
         {   
-            return base.StorageContext.QueryEntitiesAsync(e => e.Type == type);
+            return base.StorageContext.QueryEntitiesAsync(e => e.Type == type && e.Users.Any(u=>u.UserId == user));
             
         }
 
@@ -29,15 +30,15 @@ namespace VirtualTeacherGenAIDemo.Server.Storage
 
 
         //function to return all agents
-        public Task<IEnumerable<AgentItem>> GetAllAgentsAsync()
+        public Task<IEnumerable<AgentItem>> GetAllAgentsAsync(string user)
         {
-            return base.StorageContext.QueryEntitiesAsync(e => true);
+            return base.StorageContext.QueryEntitiesAsync(e => e.Users.Any(u=>u.UserId == user));
         }
 
         //function to retrun all agents depend on type and system agents
-        public Task<IEnumerable<AgentItem>> GetAgentsAndSystemAsync(string type)
+        public Task<IEnumerable<AgentItem>> GetAgentsAndSystemAsync(string type, string user)
         {
-            return base.StorageContext.QueryEntitiesAsync(e => e.Type == type || e.Type == "system");
+            return base.StorageContext.QueryEntitiesAsync(e => (e.Type == type || e.Type == "system") && e.Users.Any(u => u.UserId == user));
         }
 
         //function Get by id

@@ -21,6 +21,8 @@ namespace VirtualTeacherGenAIDemo.Server.Models.Storage
 
         [JsonIgnore]
         public string Partition => this.Id;
+
+        public List<UserFilter> Users { get; set; } = new List<UserFilter>();
     }
 
     public class Agent

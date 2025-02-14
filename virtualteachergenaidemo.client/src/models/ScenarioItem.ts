@@ -3,11 +3,13 @@ export class ScenarioItem {
     name: string;
     description: string;
     agents: Agent[];
-    constructor(id: string, name: string, description: string, agents: Agent[]) {
+    users: { userId: string, sharedUser: boolean }[];
+    constructor(id: string, name: string, description: string, agents: Agent[], users: { userId: string, sharedUser: boolean }[]) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.agents = agents;
+        this.users = users;
     }
 }
 

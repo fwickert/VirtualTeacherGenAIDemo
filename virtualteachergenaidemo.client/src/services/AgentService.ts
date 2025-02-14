@@ -9,11 +9,11 @@ const apiClient = axios.create({
 });
 
 export const AgentService = {
-    getAllAgents: () => {
-        return apiClient.get<AgentItem[]>('/agent/all');
+    getAllAgents: (user: string) => {
+        return apiClient.get<AgentItem[]>(`/agent/all?user=${user}`);
     },
-    getAgentsByType: (type: string) => {
-        return apiClient.get<AgentItem[]>(`/agent/ByType?type=${type}`);
+    getAgentsByType: (type: string, user: string) => {
+        return apiClient.get<AgentItem[]>(`/agent/ByType?type=${type}&user=${user}`);
     },
     upsertAgent: (agent: AgentItem, isUpdate: boolean) => {
         const apiUrl = isUpdate ? `/agent/${agent.id}` : '/agent';

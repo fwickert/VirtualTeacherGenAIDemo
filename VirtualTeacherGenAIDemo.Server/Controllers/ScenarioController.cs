@@ -9,16 +9,16 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
     [ApiController]
     public class ScenarioController : ControllerBase
     {
-        [HttpGet()]
+        [HttpGet("")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IEnumerable<ScenarioItem>> Get([FromServices] ScenarioService scenarioService, CancellationToken token)
+        public async Task<IEnumerable<ScenarioItem>> Get([FromServices] ScenarioService scenarioService, string user,  CancellationToken token)
         {
-            return await scenarioService.GetScenariosAsync();
+            return await scenarioService.GetScenariosAsyncByUser(user);
         }
 
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ScenarioItem> Get([FromServices] ScenarioService scenarioService, string id, CancellationToken token)
+        public async Task<ScenarioItem> GetWithID([FromServices] ScenarioService scenarioService, string id, CancellationToken token)
         {
             return await scenarioService.GetByIdAsync(id, id);
         }

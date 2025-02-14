@@ -14,7 +14,7 @@ import { useUserRole } from '../../auth/UserRoleContext';
 import { UserRoleEnum } from '../../models/UserRoleEnum';
 import { useLocalization } from '../../contexts/LocalizationContext';
 import { ScenarioService } from '../../services/ScenarioService';
-
+import { useUsername } from '../../auth/UserContext';
 
 interface ScenarioListProps {
     onScenarioSelect?: (scenario: ScenarioItem) => void;
@@ -117,9 +117,10 @@ const ScenarioList: React.FC<ScenarioListProps> = ({ onScenarioStart }) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);    
     const { getTranslation } = useLocalization();
+    const userName = useUsername();
 
     useEffect(() => {
-        ScenarioService.getAllScenarios()
+        ScenarioService.getAllScenarios(userName)
             .then(response => {
                 setScenarios(response.data);
                 setIsLoading(false);

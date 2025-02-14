@@ -8,9 +8,15 @@ namespace VirtualTeacherGenAIDemo.Server.Storage
         {
         }
 
+        public Task<IEnumerable<ScenarioItem>> GetScenariosAsyncByUser(string user)
+        {
+            return base.StorageContext.QueryEntitiesAsync(q => q.Users.Any(u=> u.UserId == user));
+
+        }
+
         public Task<IEnumerable<ScenarioItem>> GetScenariosAsync()
         {
-            return base.StorageContext.QueryEntitiesAsync(q => true);
+            return base.StorageContext.QueryEntitiesAsync(e => true);            
 
         }
 

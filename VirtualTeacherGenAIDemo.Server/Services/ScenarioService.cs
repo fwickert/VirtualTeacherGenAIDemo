@@ -16,12 +16,18 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             _agentRepository = agentRepository;
         }
 
+        public async Task<IEnumerable<ScenarioItem>> GetScenariosAsyncByUser(string user)
+        {
+            IEnumerable<ScenarioItem> scenarios = await _scenarioRepository.GetScenariosAsyncByUser(user);
+
+            return scenarios;
+        }
+
         public async Task<IEnumerable<ScenarioItem>> GetScenariosAsync()
         {
             IEnumerable<ScenarioItem> scenarios = await _scenarioRepository.GetScenariosAsync();
 
-
-            return await _scenarioRepository.GetScenariosAsync();
+            return scenarios;
         }
 
         public async Task<ScenarioItem> GetByIdAsync(string id, string type)

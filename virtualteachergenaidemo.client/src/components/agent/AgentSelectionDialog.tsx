@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { Agent } from '../../models/ScenarioItem';
 import { useLocalization } from '../../contexts/LocalizationContext';
 import { AgentService } from '../../services/AgentService';
+import { useUsername } from '../../auth/UserContext';
 
 interface AgentSelectionDialogProps {
     onSelectAgent: (agent: Agent) => void;
@@ -16,9 +17,10 @@ interface AgentSelectionDialogProps {
 export const AgentSelectionDialog = ({ onSelectAgent, onClose, isOpen, type }: AgentSelectionDialogProps) => {
     const [agents, setAgents] = useState<Agent[]>([]);
     const { getTranslation } = useLocalization();
+    const user = useUsername();
 
     useEffect(() => {
-        AgentService.getAgentsByType(type)
+        AgentService.getAgentsByType(type, user)
             .then(response => setAgents(response.data))
             .catch(error => console.error('Error:', error));
     }, [type]);

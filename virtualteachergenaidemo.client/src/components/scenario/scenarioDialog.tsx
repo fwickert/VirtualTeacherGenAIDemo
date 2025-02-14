@@ -12,6 +12,7 @@ import { Add24Regular } from '@fluentui/react-icons';
 import { tokens } from '@fluentui/tokens';
 import { useLocalization } from '../../contexts/LocalizationContext';
 import { ScenarioService } from '../../services/ScenarioService';
+import { useUsername } from '../../auth/UserContext';
 
 const useStyles = makeStyles({
     customDialogSurface: {
@@ -75,6 +76,7 @@ export const ScenarioDialog = ({ onAddScenario, onDeleteScenario, onClose, isOpe
     const [agentType, setAgentType] = useState<'system' | 'rolePlay' | 'teacher'>('system');
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
     const { getTranslation } = useLocalization();
+    const userName = useUsername();
 
     useEffect(() => {
         if (scenario) {
@@ -132,7 +134,7 @@ export const ScenarioDialog = ({ onAddScenario, onDeleteScenario, onClose, isOpe
             teacherAgent
         ].filter(agent => agent !== null) as Agent[];
 
-        const newScenario = { name, description, agents, id: scenario ? scenario.id : "" };
+        const newScenario = { name, description, agents, id: scenario ? scenario.id : "", users: [{ userId: userName, sharedUser: false }] };
 
         const apiCall = scenario ? ScenarioService.updateScenario(newScenario) : ScenarioService.addScenario(newScenario);
 

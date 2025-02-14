@@ -24,21 +24,21 @@ namespace VirtualTeacherGenAIDemo.Server.Controllers
 
         [HttpGet("ByType", Name = "{type}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IEnumerable<AgentItem>> GetAgentsByType(string type, bool withSystem = false)
+        public async Task<IEnumerable<AgentItem>> GetAgentsByType(string type, string user, bool withSystem = false)
         {
             if (withSystem)
             {
-                return await _agentService.GetAgentsAndSystemAsync(type);
+                return await _agentService.GetAgentsAndSystemAsync(type, user);
             }
 
-            return await _agentService.GetByTypeAsync(type);
+            return await _agentService.GetByTypeAsync(type, user);
         }
 
         [HttpGet("All")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IEnumerable<AgentItem>> GetAllAgents()
+        public async Task<IEnumerable<AgentItem>> GetAllAgents(string user)
         {
-            return await _agentService.GetAllAgentsAsync();
+            return await _agentService.GetAllAgentsAsync(user);
         }
 
         [HttpGet("{id}")]

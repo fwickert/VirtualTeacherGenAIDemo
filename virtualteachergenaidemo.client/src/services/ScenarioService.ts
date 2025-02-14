@@ -9,8 +9,8 @@ const apiClient = axios.create({
 });
 
 export const ScenarioService = {
-    getAllScenarios: () => {
-        return apiClient.get<ScenarioItem[]>('/scenario');
+    getAllScenarios: (user: string) => {
+        return apiClient.get<ScenarioItem[]>(`/scenario?user=${user}`);
     },
     addScenario: (scenario: ScenarioItem) => {
         return apiClient.post('/scenario', scenario);

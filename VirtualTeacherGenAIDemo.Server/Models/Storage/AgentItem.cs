@@ -28,6 +28,9 @@ namespace VirtualTeacherGenAIDemo.Server.Models.Storage
         [JsonPropertyName("features")]
         public List<PromptDashboardFeature> Features { get; set; } = new List<PromptDashboardFeature>();
 
+        [JsonPropertyName("users")]
+        public List<UserFilter> Users { get; set; } = new List<UserFilter>();
+
         [JsonIgnore]
         public string Partition => this.Type;
 
@@ -39,7 +42,6 @@ namespace VirtualTeacherGenAIDemo.Server.Models.Storage
         public string Prompt { get; set; } = string.Empty;
 
         public string Feature { get; set; } = string.Empty;
-
 
     }
 }

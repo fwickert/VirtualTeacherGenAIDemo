@@ -14,6 +14,7 @@ import { AgentService } from '../../services/AgentService';
 import { v4 as uuidv4 } from 'uuid';
 import { useRef } from 'react';
 import { Spinner } from '@fluentui/react';
+import { useUsername } from '../../auth/UserContext';
 
 interface AgentDialogProps {
     onAddAgent: (agent: AgentItem) => void;
@@ -75,6 +76,7 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
     const [selectedTab, setSelectedTab] = useState('summary'); // Add this state
     const [isProcessing, setIsProcessing] = useState<boolean>(false); // Add this state
     const { getTranslation } = useLocalization();
+    const user = useUsername();
 
     const agentIdRef = useRef(agent?.id || uuidv4());
     const agentId = agentIdRef.current;
@@ -141,7 +143,8 @@ export const AgentDialog = ({ onAddAgent, onDeleteAgent, type, onClose, agent }:
             type,
             id: agentId,
             fileNames,
-            features: type === 'teacher' ? features : [] 
+            features: type === 'teacher' ? features : [],
+            users: [{ userId: user, sharedUser: false }], 
         };
 
         const isUpdate = !!agent;

@@ -13,6 +13,7 @@ import { Button } from '@fluentui/react-button';
 import { AgentDialog } from './AgentDialog';
 import { useLocalization } from '../../contexts/LocalizationContext';
 import { AgentService } from '../../services/AgentService';
+import { useUsername } from '../../auth/UserContext';
 
 const useStyles = makeStyles({
     customPreview: {
@@ -113,9 +114,10 @@ const AgentList: FC = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [dialogType, setDialogType] = useState<string>('');
     const { getTranslation } = useLocalization();
+    const userName = useUsername();
 
     useEffect(() => {        
-        AgentService.getAllAgents()
+        AgentService.getAllAgents(userName)
             .then(response => {
                 setAgents(response.data);
                 setLoading(false);

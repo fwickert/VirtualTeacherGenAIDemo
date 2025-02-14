@@ -20,14 +20,14 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             _options = options.Value;
         }
 
-        public async Task<IEnumerable<AgentItem>> GetByTypeAsync(string type)
+        public async Task<IEnumerable<AgentItem>> GetByTypeAsync(string type, string user)
         {
-            return await _agentRepository.GetAgentsByTypeAsync(type);
+            return await _agentRepository.GetAgentsByTypeAsync(type, user);
         }
 
-        public async Task<IEnumerable<AgentItem>> GetAgentsAndSystemAsync(string type)
+        public async Task<IEnumerable<AgentItem>> GetAgentsAndSystemAsync(string type, string user)
         {
-            return await _agentRepository.GetAgentsAndSystemAsync(type);
+            return await _agentRepository.GetAgentsAndSystemAsync(type, user);
         }
 
         public async Task<IEnumerable<AgentItem>> GetAgentsByFileNameAsync(string fileName)
@@ -35,9 +35,9 @@ namespace VirtualTeacherGenAIDemo.Server.Services
             return await _agentRepository.GetAgentsByFileNameAsync(fileName);
         }
 
-        public async Task<IEnumerable<AgentItem>> GetAllAgentsAsync()
+        public async Task<IEnumerable<AgentItem>> GetAllAgentsAsync(string user)
         {
-            return await _agentRepository.GetAllAgentsAsync();
+            return await _agentRepository.GetAllAgentsAsync(user);
         }
 
         public async Task<AgentItem> GetByIdAsync(string id, string type)
@@ -76,7 +76,8 @@ namespace VirtualTeacherGenAIDemo.Server.Services
                 Description = originalAgent.Description,
                 Prompt = originalAgent.Prompt,
                 Type = originalAgent.Type,
-                FileNames = new List<string>(originalAgent.FileNames)
+                FileNames = new List<string>(originalAgent.FileNames),
+                Users = originalAgent.Users
             };
 
             await AddAgentAsync(newAgent);
